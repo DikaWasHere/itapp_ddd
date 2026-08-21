@@ -11,6 +11,7 @@ import (
 	"itapp_ddd/presentation/route"
 
 	attachmentApp "itapp_ddd/application/attachment"
+	docCrApp "itapp_ddd/application/doc_cr"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -22,20 +23,23 @@ func main() {
 
 	// 2. Init Infrastructure
 	attachmentRepo := persistence.NewAttachmentRepositoryDB(persistence.DB)
+	docCrRepo := persistence.NewDocumentCrRepositoryDB(persistence.DB)
 	fileStorage := storage.NewFileStorage()
 
 	// 3. Init Application Service
 	attachmentService := attachmentApp.NewService(attachmentRepo, fileStorage)
+	docCrService := docCrApp.NewService(docCrRepo)
 
 	// 4. Init Handler
 	attachmentHandler := handler.NewAttachmentHandler(attachmentService)
+	docCrHandler := handler.NewDocumentCrHandler(docCrService)
 
 	// 5. Init Fiber
 	app := fiber.New()
 	app.Use(cors.New())
 
 	// 6. Init Routes
-	route.RouteInit(app, attachmentHandler)
+	route.RouteInit(app, attachmentHandler, docCrHandler)
 
 	// 7. Start Server
 	port := os.Getenv("PORT")
