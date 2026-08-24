@@ -19,3 +19,11 @@ func NewService(repo domainDocCr.DocumentCrRepository) *Service {
 func (s *Service) GetAll(ctx context.Context, req domainDocCr.GetListRequest) ([]*domainDocCr.DocumentCrListItem, error) {
 	return s.repo.GetAll(ctx, req)
 }
+
+func (s *Service) GetAndika(ctx context.Context, req domainDocCr.GetListRequest) ([]*domainDocCr.DocumentCrListItem, error) {
+	return s.repo.GetAndika(ctx, req)
+}
+
+func (s *Service) GetOneMine(ctx context.Context, req domainDocCr.GetListRequest) ([]*domainDocCr.DocumentCrListItem, error) {
+	return s.repo.GetOneMine(ctx, req)
+}

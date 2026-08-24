@@ -15,4 +15,6 @@ func RouteInit(app *fiber.App, attachmentHandler *handler.AttachmentHandler, doc
 
 	// Document CR
 	v1.Post("/doc-cr", docCrHandler.GetAll)
+	v1.Post("/doc-Cr/andika", docCrHandler.GetAndika)
+	v1.Post("/doc-Cr/onemine", docCrHandler.GetOneMine)
 }
