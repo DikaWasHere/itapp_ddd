@@ -13,14 +13,15 @@ type GetListRequest struct {
 
 // DocumentCrListItem adalah DTO untuk list response
 type DocumentCrListItem struct {
-	DocCr             *DocumentCr
-	Review            *Review
-	Approvals         []*Approval
-	PICDevelopers     []*PIC
-	PICFunctionals    []*PIC
+	DocCr          *DocumentCr
+	Review         *Review
+	Approvals      []*Approval
+	PICDevelopers  []*PIC
+	PICFunctionals []*PIC
 }
 
 // DocumentCrRepository adalah kontrak untuk akses data DocumentCr
 type DocumentCrRepository interface {
 	GetAll(ctx context.Context, req GetListRequest) ([]*DocumentCrListItem, error)
+	GetPr(ctx context.Context, req GetListRequest) ([]*DocumentCrListItem, error)
 }

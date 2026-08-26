@@ -187,3 +187,113 @@ func (h *DocumentCrHandler) GetAll(c *fiber.Ctx) error {
 
 	return pkg.SuccessResponse(c, data)
 }
+
+
+
+
+
+
+
+
+
+
+func (h *DocumentCrHandler) GetPr(c *fiber.Ctx) error {
+	req := new(docCrGetListRequest)
+
+	if err := c.BodyParser(req); err != nil {
+		return pkg.BadRequestResponse(c, "Failed to parse request body")
+	}
+
+	// Map request ke domain request
+	domainReq := domainDocCr.GetListRequest{
+		StartDate:    req.StartDate,
+		EndDate:      req.EndDate,
+		RequesterNik: req.RequesterNik,
+		ApprovalNik:  req.ApprovalNik,
+		DocStatus:    req.DocStatus,
+	}
+
+	// Panggil service
+	items, err := h.service.GetPr(c.Context(), domainReq)
+	if err != nil {
+		return pkg.BadRequestResponse(c, "Failed to retrieve DocumentCr data")
+	}
+
+	// Map domain response ke response DTO
+	var data []docCrListResponse
+	for _, item := range items {
+		doc := docCrListResponse{
+			DocCrID:             item.DocCr.DocCrID,
+			DocCrName:           item.DocCr.DocCrName,
+			FormId:              item.DocCr.FormId,
+			DocReference:        item.DocCr.DocReference,
+			RequesterNIK:        item.DocCr.RequesterNIK,
+			RequesterName:       item.DocCr.RequesterName,
+			RequesterDepartment: item.DocCr.RequesterDepartment,
+			ReasonDetail:        item.DocCr.ReasonDetail,
+			ProblemDetail:       item.DocCr.ProblemDetail,
+			ServerType:          item.DocCr.ServerType,
+			CrType:              item.DocCr.CrType,
+			CrPriority:          item.DocCr.CrPriority,
+			GitMergeRequest:     item.DocCr.GitMergeRequest,
+			GitRepository:       item.DocCr.GitRepository,
+			DocNotes:            item.DocCr.DocNotes,
+			DocAttachment:       item.DocCr.DocAttachment,
+			DocStatus:           item.DocCr.DocStatus,
+			ApplicationName:     item.DocCr.ApplicationName,
+			DeployedDate:        item.DocCr.DeployedDate,
+			CreatedAt:           item.DocCr.CreatedAt,
+			PICDevelopers:       make([]picResponse, 0),
+			PICFunctionals:      make([]picResponse, 0),
+			Approval:            make([]approvalResponse, 0),
+		}
+
+		// Map Review
+		if item.Review != nil {
+			doc.Review = &reviewResponse{
+				ReviewID:     item.Review.ReviewID,
+				ReviewNik:    item.Review.ReviewNik,
+				ReviewName:   item.Review.ReviewName,
+				ReviewDate:   item.Review.ReviewDate,
+				ReviewStatus: item.Review.ReviewStatus,
+				ReviewNote:   item.Review.ReviewNote,
+				DocCrID:      item.Review.DocCrID,
+			}
+		}
+
+		// Map Approval
+		for _, a := range item.Approvals {
+			doc.Approval = append(doc.Approval, approvalResponse{
+				ApprovalID:         a.ApprovalID,
+				ApprovalNik:        a.ApprovalNik,
+				ApprovalName:       a.ApprovalName,
+				ApprovalDate:       a.ApprovalDate,
+				ApprovalStatus:     a.ApprovalStatus,
+				ApprovalDepartment: a.ApprovalDepartment,
+				DocCrID:            a.DocCrID,
+			})
+		}
+
+		// Map PIC Developer
+		for _, p := range item.PICDevelopers {
+			doc.PICDevelopers = append(doc.PICDevelopers, picResponse{
+				PICNik:        p.PICNik,
+				PICName:       p.PICName,
+				PICDepartment: p.PICDepartment,
+			})
+		}
+
+		// Map PIC Functional
+		for _, p := range item.PICFunctionals {
+			doc.PICFunctionals = append(doc.PICFunctionals, picResponse{
+				PICNik:        p.PICNik,
+				PICName:       p.PICName,
+				PICDepartment: p.PICDepartment,
+			})
+		}
+
+		data = append(data, doc)
+	}
+
+	return pkg.SuccessResponse(c, data)
+}

@@ -273,3 +273,118 @@ func (r *DocumentCrRepositoryDB) GetAll(ctx context.Context, req domainDocCr.Get
 
 	return items, nil
 }
+
+func (r *DocumentCrRepositoryDB) GetPr(ctx context.Context, req domainDocCr.GetListRequest) ([]*domainDocCr.DocumentCrListItem, error) {
+	query := `
+		SELECT * FROM (
+			SELECT DISTINCT ON (tdc.doc_cr_id) tdc.*
+			FROM trs.trs_document_cr tdc
+			LEFT JOIN trs.trs_pic tp ON tdc.doc_cr_id = tp.doc_cr_id
+			LEFT JOIN trs.trs_approval ta ON tdc.doc_cr_id = ta.doc_cr_id
+			WHERE 1=1
+	`
+	var queryParams []interface{}
+
+	// Kondisi Approval NIK
+	if req.ApprovalNik != "" {
+		query += " AND ta.approval_nik = ?"
+		queryParams = append(queryParams, req.ApprovalNik)
+	}
+
+	// Kondisi Requester NIK
+	if req.RequesterNik != "" {
+		query += " AND (tp.pic_nik = ? OR tdc.requester_nik = ?)"
+		queryParams = append(queryParams, req.RequesterNik, req.RequesterNik)
+	}
+
+	// // Kondisi tanggal
+	// if req.StartDate != "" && req.EndDate != "" {
+	// 	query += " AND date_trunc('day', tdc.created_at) BETWEEN ? AND ?"
+	// 	queryParams = append(queryParams, req.StartDate, req.EndDate)
+	// }
+
+	// // Kondisi doc_status
+	// if len(req.DocStatus) > 0 {
+	// 	query += " AND tdc.doc_status IN ("
+	// 	placeholders := make([]string, len(req.DocStatus))
+	// 	for i := range req.DocStatus {
+	// 		placeholders[i] = "?"
+	// 	}
+	// 	query += strings.Join(placeholders, ",") + ")"
+	// 	for _, status := range req.DocStatus {
+	// 		queryParams = append(queryParams, status)
+	// 	}
+	// }
+
+	query += " ORDER BY tdc.doc_cr_id, tdc.created_at DESC ) AS subquery ORDER BY created_at DESC"
+
+	// Eksekusi query
+	rows, err := r.db.WithContext(ctx).Raw(query, queryParams...).Rows()
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve DocumentCr data: %w", err)
+	}
+	defer rows.Close()
+
+	var items []*domainDocCr.DocumentCrListItem
+
+	for rows.Next() {
+		var docModel DocumentCrModel
+		if err := r.db.ScanRows(rows, &docModel); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+
+		doc := docModel.toEntity()
+		item := &domainDocCr.DocumentCrListItem{
+			DocCr:          doc,
+			Approvals:      make([]*domainDocCr.Approval, 0),
+			PICDevelopers:  make([]*domainDocCr.PIC, 0),
+			PICFunctionals: make([]*domainDocCr.PIC, 0),
+		}
+
+		// Fetch Review
+		var reviewModel ReviewModel
+		err := r.db.Raw(`
+			SELECT * FROM trs.trs_review WHERE doc_cr_id = ?;
+		`, doc.DocCrID).Scan(&reviewModel).Error
+		if err == nil {
+			item.Review = reviewModel.toEntity()
+		}
+
+		// Fetch Approval
+		approvalRows, err := r.db.Raw(`
+			SELECT * FROM trs.trs_approval WHERE doc_cr_id = ? AND approval_status != 'Cancel';
+		`, doc.DocCrID).Rows()
+		if err == nil {
+			for approvalRows.Next() {
+				var approvalModel ApprovalModel
+				r.db.ScanRows(approvalRows, &approvalModel)
+				item.Approvals = append(item.Approvals, approvalModel.toEntity())
+			}
+			approvalRows.Close()
+		}
+
+		// Fetch PIC
+		picRows, err := r.db.Raw(`
+			SELECT * FROM trs.trs_pic WHERE doc_cr_id = ?;
+		`, doc.DocCrID).Rows()
+		if err == nil {
+			for picRows.Next() {
+				var picModel PICModel
+				r.db.ScanRows(picRows, &picModel)
+				pic := picModel.toEntity()
+
+				if pic.PICDepartment == "IT FUNCTIONAL" {
+					item.PICFunctionals = append(item.PICFunctionals, pic)
+				}
+				if pic.PICDepartment == "IT DEVELOPMENT" {
+					item.PICDevelopers = append(item.PICDevelopers, pic)
+				}
+			}
+			picRows.Close()
+		}
+
+		items = append(items, item)
+	}
+
+	return items, nil
+}

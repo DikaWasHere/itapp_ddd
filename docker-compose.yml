@@ -1,0 +1,19 @@
+version: "3.8"
+ 
+
+services:
+  app:
+    build: .
+    ports:
+      - "8280:8280"
+    environment:
+      - DB_HOST_TS=172.16.0.201
+      - DB_PORT_TS=5432
+      - DB_USERNAME_TS=portal_admin
+      - DB_PASSWORD_TS=portal_admin_dev2022#
+      - DB_DATABASE_TS=it_app_db
+      - PORT=8280
+    restart: unless-stopped
+
+
+

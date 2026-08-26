@@ -2,7 +2,6 @@ package persistence
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -13,10 +12,7 @@ import (
 var DB *gorm.DB
 
 func DatabaseInit() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	godotenv.Load()
 
 	host := os.Getenv("DB_HOST_TS")
 	port := os.Getenv("DB_PORT_TS")
@@ -29,6 +25,7 @@ func DatabaseInit() {
 		host, port, user, password, dbname,
 	)
 
+	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("Cannot connect to database")
