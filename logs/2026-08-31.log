@@ -1,0 +1,59 @@
+2026-08-31T08:21:45.1724014+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-08-31T08:22:05.4690847+07:00 | ERROR | router.go:143 | v2.(*App).next | Failed to parse request body
+2026-08-31T09:21:09.5192596+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-08-31T09:25:00.009317+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-08-31T09:37:28.3451006+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-08-31T09:42:46.8030237+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-08-31T09:42:56.4139042+07:00 | INFO | ctx.go:1040 | v2.(*Ctx).Next | [POST] /api/v1/doc-cr-detail
+2026-08-31T09:42:56.6350651+07:00 | INFO | ctx.go:1040 | v2.(*Ctx).Next | [POST] /api/v1/doc-cr-detail | Status: 200
+2026-08-31T09:43:46.6207711+07:00 | INFO | ctx.go:1040 | v2.(*Ctx).Next | [POST] /api/v1/doc-cr-detail
+2026-08-31T09:43:46.6991277+07:00 | INFO | ctx.go:1040 | v2.(*Ctx).Next | [POST] /api/v1/doc-cr-detail | Status: 200
+2026-08-31T10:21:39.9742456+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-08-31T10:22:02.7432729+07:00 | INFO | ctx.go:1040 | v2.(*Ctx).Next | [POST] /api/v1/doc-cr-detail
+2026-08-31T10:22:02.7440751+07:00 | INFO | service.go:25 | doc_cr.(*Service).GetDetail | GetDetail called with doc_cr_id=2
+2026-08-31T10:22:03.3636612+07:00 | INFO | service.go:33 | doc_cr.(*Service).GetDetail | GetDetail success for doc_cr_id=2
+2026-08-31T10:22:03.3646601+07:00 | INFO | ctx.go:1040 | v2.(*Ctx).Next | [POST] /api/v1/doc-cr-detail | Status: 200
+2026-08-31T10:22:37.3159743+07:00 | INFO | ctx.go:1040 | v2.(*Ctx).Next | [POST] /api/v1/doc-cr-detail
+2026-08-31T10:22:37.3159743+07:00 | INFO | service.go:25 | doc_cr.(*Service).GetDetail | GetDetail called with doc_cr_id=2
+2026-08-31T10:22:37.3784442+07:00 | INFO | service.go:33 | doc_cr.(*Service).GetDetail | GetDetail success for doc_cr_id=2
+2026-08-31T10:22:37.3784442+07:00 | INFO | ctx.go:1040 | v2.(*Ctx).Next | [POST] /api/v1/doc-cr-detail | Status: 200
+2026-08-31T10:47:59.5446274+07:00 | INFO | ctx.go:1040 | v2.(*Ctx).Next | [POST] /api/v1/doc-cr-detail
+2026-08-31T10:47:59.5446274+07:00 | INFO | service.go:25 | doc_cr.(*Service).GetDetail | GetDetail called with doc_cr_id=2
+2026-08-31T10:47:59.6420552+07:00 | INFO | service.go:33 | doc_cr.(*Service).GetDetail | GetDetail success for doc_cr_id=2
+2026-08-31T10:47:59.6420552+07:00 | INFO | ctx.go:1040 | v2.(*Ctx).Next | [POST] /api/v1/doc-cr-detail | Status: 200
+2026-08-31T11:00:00.549962+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-08-31T11:00:37.5006236+07:00 | INFO | ctx.go:1040 | v2.(*Ctx).Next | [POST] /api/v1/doc-cr-detail
+2026-08-31T11:00:37.5006236+07:00 | INFO | service.go:25 | doc_cr.(*Service).GetDetail | GetDetail called with doc_cr_id=2
+2026-08-31T11:00:38.1623057+07:00 | INFO | ctx.go:1040 | v2.(*Ctx).Next | [POST] /api/v1/doc-cr-detail | Status: 200
+2026-08-31T11:08:12.9540651+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-08-31T11:08:20.7428577+07:00 | INFO | ctx.go:1040 | v2.(*Ctx).Next | [POST] /api/v1/doc-cr-detail | Status: 200
+2026-08-31T11:10:53.6415755+07:00 | INFO | ctx.go:1040 | v2.(*Ctx).Next | [POST] /api/v1/doc-cr-detail | Status: 200
+2026-08-31T11:12:31.0236593+07:00 | INFO | C:/Program Files/Go/src/runtime/proc.go:290 | runtime.main | Logger initialized
+2026-08-31T11:12:40.231042+07:00 | INFO | C:/Users/andik/go/pkg/mod/github.com/gofiber/fiber/v2@v2.52.15/ctx.go:1040 | v2.(*Ctx).Next | [POST] /api/v1/doc-cr-detail | Status: 200
+2026-08-31T11:23:07.724617+07:00 | INFO | main.go:74 | main.main | Logger initialized
+2026-08-31T11:23:22.8821526+07:00 | INFO | main.go:87 | main.main.func1 | [POST] /api/v1/doc-cr-detail | Status: 200
+2026-08-31T11:33:09.3362646+07:00 | INFO | Logger initialized
+2026-08-31T11:33:17.5987273+07:00 | INFO | [POST] /api/v1/doc-cr-detail | Status: 200
+2026-08-31T13:47:25.3230252+07:00 | INFO | asm_amd64.s:1771 | runtime.goexit | Logger initialized
+2026-08-31T13:47:34.8906646+07:00 | INFO | ctx.go:1043 | v2.(*Ctx).Next | [POST] /api/v1/doc-cr-detail | Status: 200 | 192.5572ms
+2026-08-31T13:48:39.5236792+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-08-31T13:48:45.8272738+07:00 | INFO | router.go:143 | v2.(*App).next | [POST] /api/v1/doc-cr-detail | Status: 200 | 156.3875ms
+2026-08-31T13:49:39.9869413+07:00 | INFO | main.go:74 | main.main | Logger initialized
+2026-08-31T13:49:46.515074+07:00 | INFO | doc_cr_handler.go:371 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 | 147.0819ms
+2026-08-31T14:01:30.0295591+07:00 | INFO | main.go:74 | main.main | Logger initialized
+2026-08-31T14:01:39.3598664+07:00 | INFO | doc_cr_handler.go:367 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 |berhasil mengambil detail data 
+2026-08-31T14:03:25.8140748+07:00 | ERROR | doc_cr_handler.go:246 | handler.(*DocumentCrHandler).GetDetail | Failed to parse request body: invalid character '}' looking for beginning of value
+2026-08-31T14:07:10.115772+07:00 | INFO | doc_cr_handler.go:236 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 |Berhasil mengambil semua data %!v(MISSING)
+2026-08-31T14:08:31.3648749+07:00 | INFO | main.go:74 | main.main | Logger initialized
+2026-08-31T14:08:47.1362866+07:00 | INFO | doc_cr_handler.go:236 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 |Berhasil mengambil semua data 
+2026-08-31T14:09:05.9632925+07:00 | INFO | doc_cr_handler.go:367 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 |berhasil mengambil detail data 
+2026-08-31T14:25:31.2556614+07:00 | INFO | doc_cr_handler.go:367 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 |berhasil mengambil detail data 
+2026-08-31T14:27:11.097967+07:00 | INFO | doc_cr_handler.go:367 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 |berhasil mengambil detail data 
+2026-08-31T14:27:30.5708559+07:00 | INFO | doc_cr_handler.go:236 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 |Berhasil mengambil semua data 
+2026-08-31T14:33:14.1110683+07:00 | INFO | main.go:18 | main.main | Logger initialized
+2026-08-31T14:33:29.633486+07:00 | INFO | doc_cr_handler.go:236 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 |Berhasil mengambil semua data 
+2026-08-31T14:35:02.9401723+07:00 | INFO | doc_cr_handler.go:367 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 |berhasil mengambil detail data 
+2026-08-31T15:10:08.8474652+07:00 | INFO | main.go:18 | main.main | Logger initialized
+2026-08-31T15:10:15.6800576+07:00 | INFO | logger.go:88 | logger.(*LoggerImpl).Info | [POST] /api/v1/doc-cr-detail | Status: 200 | Berhasil mengambil semua data
+2026-08-31T15:12:55.6769575+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-08-31T15:13:04.3699519+07:00 | INFO | doc_cr_handler.go:368 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 | Berhasil mengambil semua data

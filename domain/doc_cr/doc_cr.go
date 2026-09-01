@@ -47,6 +47,16 @@ type PIC struct {
 	PICDepartment string
 }
 
+type Milestone struct {
+	LogID       uint
+	DocCrID     uint
+	LogActivity string
+	NikLog      string
+	NameLog     string
+	NoteLog     string
+	CreatedAt   time.Time
+}
+
 // Entity: DocumentCr (Aggregate Root)
 type DocumentCr struct {
 	DocCrID             uint
