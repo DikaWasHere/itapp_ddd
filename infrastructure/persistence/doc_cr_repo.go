@@ -142,7 +142,7 @@ type PICModel struct {
 	PICNik        string    `gorm:"column:pic_nik"`
 	PICName       string    `gorm:"column:pic_name"`
 	DocCrID       uint      `gorm:"column:doc_cr_id"`
-	PICDepartment string    `gorm:"column:approval_department"`
+	PICDepartment string    `gorm:"column:pic_department"`
 	CreatedAt     time.Time `gorm:"column:created_at"`
 	UpdatedAt     time.Time `gorm:"column:updated_at"`
 }
@@ -253,7 +253,7 @@ func (r *DocumentCrRepositoryDB) GetAll(ctx context.Context, req domainDocCr.Get
 		}
 
 		// Fetch related data (errors logged but don't fail the request)
- 		//r.fetchRelatedData(ctx, doc.DocCrID, item)
+		//r.fetchRelatedData(ctx, doc.DocCrID, item)
 		docIDs = append(docIDs, doc.DocCrID)
 
 		items = append(items, item)
@@ -325,46 +325,48 @@ func (r *DocumentCrRepositoryDB) GetAll(ctx context.Context, req domainDocCr.Get
 	return items, nil
 }
 
-// GetDetail mengambil detail DocumentCr berdasarkan DocCrID
+// GetDetail mengambil detail DocumentCr berdasarkan DocCrID (optimized with JOIN)
 func (r *DocumentCrRepositoryDB) GetDetail(ctx context.Context, req domainDocCr.GetDetailRequest) (*domainDocCr.DocumentCrDetailItem, error) {
-	var docModel DocumentCrModel
-	err := r.db.WithContext(ctx).Raw(`
-		SELECT tdc.*
-		FROM trs.trs_document_cr tdc
-		WHERE tdc.doc_cr_id = ?;
-	`, req.DocCrID).Scan(&docModel).Error
+	query := `
+        SELECT
+            -- Document fields
+            tdc.doc_cr_id, tdc.doc_cr_name, tdc.form_id, tdc.doc_reference,
+            tdc.requester_nik, tdc.requester_name, tdc.requester_department,
+            tdc.reason_detail, tdc.problem_detail, tdc.server_type, tdc.cr_type,
+            tdc.cr_priority, tdc.git_merge_request, tdc.git_repository,
+            tdc.doc_notes, tdc.doc_attachment, tdc.doc_status, tdc.application_name,
+            tdc.deployed_date, tdc.created_at,
+            -- Approval fields (nullable)
+            ta.approval_id, ta.approval_nik, ta.approval_name,
+            ta.approval_date, ta.approval_status, ta.approval_note,
+            ta.approval_department,
+            -- PIC fields (nullable)
+            tp.pic_id, tp.pic_nik, tp.pic_name, tp.pic_department AS pic_department,
+            -- Review fields (nullable)
+            tr.review_id, tr.review_nik, tr.review_name,
+            tr.review_date, tr.review_status, tr.review_note
+        FROM trs.trs_document_cr tdc
+        LEFT JOIN trs.trs_approval ta ON tdc.doc_cr_id = ta.doc_cr_id AND ta.approval_status != 'Cancel'
+        LEFT JOIN trs.trs_pic tp ON tdc.doc_cr_id = tp.doc_cr_id
+        LEFT JOIN trs.trs_review tr ON tdc.doc_cr_id = tr.doc_cr_id
+        WHERE tdc.doc_cr_id = ?
+        ORDER BY tdc.created_at DESC;
+    `
 
+	var joinRows []DocumentCrDetailJoinModel
+	err := r.db.WithContext(ctx).Raw(query, req.DocCrID).Scan(&joinRows).Error
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve DocumentCr data: %w", err)
+		return nil, fmt.Errorf("failed to retrieve DocumentCr detail: %w", err)
 	}
 
-	doc := docModel.toEntity()
-
-	item := &domainDocCr.DocumentCrDetailItem{
-		DocCr:          doc,
-		Approvals:      make([]*domainDocCr.Approval, 0),
-		PICDevelopers:  make([]*domainDocCr.PIC, 0),
-		PICFunctionals: make([]*domainDocCr.PIC, 0),
-		PICViewers:     make([]*domainDocCr.PIC, 0),
-		PICQAs:         make([]*domainDocCr.PIC, 0),
-		Milestones:     make([]*domainDocCr.Milestone, 0),
+	// Step 1: Convert JOIN rows to detail item (without milestones)
+	item, err := toDocumentCrDetailItem(joinRows)
+	if err != nil {
+		return nil, err
 	}
 
-	// Fetch Approval
-	if err := r.fetchApprovals(ctx, doc.DocCrID, item); err != nil {
-		return nil, fmt.Errorf("failed to retrieve approval data: %w", err)
-	}
-
-	// Fetch PIC
-	if err := r.fetchPICs(ctx, doc.DocCrID, item); err != nil {
-		return nil, fmt.Errorf("failed to retrieve PIC data: %w", err)
-	}
-
-	// Fetch Review (optional - don't fail if missing)
-	r.fetchReview(ctx, doc.DocCrID, item)
-
-	// Fetch Milestones (optional)
-	r.fetchMilestones(ctx, doc.DocCrID, item)
+	// Step 2: Fetch milestones separately (already exists!)
+	r.fetchMilestones(ctx, item.DocCr.DocCrID, item)
 
 	return item, nil
 }
@@ -392,35 +394,35 @@ func (r *DocumentCrRepositoryDB) fetchApprovals(ctx context.Context, docCrID uin
 }
 
 // fetchPICs mengambil data PIC dan mengkategorikan berdasarkan department
-func (r *DocumentCrRepositoryDB) fetchPICs(ctx context.Context, docCrID uint, item *domainDocCr.DocumentCrDetailItem) error {
-	rows, err := r.db.WithContext(ctx).Raw(`
-		SELECT *
-		FROM trs.trs_pic
-		WHERE doc_cr_id = ?;
-	`, docCrID).Rows()
-	if err != nil {
-		return err
-	}
-	defer rows.Close()
+// func (r *DocumentCrRepositoryDB) fetchPICs(ctx context.Context, docCrID uint, item *domainDocCr.DocumentCrDetailItem) error {
+// 	rows, err := r.db.WithContext(ctx).Raw(`
+// 		SELECT *
+// 		FROM trs.trs_pic
+// 		WHERE doc_cr_id = ?;
+// 	`, docCrID).Rows()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer rows.Close()
 
-	for rows.Next() {
-		var picModel PICModel
-		r.db.ScanRows(rows, &picModel)
-		pic := picModel.toEntity()
+// 	for rows.Next() {
+// 		var picModel PICModel
+// 		r.db.ScanRows(rows, &picModel)
+// 		pic := picModel.toEntity()
 
-		switch pic.PICDepartment {
-		case "IT FUNCTIONAL":
-			item.PICFunctionals = append(item.PICFunctionals, pic)
-		case "IT DEVELOPMENT":
-			item.PICDevelopers = append(item.PICDevelopers, pic)
-		case "IT SERVICES & IMPLEMENTATION":
-			item.PICViewers = append(item.PICViewers, pic)
-		case "QA":
-			item.PICQAs = append(item.PICQAs, pic)
-		}
-	}
-	return nil
-}
+// 		switch pic.PICDepartment {
+// 		case "IT FUNCTIONAL":
+// 			item.PICFunctionals = append(item.PICFunctionals, pic)
+// 		case "IT DEVELOPMENT":
+// 			item.PICDevelopers = append(item.PICDevelopers, pic)
+// 		case "IT SERVICES & IMPLEMENTATION":
+// 			item.PICViewers = append(item.PICViewers, pic)
+// 		case "QA":
+// 			item.PICQAs = append(item.PICQAs, pic)
+// 		}
+// 	}
+// 	return nil
+// }
 
 // fetchReview mengambil data review (optional)
 func (r *DocumentCrRepositoryDB) fetchReview(ctx context.Context, docCrID uint, item *domainDocCr.DocumentCrDetailItem) {
@@ -453,6 +455,153 @@ func (r *DocumentCrRepositoryDB) fetchMilestones(ctx context.Context, docCrID ui
 		r.db.ScanRows(rows, &milestoneModel)
 		item.Milestones = append(item.Milestones, milestoneModel.toEntity())
 	}
+}
+
+// DocumentCrDetailJoinModel is a temporary model for JOIN query results
+type DocumentCrDetailJoinModel struct {
+	// Data from trs_document_cr
+	DocCrID             uint       `gorm:"column:doc_cr_id"`
+	DocCrName           string     `gorm:"column:doc_cr_name"`
+	FormId              string     `gorm:"column:form_id"`
+	DocReference        string     `gorm:"column:doc_reference"`
+	RequesterNIK        string     `gorm:"column:requester_nik"`
+	RequesterName       string     `gorm:"column:requester_name"`
+	RequesterDepartment string     `gorm:"column:requester_department"`
+	ReasonDetail        string     `gorm:"column:reason_detail"`
+	ProblemDetail       string     `gorm:"column:problem_detail"`
+	ServerType          string     `gorm:"column:server_type"`
+	CrType              string     `gorm:"column:cr_type"`
+	CrPriority          string     `gorm:"column:cr_priority"`
+	GitMergeRequest     string     `gorm:"column:git_merge_request"`
+	GitRepository       string     `gorm:"column:git_repository"`
+	DocNotes            string     `gorm:"column:doc_notes"`
+	DocAttachment       string     `gorm:"column:doc_attachment"`
+	DocStatus           string     `gorm:"column:doc_status"`
+	ApplicationName     string     `gorm:"column:application_name"`
+	DeployedDate        *time.Time `gorm:"column:deployed_date"`
+	CreatedAt           time.Time  `gorm:"column:created_at"`
+
+	// Data from trs_approval (nullable because LEFT JOIN)
+	ApprovalID         *uint   `gorm:"column:approval_id"`
+	ApprovalNik        *string `gorm:"column:approval_nik"`
+	ApprovalName       *string `gorm:"column:approval_name"`
+	ApprovalDate       *string `gorm:"column:approval_date"`
+	ApprovalStatus     *string `gorm:"column:approval_status"`
+	ApprovalNote       *string `gorm:"column:approval_note"`
+	ApprovalDepartment *string `gorm:"column:approval_department"`
+
+	// Data from trs_pic (nullable because LEFT JOIN)
+	PICID         *uint   `gorm:"column:pic_id"`
+	PICNik        *string `gorm:"column:pic_nik"`
+	PICName       *string `gorm:"column:pic_name"`
+	PICDepartment *string `gorm:"column:pic_department"`
+
+	// Data from trs_review (nullable because LEFT JOIN)
+	ReviewID     *uint   `gorm:"column:review_id"`
+	ReviewNik    *string `gorm:"column:review_nik"`
+	ReviewName   *string `gorm:"column:review_name"`
+	ReviewDate   *string `gorm:"column:review_date"`
+	ReviewStatus *string `gorm:"column:review_status"`
+	ReviewNote   *string `gorm:"column:review_note"`
+}
+
+// toDocumentCrDetailItem converts JOIN model rows to domain entity
+func toDocumentCrDetailItem(rows []DocumentCrDetailJoinModel) (*domainDocCr.DocumentCrDetailItem, error) {
+	if len(rows) == 0 {
+		return nil, fmt.Errorf("document not found")
+	}
+
+	first := rows[0]
+
+	// Build DocumentCr entity
+	doc := &domainDocCr.DocumentCr{
+		DocCrID:             first.DocCrID,
+		DocCrName:           first.DocCrName,
+		FormId:              first.FormId,
+		DocReference:        first.DocReference,
+		RequesterNIK:        first.RequesterNIK,
+		RequesterName:       first.RequesterName,
+		RequesterDepartment: first.RequesterDepartment,
+		ReasonDetail:        first.ReasonDetail,
+		ProblemDetail:       first.ProblemDetail,
+		ServerType:          first.ServerType,
+		CrType:              first.CrType,
+		CrPriority:          first.CrPriority,
+		GitMergeRequest:     first.GitMergeRequest,
+		GitRepository:       first.GitRepository,
+		DocNotes:            first.DocNotes,
+		DocAttachment:       first.DocAttachment,
+		DocStatus:           first.DocStatus,
+		ApplicationName:     first.ApplicationName,
+		DeployedDate:        first.DeployedDate,
+		CreatedAt:           first.CreatedAt,
+	}
+
+	item := &domainDocCr.DocumentCrDetailItem{
+		DocCr:          doc,
+		Approvals:      make([]*domainDocCr.Approval, 0),
+		PICDevelopers:  make([]*domainDocCr.PIC, 0),
+		PICFunctionals: make([]*domainDocCr.PIC, 0),
+		PICViewers:     make([]*domainDocCr.PIC, 0),
+		PICQAs:         make([]*domainDocCr.PIC, 0),
+		Milestones:     make([]*domainDocCr.Milestone, 0),
+	}
+
+	// Deduplication maps
+	seenApprovals := make(map[uint]bool)
+	seenPICs := make(map[uint]bool)
+
+	for _, row := range rows {
+		// Collect Approvals
+		if row.ApprovalID != nil && !seenApprovals[*row.ApprovalID] {
+			seenApprovals[*row.ApprovalID] = true
+			item.Approvals = append(item.Approvals, &domainDocCr.Approval{
+				ApprovalID:         row.ApprovalID,
+				ApprovalNik:        row.ApprovalNik,
+				ApprovalName:       row.ApprovalName,
+				ApprovalDate:       row.ApprovalDate,
+				ApprovalStatus:     row.ApprovalStatus,
+				ApprovalDepartment: row.ApprovalDepartment,
+				DocCrID:            &first.DocCrID,
+			})
+		}
+
+		// Collect PICs
+		if row.PICID != nil && row.PICNik != nil && row.PICName != nil && row.PICDepartment != nil && !seenPICs[*row.PICID] {
+			seenPICs[*row.PICID] = true
+			pic := &domainDocCr.PIC{
+				PICNik:        *row.PICNik,
+				PICName:       *row.PICName,
+				PICDepartment: *row.PICDepartment,
+			}
+			switch *row.PICDepartment {
+			case "IT FUNCTIONAL":
+				item.PICFunctionals = append(item.PICFunctionals, pic)
+			case "IT DEVELOPMENT":
+				item.PICDevelopers = append(item.PICDevelopers, pic)
+			case "IT SERVICES & IMPLEMENTATION":
+				item.PICViewers = append(item.PICViewers, pic)
+			case "QA":
+				item.PICQAs = append(item.PICQAs, pic)
+			}
+		}
+
+		// Collect Review (only first one)
+		if row.ReviewID != nil && item.Review == nil {
+			item.Review = &domainDocCr.Review{
+				ReviewID:     row.ReviewID,
+				ReviewNik:    row.ReviewNik,
+				ReviewName:   row.ReviewName,
+				ReviewDate:   row.ReviewDate,
+				ReviewStatus: row.ReviewStatus,
+				ReviewNote:   row.ReviewNote,
+				DocCrID:      &first.DocCrID,
+			}
+		}
+
+	}
+
+	return item, nil
 }
 
 // ini N+1 karena melakukan 3 query yaitu review, approval, dan pic. Namun, ini dilakukan untuk menghindari query yang terlalu kompleks dan tetap menjaga performa. Jika diperlukan, bisa dioptimalkan dengan join query, tetapi harus dipastikan hasilnya tetap sesuai dengan kebutuhan.
