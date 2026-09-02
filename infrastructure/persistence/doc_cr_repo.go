@@ -234,6 +234,8 @@ func (r *DocumentCrRepositoryDB) GetAll(ctx context.Context, req domainDocCr.Get
 	}
 	defer rows.Close()
 
+	var docIDs []uint
+
 	var items []*domainDocCr.DocumentCrListItem
 
 	for rows.Next() {
@@ -251,9 +253,73 @@ func (r *DocumentCrRepositoryDB) GetAll(ctx context.Context, req domainDocCr.Get
 		}
 
 		// Fetch related data (errors logged but don't fail the request)
-		r.fetchRelatedData(ctx, doc.DocCrID, item)
+ 		//r.fetchRelatedData(ctx, doc.DocCrID, item)
+		docIDs = append(docIDs, doc.DocCrID)
 
 		items = append(items, item)
+	}
+	// go
+	// Batch fetch semua review sekaligus
+	reviewMap := make(map[uint]*domainDocCr.Review)
+	if len(docIDs) > 0 {
+		var reviewModels []ReviewModel
+		r.db.Where("doc_cr_id IN ?", docIDs).Find(&reviewModels)
+		for _, rev := range reviewModels {
+			reviewMap[rev.DocCrID] = rev.toEntity()
+		}
+	}
+
+	// Batch fetch semua approval sekaligus
+	approvalMap := make(map[uint][]*domainDocCr.Approval)
+	if len(docIDs) > 0 {
+		var approvalModels []ApprovalModel
+		r.db.Where("doc_cr_id IN ? AND approval_status != ?", docIDs, "Cancel").Find(&approvalModels)
+		for i := range approvalModels {
+			appr := approvalModels[i].toEntity()
+			if appr.DocCrID != nil { // ✅ Tambah check ini
+				approvalMap[*appr.DocCrID] = append(approvalMap[*appr.DocCrID], appr) // ✅ Dereference
+			}
+		}
+	}
+
+	// Batch fetch semua PIC sekaligus
+	picMap := make(map[uint][]*domainDocCr.PIC)
+	if len(docIDs) > 0 {
+		var picModels []PICModel
+		r.db.Where("doc_cr_id IN ?", docIDs).Find(&picModels)
+		for _, picM := range picModels {
+			pic := picM.toEntity()
+			switch pic.PICDepartment {
+			case "IT FUNCTIONAL":
+				picMap[picM.DocCrID] = append(picMap[picM.DocCrID], pic)
+			case "IT DEVELOPMENT":
+				picMap[picM.DocCrID] = append(picMap[picM.DocCrID], pic)
+			}
+		}
+	}
+
+	// Cocokkan data dari map ke item
+	for _, item := range items {
+		docID := item.DocCr.DocCrID
+
+		if review, ok := reviewMap[docID]; ok {
+			item.Review = review
+		}
+
+		if approvals, ok := approvalMap[docID]; ok {
+			item.Approvals = approvals
+		}
+
+		if pics, ok := picMap[docID]; ok {
+			for _, pic := range pics {
+				switch pic.PICDepartment {
+				case "IT FUNCTIONAL":
+					item.PICFunctionals = append(item.PICFunctionals, pic)
+				case "IT DEVELOPMENT":
+					item.PICDevelopers = append(item.PICDevelopers, pic)
+				}
+			}
+		}
 	}
 
 	return items, nil
@@ -389,41 +455,41 @@ func (r *DocumentCrRepositoryDB) fetchMilestones(ctx context.Context, docCrID ui
 	}
 }
 
-// fetchRelatedData mengambil semua data terkait untuk list view (best effort)
-func (r *DocumentCrRepositoryDB) fetchRelatedData(ctx context.Context, docCrID uint, item *domainDocCr.DocumentCrListItem) {
-	// Review (optional)
-	var reviewModel ReviewModel
-	err := r.db.Raw(`SELECT * FROM trs.trs_review WHERE doc_cr_id = ?;`, docCrID).Scan(&reviewModel).Error
-	if err == nil {
-		item.Review = reviewModel.toEntity()
-	}
+// ini N+1 karena melakukan 3 query yaitu review, approval, dan pic. Namun, ini dilakukan untuk menghindari query yang terlalu kompleks dan tetap menjaga performa. Jika diperlukan, bisa dioptimalkan dengan join query, tetapi harus dipastikan hasilnya tetap sesuai dengan kebutuhan.
+// func (r *DocumentCrRepositoryDB) fetchRelatedData(ctx context.Context, docCrID uint, item *domainDocCr.DocumentCrListItem) {
+// 	// Review
+// 	var reviewModel ReviewModel
+// 	err := r.db.Raw(`SELECT * FROM trs.trs_review WHERE doc_cr_id = ?;`, docCrID).Scan(&reviewModel).Error
+// 	if err == nil {
+// 		item.Review = reviewModel.toEntity()
+// 	}
 
-	// Approvals (optional)
-	approvalRows, err := r.db.Raw(`SELECT * FROM trs.trs_approval WHERE doc_cr_id = ? AND approval_status != 'Cancel';`, docCrID).Rows()
-	if err == nil {
-		defer approvalRows.Close()
-		for approvalRows.Next() {
-			var approvalModel ApprovalModel
-			r.db.ScanRows(approvalRows, &approvalModel)
-			item.Approvals = append(item.Approvals, approvalModel.toEntity())
-		}
-	}
+// 	// Approvals
+// 	approvalRows, err := r.db.Raw(`SELECT * FROM trs.trs_approval WHERE doc_cr_id = ? AND approval_status != 'Cancel';`, docCrID).Rows()
+// 	if err == nil {
+// 		defer approvalRows.Close()
+// 		for approvalRows.Next() {
+// 			var approvalModel ApprovalModel
+// 			r.db.ScanRows(approvalRows, &approvalModel)
+// 			item.Approvals = append(item.Approvals, approvalModel.toEntity())
+// 		}
+// 	}
 
-	// PICs (optional)
-	picRows, err := r.db.Raw(`SELECT * FROM trs.trs_pic WHERE doc_cr_id = ?;`, docCrID).Rows()
-	if err == nil {
-		defer picRows.Close()
-		for picRows.Next() {
-			var picModel PICModel
-			r.db.ScanRows(picRows, &picModel)
-			pic := picModel.toEntity()
+// 	// PICs
+// 	picRows, err := r.db.Raw(`SELECT * FROM trs.trs_pic WHERE doc_cr_id = ?;`, docCrID).Rows()
+// 	if err == nil {
+// 		defer picRows.Close()
+// 		for picRows.Next() {
+// 			var picModel PICModel
+// 			r.db.ScanRows(picRows, &picModel)
+// 			pic := picModel.toEntity()
 
-			if pic.PICDepartment == "IT FUNCTIONAL" {
-				item.PICFunctionals = append(item.PICFunctionals, pic)
-			}
-			if pic.PICDepartment == "IT DEVELOPMENT" {
-				item.PICDevelopers = append(item.PICDevelopers, pic)
-			}
-		}
-	}
-}
+// 			if pic.PICDepartment == "IT FUNCTIONAL" {
+// 				item.PICFunctionals = append(item.PICFunctionals, pic)
+// 			}
+// 			if pic.PICDepartment == "IT DEVELOPMENT" {
+// 				item.PICDevelopers = append(item.PICDevelopers, pic)
+// 			}
+// 		}
+// 	}
+// }
