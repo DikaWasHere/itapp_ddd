@@ -366,3 +366,122 @@ func (h *DocumentCrHandler) GetDetail(c *fiber.Ctx) error {
 	h.logger.Info("[%s] %s | Status: 200 | Berhasil mengambil semua data", c.Method(), c.Path())
 	return pkg.SuccessResponse(c, doc)
 }
+
+// --- Request DTO untuk Create ---
+type docCrCreateRequest struct {
+	DocCrName              string     `json:"doc_cr_name"`
+	FormId                 string     `json:"form_id"`
+	DocReference           string     `json:"doc_reference"`
+	RequesterNIK           string     `json:"requester_nik"`
+	RequesterName          string     `json:"requester_name"`
+	RequesterDepartment    string     `json:"requester_department"`
+	ReasonDetail           string     `json:"reason_detail"`
+	ProblemDetail          string     `json:"problem_detail"`
+	ServerType             string     `json:"server_type"`
+	CrType                 string     `json:"cr_type"`
+	CrPriority             string     `json:"cr_priority"`
+	GitMergeRequest        string     `json:"git_merge_request"`
+	GitRepository          string     `json:"git_repository"`
+	DocNotes               string     `json:"doc_notes"`
+	DocAttachment          []string   `json:"doc_attachment"`
+	DocAttachmentExtension []string   `json:"doc_attachment_extension"`
+	DocStatus              string     `json:"doc_status"`
+	ApplicationName        string     `json:"application_name"`
+	DeployedDate           *time.Time `json:"deployed_date"`
+}
+
+// --- Response DTO untuk Create ---
+type docCrCreateResponse struct {
+	DocCrID             uint       `json:"doc_cr_id"`
+	DocCrName           string     `json:"doc_cr_name"`
+	FormId              string     `json:"form_id"`
+	DocReference        string     `json:"doc_reference"`
+	RequesterNIK        string     `json:"requester_nik"`
+	RequesterName       string     `json:"requester_name"`
+	RequesterDepartment string     `json:"requester_department"`
+	ReasonDetail        string     `json:"reason_detail"`
+	ProblemDetail       string     `json:"problem_detail"`
+	ServerType          string     `json:"server_type"`
+	CrType              string     `json:"cr_type"`
+	CrPriority          string     `json:"cr_priority"`
+	GitMergeRequest     string     `json:"git_merge_request"`
+	GitRepository       string     `json:"git_repository"`
+	DocNotes            string     `json:"doc_notes"`
+	DocAttachment       string     `json:"doc_attachment"`
+	DocStatus           string     `json:"doc_status"`
+	ApplicationName     string     `json:"application_name"`
+	DeployedDate        *time.Time `json:"deployed_date"`
+	CreatedAt           time.Time  `json:"created_at"`
+}
+
+// go
+// Create menangani request untuk membuat DocumentCr baru
+func (h *DocumentCrHandler) Create(c *fiber.Ctx) error {
+	req := new(docCrCreateRequest)
+
+	if err := c.BodyParser(req); err != nil {
+		h.logger.Error("Failed to parse request body", err)
+		return pkg.BadRequestResponse(c, "Failed to parse request body")
+	}
+
+	// Map request ke domain request
+	domainReq := domainDocCr.CreateDocCrRequest{
+		DocCrName:              req.DocCrName,
+		FormId:                 req.FormId,
+		DocReference:           req.DocReference,
+		RequesterNIK:           req.RequesterNIK,
+		RequesterName:          req.RequesterName,
+		RequesterDepartment:    req.RequesterDepartment,
+		ReasonDetail:           req.ReasonDetail,
+		ProblemDetail:          req.ProblemDetail,
+		ServerType:             req.ServerType,
+		CrType:                 req.CrType,
+		CrPriority:             req.CrPriority,
+		GitMergeRequest:        req.GitMergeRequest,
+		GitRepository:          req.GitRepository,
+		DocNotes:               req.DocNotes,
+		DocAttachment:          req.DocAttachment,          // Now []string
+		DocAttachmentExtension: req.DocAttachmentExtension, // NEW
+		DocStatus:              req.DocStatus,
+		ApplicationName:        req.ApplicationName,
+		DeployedDate:           req.DeployedDate,
+	}
+
+	// Panggil service
+	doc, err := h.service.Create(c.Context(), domainReq)
+	if err != nil {
+		h.logger.Error("Failed to create DocumentCr", err)
+		return pkg.BadRequestResponse(c, "Failed to create DocumentCr: "+err.Error())
+	}
+
+	// Map domain response ke response DTO
+	data := docCrCreateResponse{
+		DocCrID:             doc.DocCrID,
+		DocCrName:           doc.DocCrName,
+		FormId:              doc.FormId,
+		DocReference:        doc.DocReference,
+		RequesterNIK:        doc.RequesterNIK,
+		RequesterName:       doc.RequesterName,
+		RequesterDepartment: doc.RequesterDepartment,
+		ReasonDetail:        doc.ReasonDetail,
+		ProblemDetail:       doc.ProblemDetail,
+		ServerType:          doc.ServerType,
+		CrType:              doc.CrType,
+		CrPriority:          doc.CrPriority,
+		GitMergeRequest:     doc.GitMergeRequest,
+		GitRepository:       doc.GitRepository,
+		DocNotes:            doc.DocNotes,
+		DocAttachment:       doc.DocAttachment,
+		DocStatus:           doc.DocStatus,
+		ApplicationName:     doc.ApplicationName,
+		DeployedDate:        doc.DeployedDate,
+		CreatedAt:           doc.CreatedAt,
+	}
+
+	h.logger.Info("[%s] %s | Status: 201 | DocumentCr created successfully", c.Method(), c.Path())
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"status":  fiber.StatusCreated,
+		"message": "DocumentCr created successfully",
+		"data":    data,
+	})
+}

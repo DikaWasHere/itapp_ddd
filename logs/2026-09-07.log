@@ -1,0 +1,6 @@
+2026-09-07T09:06:44.3102628+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-07T09:08:03.7433749+07:00 | INFO | service.go:55 | doc_cr.(*Service).Create | DocumentCr created successfully with ID: 132
+2026-09-07T09:08:03.7433749+07:00 | INFO | doc_cr_handler.go:478 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-07T10:50:29.2312027+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-07T10:50:45.9924141+07:00 | INFO | service.go:109 | doc_cr.(*Service).Create | DocumentCr created successfully with ID: 133
+2026-09-07T10:50:45.9924141+07:00 | INFO | doc_cr_handler.go:481 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully

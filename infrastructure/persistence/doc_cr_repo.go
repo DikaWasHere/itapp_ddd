@@ -642,3 +642,54 @@ func toDocumentCrDetailItem(rows []DocumentCrDetailJoinModel) (*domainDocCr.Docu
 // 		}
 // 	}
 // }
+
+// Create membuat DocumentCr baru
+func (r *DocumentCrRepositoryDB) Create(ctx context.Context, req domainDocCr.CreateDocCrRequest) (*domainDocCr.DocumentCr, error) {
+    // Konversi DocAttachment ([]string) ke string dengan join "|"
+    var docAttachmentStr string
+    if len(req.DocAttachment) > 0 {
+        docAttachmentStr = strings.Join(req.DocAttachment, "|")
+    }
+ 
+    docModel := DocumentCrModel{
+        DocCrName:           req.DocCrName,
+        FormId:              req.FormId,
+        DocReference:        req.DocReference,
+        RequesterNIK:        req.RequesterNIK,
+        RequesterName:       req.RequesterName,
+        RequesterDepartment: req.RequesterDepartment,
+        ReasonDetail:        req.ReasonDetail,
+        ProblemDetail:       req.ProblemDetail,
+        ServerType:          req.ServerType,
+        CrType:              req.CrType,
+        CrPriority:          req.CrPriority,
+        GitMergeRequest:     req.GitMergeRequest,
+        GitRepository:       req.GitRepository,
+        DocNotes:            req.DocNotes,
+        DocAttachment:       docAttachmentStr,  // ← SEKARANG VALID
+        DocStatus:           req.DocStatus,
+        ApplicationName:     req.ApplicationName,
+        DeployedDate:        req.DeployedDate,
+        CreatedAt:           time.Now(),
+        UpdatedAt:           time.Now(),
+    }
+ 
+    if err := r.db.WithContext(ctx).Create(&docModel).Error; err != nil {
+        return nil, fmt.Errorf("failed to create DocumentCr: %w", err)
+    }
+ 
+    return docModel.toEntity(), nil
+}
+
+// CountByYear menghitung jumlah DocumentCr berdasarkan tahun
+func (r *DocumentCrRepositoryDB) CountByYear(ctx context.Context, year string) (int64, error) {
+    var count int64
+    err := r.db.WithContext(ctx).
+        Model(&DocumentCrModel{}).
+        Where("created_at::TEXT ILIKE ?", year+"%").
+        Count(&count).Error
+    if err != nil {
+        return 0, fmt.Errorf("failed to count DocumentCr by year: %w", err)
+    }
+    return count, nil
+}
