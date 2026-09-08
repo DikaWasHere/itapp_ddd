@@ -30,6 +30,7 @@ type DocumentCrRepository interface {
 	Create(ctx context.Context, req CreateDocCrRequest) (*DocumentCr, error)
 	CountByYear(ctx context.Context, year string) (int64, error)
 	SendReview(ctx context.Context, req SendReviewRequest) (*SendReviewResult, error)
+	SendReviewReject(ctx context.Context, req SendReviewRejectRequest) (*SendReviewRejectResult, error)
 }
 
 // GetDetailRequest adalah parameter untuk mengambil detail DocumentCr
@@ -104,5 +105,21 @@ type SendReviewRequest struct {
 
 // SendReviewResult adalah hasil dari operasi send review
 type SendReviewResult struct {
+	DocCrID uint
+}
+
+// SendReviewRejectRequest adalah request untuk menolak CR dari review
+type SendReviewRejectRequest struct {
+	DocCrID       uint
+	RequesterNIK  string
+	FormId        string
+	ReviewNote    string
+	NikLog        string
+	NameLog       string
+	NoteLog       string
+}
+ 
+// SendReviewRejectResult adalah hasil dari operasi reject review
+type SendReviewRejectResult struct {
 	DocCrID uint
 }

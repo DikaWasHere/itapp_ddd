@@ -818,3 +818,42 @@ func (r *DocumentCrRepositoryDB) SendReview(ctx context.Context, req domainDocCr
 
 	return &domainDocCr.SendReviewResult{DocCrID: req.DocCrID}, nil
 }
+
+// SendReviewReject implementasi persistensi untuk reject review CR
+func (r *DocumentCrRepositoryDB) SendReviewReject(ctx context.Context, req domainDocCr.SendReviewRejectRequest) (*domainDocCr.SendReviewRejectResult, error) {
+	// 1. Update status dokumen ke "Waiting Revision"
+	newDocStatus := struct {
+		DocStatus string
+	}{
+		DocStatus: "Waiting Revision",
+	}
+ 
+	if err := r.db.WithContext(ctx).Model(&DocumentCrModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(newDocStatus).Error; err != nil {
+		return nil, fmt.Errorf("failed to update document status: %w", err)
+	}
+ 
+	// 2. Insert log aktivitas "Rejected"
+	logModel := DocumentCrLogModel{
+		DocCrID:     req.DocCrID,
+		LogActivity: "Rejected",
+		NikLog:      req.NikLog,
+		NameLog:     req.NameLog,
+		NoteLog:     req.NoteLog,
+	}
+	if err := r.db.WithContext(ctx).Create(&logModel).Error; err != nil {
+		return nil, fmt.Errorf("failed to create log: %w", err)
+	}
+ 
+	// 3. Update data review
+	now := time.Now()
+	reviewUpdate := ReviewModel{
+		ReviewDate:   func() *string { s := now.Format(time.RFC3339); return &s }(),
+		ReviewStatus: "Waiting Revision",
+		ReviewNote:   req.ReviewNote,
+	}
+	if err := r.db.WithContext(ctx).Model(&ReviewModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(reviewUpdate).Error; err != nil {
+		return nil, fmt.Errorf("failed to update review: %w", err)
+	}
+ 
+	return &domainDocCr.SendReviewRejectResult{DocCrID: req.DocCrID}, nil
+}

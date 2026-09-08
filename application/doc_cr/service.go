@@ -119,3 +119,20 @@ func (s *Service) SendReview(ctx context.Context, req domainDocCr.SendReviewRequ
 	s.logger.Info("Review submitted for DocCrID: %d", result.DocCrID)
 	return result, nil
 }
+
+// SendReviewReject menolak CR dari tahap review
+func (s *Service) SendReviewReject(ctx context.Context, req domainDocCr.SendReviewRejectRequest) (*domainDocCr.SendReviewRejectResult, error) {
+	if req.DocCrID == 0 {
+		s.logger.Warn("SendReviewReject failed: DocCrID is required")
+		return nil, fmt.Errorf("DocCrID is required")
+	}
+ 
+	result, err := s.repo.SendReviewReject(ctx, req)
+	if err != nil {
+		s.logger.Error("SendReviewReject failed", err)
+		return nil, err
+	}
+ 
+	s.logger.Info("Review rejected for DocCrID: %d", result.DocCrID)
+	return result, nil
+}

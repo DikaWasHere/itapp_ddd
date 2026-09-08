@@ -1,0 +1,28 @@
+2026-09-08T08:49:03.9528827+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-08T08:49:33.9532894+07:00 | INFO | doc_cr_handler.go:366 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 | Berhasil mengambil semua data
+2026-09-08T08:50:02.3912736+07:00 | INFO | doc_cr_handler.go:366 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 | Berhasil mengambil semua data
+2026-09-08T08:50:19.7540237+07:00 | INFO | doc_cr_handler.go:366 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 | Berhasil mengambil semua data
+2026-09-08T08:51:16.4895738+07:00 | INFO | doc_cr_handler.go:366 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 | Berhasil mengambil semua data
+2026-09-08T08:51:37.5908637+07:00 | INFO | doc_cr_handler.go:366 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 | Berhasil mengambil semua data
+2026-09-08T08:51:51.7688087+07:00 | INFO | doc_cr_handler.go:366 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 | Berhasil mengambil semua data
+2026-09-08T08:55:34.75187+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-08T08:55:53.0354927+07:00 | ERROR | service.go:42 | doc_cr.(*Service).GetDetail | GetDetail failed: document not found
+2026-09-08T08:55:53.0354927+07:00 | ERROR | doc_cr_handler.go:257 | handler.(*DocumentCrHandler).GetDetail | Failed to parse request body: document not found
+2026-09-08T08:56:14.2359169+07:00 | INFO | doc_cr_handler.go:366 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 | Berhasil mengambil semua data
+2026-09-08T08:56:29.6792786+07:00 | INFO | doc_cr_handler.go:366 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 | Berhasil mengambil semua data
+2026-09-08T08:57:44.9870143+07:00 | ERROR | doc_cr_handler.go:536 | handler.(*DocumentCrHandler).SendReview | Failed to parse request body: invalid character '{' looking for beginning of object key string
+2026-09-08T08:58:08.0547663+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-08T08:58:29.4813642+07:00 | INFO | service.go:119 | doc_cr.(*Service).SendReview | Review submitted for DocCrID: 2
+2026-09-08T08:58:29.4813642+07:00 | INFO | doc_cr_handler.go:609 | handler.(*DocumentCrHandler).SendReview | [POST] /api/v1/doc-cr-review | Status: 200 | Review submitted for DocCrID: 2
+2026-09-08T08:58:48.3164839+07:00 | INFO | service.go:119 | doc_cr.(*Service).SendReview | Review submitted for DocCrID: 1
+2026-09-08T08:58:48.3164839+07:00 | INFO | doc_cr_handler.go:609 | handler.(*DocumentCrHandler).SendReview | [POST] /api/v1/doc-cr-review | Status: 200 | Review submitted for DocCrID: 1
+2026-09-08T08:59:18.4958786+07:00 | INFO | service.go:119 | doc_cr.(*Service).SendReview | Review submitted for DocCrID: 2
+2026-09-08T08:59:18.4958786+07:00 | INFO | doc_cr_handler.go:609 | handler.(*DocumentCrHandler).SendReview | [POST] /api/v1/doc-cr-review | Status: 200 | Review submitted for DocCrID: 2
+2026-09-08T11:44:23.9775033+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-08T11:44:39.0680781+07:00 | INFO | service.go:136 | doc_cr.(*Service).SendReviewReject | Review rejected for DocCrID: 11
+2026-09-08T11:44:39.0680781+07:00 | INFO | doc_cr_handler.go:657 | handler.(*DocumentCrHandler).SendReviewReject | [POST] /api/v1/doc-cr-reject | Status: 200 | Review rejected for DocCrID: 11
+2026-09-08T13:23:08.1687417+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-08T13:27:59.5699134+07:00 | INFO | service.go:136 | doc_cr.(*Service).SendReviewReject | Review rejected for DocCrID: 1
+2026-09-08T13:27:59.5699134+07:00 | INFO | doc_cr_handler.go:657 | handler.(*DocumentCrHandler).SendReviewReject | [POST] /api/v1/doc-cr-reject | Status: 200 | Review rejected for DocCrID: 1
+2026-09-08T13:29:56.4744542+07:00 | INFO | service.go:136 | doc_cr.(*Service).SendReviewReject | Review rejected for DocCrID: 1
+2026-09-08T13:29:56.4744542+07:00 | INFO | doc_cr_handler.go:657 | handler.(*DocumentCrHandler).SendReviewReject | [POST] /api/v1/doc-cr-reject | Status: 200 | Review rejected for DocCrID: 1

@@ -611,3 +611,51 @@ func (h *DocumentCrHandler) SendReview(c *fiber.Ctx) error {
 		"doc_cr_id": result.DocCrID,
 	})
 }
+
+// --- Request DTO untuk SendReviewReject ---
+type docCrSendReviewRejectRequest struct {
+	DocCrID      uint   `json:"doc_cr_id"`
+	RequesterNIK string `json:"requester_nik"`
+	FormId       string `json:"form_id"`
+	ReviewNote   string `json:"review_note"`
+	NikLog       string `json:"nik_log"`
+	NameLog      string `json:"name_log"`
+	NoteLog      string `json:"note_log"`
+}
+
+// SendReviewReject menangani request untuk menolak CR dari tahap review
+func (h *DocumentCrHandler) SendReviewReject(c *fiber.Ctx) error {
+	req := new(docCrSendReviewRejectRequest)
+	if err := c.BodyParser(req); err != nil {
+		h.logger.Error("Failed to parse request body", err)
+		return pkg.BadRequestResponse(c, "Failed to parse request body")
+	}
+
+	// Validasi input
+	if req.DocCrID == 0 {
+		return pkg.BadRequestResponse(c, "doc_cr_id is required")
+	}
+
+	// Map ke domain request
+	domainReq := domainDocCr.SendReviewRejectRequest{
+		DocCrID:      req.DocCrID,
+		RequesterNIK: req.RequesterNIK,
+		FormId:       req.FormId,
+		ReviewNote:   req.ReviewNote,
+		NikLog:       req.NikLog,
+		NameLog:      req.NameLog,
+		NoteLog:      req.NoteLog,
+	}
+
+	// Panggil service
+	result, err := h.service.SendReviewReject(c.Context(), domainReq)
+	if err != nil {
+		h.logger.Error("Failed to reject review", err)
+		return pkg.BadRequestResponse(c, "Failed to reject review: "+err.Error())
+	}
+
+	h.logger.Info("[%s] %s | Status: 200 | Review rejected for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
+	return pkg.SuccessResponse(c, fiber.Map{
+		"doc_cr_id": result.DocCrID,
+	})
+}
