@@ -13,11 +13,12 @@ import (
 // DocumentCrHandler adalah handler untuk DocumentCr
 type DocumentCrHandler struct {
 	service *docCrApp.Service
+	logger  docCrApp.Logger
 }
 
 // NewDocumentCrHandler constructor
-func NewDocumentCrHandler(service *docCrApp.Service) *DocumentCrHandler {
-	return &DocumentCrHandler{service: service}
+func NewDocumentCrHandler(service *docCrApp.Service, logger docCrApp.Logger) *DocumentCrHandler {
+	return &DocumentCrHandler{service: service, logger: logger}
 }
 
 // Request DTO untuk GetAll
@@ -27,6 +28,11 @@ type docCrGetListRequest struct {
 	RequesterNik string   `json:"requester_nik"`
 	ApprovalNik  string   `json:"approval_nik"`
 	DocStatus    []string `json:"doc_status"`
+}
+
+// Request DTO untuk GetDetail
+type docCrGetDetailRequest struct {
+	DocCrID uint `json:"doc_cr_id"`
 }
 
 // Response DTO untuk Review
@@ -84,6 +90,48 @@ type docCrListResponse struct {
 	PICFunctionals      []picResponse      `json:"pic_functional"`
 	Approval            []approvalResponse `json:"approval"`
 	Review              *reviewResponse    `json:"review"`
+}
+
+// Response DTO untuk Milestone
+type milestoneResponse struct {
+	LogID       uint      `json:"log_id"`
+	DocCrID     uint      `json:"doc_cr_id"`
+	LogActivity string    `json:"log_activity"`
+	NikLog      string    `json:"nik_log"`
+	NameLog     string    `json:"name_log"`
+	NoteLog     string    `json:"note_log"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+// Response DTO untuk DocumentCr Detail
+type docCrDetailResponse struct {
+	DocCrID             uint                `json:"doc_cr_id"`
+	DocCrName           string              `json:"doc_cr_name"`
+	FormId              string              `json:"form_id"`
+	DocReference        string              `json:"doc_reference"`
+	RequesterNIK        string              `json:"requester_nik"`
+	RequesterName       string              `json:"requester_name"`
+	RequesterDepartment string              `json:"requester_department"`
+	ReasonDetail        string              `json:"reason_detail"`
+	ProblemDetail       string              `json:"problem_detail"`
+	ServerType          string              `json:"server_type"`
+	CrType              string              `json:"cr_type"`
+	CrPriority          string              `json:"cr_priority"`
+	GitMergeRequest     string              `json:"git_merge_request"`
+	GitRepository       string              `json:"git_repository"`
+	DocNotes            string              `json:"doc_notes"`
+	DocAttachment       string              `json:"doc_attachment"`
+	DocStatus           string              `json:"doc_status"`
+	ApplicationName     string              `json:"application_name"`
+	DeployedDate        *time.Time          `json:"deployed_date"`
+	CreatedAt           time.Time           `json:"created_at"`
+	PICDevelopers       []picResponse       `json:"pic_developer"`
+	PICFunctionals      []picResponse       `json:"pic_functional"`
+	PICViewer           []picResponse       `json:"pic_viewer"`
+	PICQAs              []picResponse       `json:"pic_qa"`
+	Approval            []approvalResponse  `json:"approval"`
+	Review              *reviewResponse     `json:"review"`
+	Milestones          []milestoneResponse `json:"milestones"`
 }
 
 // GetAll menangani request untuk mengambil semua DocumentCr
@@ -185,5 +233,136 @@ func (h *DocumentCrHandler) GetAll(c *fiber.Ctx) error {
 		data = append(data, doc)
 	}
 
+	h.logger.Info("[%s] %s | Status: 200 | Berhasil mengambil semua data", c.Method(), c.Path())
 	return pkg.SuccessResponse(c, data)
+}
+
+// GetDetail menangani request untuk mengambil detail DocumentCr
+func (h *DocumentCrHandler) GetDetail(c *fiber.Ctx) error {
+	req := new(docCrGetDetailRequest)
+
+	if err := c.BodyParser(req); err != nil {
+		h.logger.Error("Failed to parse request body", err)
+		return pkg.BadRequestResponse(c, "Failed to parse request body")
+	}
+
+	// Map request ke domain request
+	domainReq := domainDocCr.GetDetailRequest{
+		DocCrID: req.DocCrID,
+	}
+
+	// Panggil service
+	item, err := h.service.GetDetail(c.Context(), domainReq)
+	if err != nil {
+		h.logger.Error("Failed to parse request body", err)
+		return pkg.BadRequestResponse(c, "Failed to retrieve DocumentCr data")
+	}
+
+	// Map domain response ke response DTO
+	doc := docCrDetailResponse{
+		DocCrID:             item.DocCr.DocCrID,
+		DocCrName:           item.DocCr.DocCrName,
+		FormId:              item.DocCr.FormId,
+		DocReference:        item.DocCr.DocReference,
+		RequesterNIK:        item.DocCr.RequesterNIK,
+		RequesterName:       item.DocCr.RequesterName,
+		RequesterDepartment: item.DocCr.RequesterDepartment,
+		ReasonDetail:        item.DocCr.ReasonDetail,
+		ProblemDetail:       item.DocCr.ProblemDetail,
+		ServerType:          item.DocCr.ServerType,
+		CrType:              item.DocCr.CrType,
+		CrPriority:          item.DocCr.CrPriority,
+		GitMergeRequest:     item.DocCr.GitMergeRequest,
+		GitRepository:       item.DocCr.GitRepository,
+		DocNotes:            item.DocCr.DocNotes,
+		DocAttachment:       item.DocCr.DocAttachment,
+		DocStatus:           item.DocCr.DocStatus,
+		ApplicationName:     item.DocCr.ApplicationName,
+		DeployedDate:        item.DocCr.DeployedDate,
+		CreatedAt:           item.DocCr.CreatedAt,
+		PICDevelopers:       make([]picResponse, 0),
+		PICFunctionals:      make([]picResponse, 0),
+		PICViewer:           make([]picResponse, 0),
+		PICQAs:              make([]picResponse, 0),
+		Approval:            make([]approvalResponse, 0),
+		Milestones:          make([]milestoneResponse, 0),
+	}
+
+	// Map Review
+	if item.Review != nil {
+		doc.Review = &reviewResponse{
+			ReviewID:     item.Review.ReviewID,
+			ReviewNik:    item.Review.ReviewNik,
+			ReviewName:   item.Review.ReviewName,
+			ReviewDate:   item.Review.ReviewDate,
+			ReviewStatus: item.Review.ReviewStatus,
+			ReviewNote:   item.Review.ReviewNote,
+			DocCrID:      item.Review.DocCrID,
+		}
+	}
+
+	// Map Approval
+	for _, a := range item.Approvals {
+		doc.Approval = append(doc.Approval, approvalResponse{
+			ApprovalID:         a.ApprovalID,
+			ApprovalNik:        a.ApprovalNik,
+			ApprovalName:       a.ApprovalName,
+			ApprovalDate:       a.ApprovalDate,
+			ApprovalStatus:     a.ApprovalStatus,
+			ApprovalDepartment: a.ApprovalDepartment,
+			DocCrID:            a.DocCrID,
+		})
+	}
+
+	// Map PIC Developer
+	for _, p := range item.PICDevelopers {
+		doc.PICDevelopers = append(doc.PICDevelopers, picResponse{
+			PICNik:        p.PICNik,
+			PICName:       p.PICName,
+			PICDepartment: p.PICDepartment,
+		})
+	}
+
+	// Map PIC Functional
+	for _, p := range item.PICFunctionals {
+		doc.PICFunctionals = append(doc.PICFunctionals, picResponse{
+			PICNik:        p.PICNik,
+			PICName:       p.PICName,
+			PICDepartment: p.PICDepartment,
+		})
+	}
+
+	// Map PIC Viewer
+	for _, p := range item.PICViewers {
+		doc.PICViewer = append(doc.PICViewer, picResponse{
+			PICNik:        p.PICNik,
+			PICName:       p.PICName,
+			PICDepartment: p.PICDepartment,
+		})
+	}
+
+	// Map PIC QA
+	for _, p := range item.PICQAs {
+		doc.PICQAs = append(doc.PICQAs, picResponse{
+			PICNik:        p.PICNik,
+			PICName:       p.PICName,
+			PICDepartment: p.PICDepartment,
+		})
+	}
+
+	// Map Milestones
+	for _, m := range item.Milestones {
+		doc.Milestones = append(doc.Milestones, milestoneResponse{
+			LogID:       m.LogID,
+			DocCrID:     m.DocCrID,
+			LogActivity: m.LogActivity,
+			NikLog:      m.NikLog,
+			NameLog:     m.NameLog,
+			NoteLog:     m.NoteLog,
+			CreatedAt:   m.CreatedAt,
+		})
+	}
+
+	h.logger.Info("[%s] %s | Status: 200 | Berhasil mengambil semua data", c.Method(), c.Path())
+	return pkg.SuccessResponse(c, doc)
 }
