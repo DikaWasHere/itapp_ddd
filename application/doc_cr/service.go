@@ -3,9 +3,7 @@ package doc_cr
 import (
 	"context"
 	"fmt"
-	"os"
 	"strconv"
-	"strings"
 	"time"
 	domainDocCr "itapp_ddd/domain/doc_cr"
 	"itapp_ddd/pkg"
@@ -13,12 +11,18 @@ import (
 
 // Service adalah application service untuk DocumentCr
 type Service struct {
-	repo   domainDocCr.DocumentCrRepository
-	logger Logger
+	repo      domainDocCr.DocumentCrRepository
+	logger    Logger
+	fileStore FileStorer
 }
 
-func NewService(repo domainDocCr.DocumentCrRepository, logger Logger) *Service {
-	return &Service{repo: repo, logger: logger}
+func NewService(repo domainDocCr.DocumentCrRepository, logger Logger, fileStore FileStorer) *Service {
+	return &Service{repo: repo, logger: logger, fileStore: fileStore}
+}
+
+// FileStorer adalah interface untuk menyimpan file ke disk
+type FileStorer interface {
+	Save(base64Data string, filePath string) error
 }
 
 // GetAll mengambil semua DocumentCr berdasarkan filter
@@ -69,36 +73,26 @@ func (s *Service) Create(ctx context.Context, req domainDocCr.CreateDocCrRequest
     var imageFileNames []string
     if len(req.DocAttachment) > 0 {
         for index, item := range req.DocAttachment {
-            // Decode base64
-            imageData := []byte(item) // In real impl, use base64.StdEncoding.DecodeString
- 
-            // Generate filename: {FormId}_{index+1}{extension}
+            // Decode base64 dan simpan lewat FileStorage (DRY — pakai utilitas yang sama dengan attachment service)
             ext := ""
             if index < len(req.DocAttachmentExtension) {
                 ext = req.DocAttachmentExtension[index]
             }
-            fileName := fmt.Sprintf("%s_%s%s", FormId, strconv.Itoa(index+1), ext)
-            imageFileNames = append(imageFileNames, fileName)
- 
-            // Save file
+            fileName := fmt.Sprintf("%s_%d%s", FormId, index+1, ext)
             filePath := fmt.Sprintf("public/attachment/%s", fileName)
-            err := os.WriteFile(filePath, imageData, 0644)
-            if err != nil {
+
+            if err := s.fileStore.Save(item, filePath); err != nil {
                 s.logger.Error("Failed to save attachment", err)
                 return nil, fmt.Errorf("failed to save attachment: %w", err)
             }
+
+            imageFileNames = append(imageFileNames, fileName)
         }
     }
  
-    // Build doc_attachment string (joined by "|")
-    var docAttachment string
-    if len(imageFileNames) > 0 {
-        docAttachment = strings.Join(imageFileNames, "|")
-    }
- 
-    // Update request dengan FormId dan docAttachment yang sudah diproses
+    // Update request dengan FormId dan nama file attachment
     req.FormId = FormId
-    req.DocAttachment = []string{docAttachment} // Store as single string in array
+    req.DocAttachment = imageFileNames
  
     result, err := s.repo.Create(ctx, req)
     if err != nil {
@@ -108,4 +102,20 @@ func (s *Service) Create(ctx context.Context, req domainDocCr.CreateDocCrRequest
  
     s.logger.Info("DocumentCr created successfully with ID: %d", result.DocCrID)
     return result, nil
+}
+
+func (s *Service) SendReview(ctx context.Context, req domainDocCr.SendReviewRequest) (*domainDocCr.SendReviewResult, error) {
+	if req.DocCrID == 0 {
+		s.logger.Warn("SendReview failed: DocCrID is required")
+		return nil, fmt.Errorf("DocCrID is required")
+	}
+ 
+	result, err := s.repo.SendReview(ctx, req)
+	if err != nil {
+		s.logger.Error("SendReview failed", err)
+		return nil, err
+	}
+ 
+	s.logger.Info("Review submitted for DocCrID: %d", result.DocCrID)
+	return result, nil
 }

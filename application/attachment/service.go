@@ -38,7 +38,11 @@ func (s *Service) ProcessAttachments(ctx context.Context, formID string, base64D
 		}
 
 		// Generate nama file: {FormId}_{index}{extension}
-		fileName := fmt.Sprintf("%s_%d%s", formID, i+1, extensions[i])
+		ext := ""
+		if i < len(extensions) {
+			ext = extensions[i]
+		}
+		fileName := fmt.Sprintf("%s_%d%s", formID, i+1, ext)
 		filePath := fmt.Sprintf("public/attachment/%s", fileName)
 
 		// Simpan file ke disk
@@ -50,7 +54,7 @@ func (s *Service) ProcessAttachments(ctx context.Context, formID string, base64D
 		att := domainAttachment.NewAttachment(
 			domainAttachment.FileName(fileName),
 			domainAttachment.FilePath(filePath),
-			extensions[i],
+			ext,
 		)
 		if err := s.repo.Save(ctx, att); err != nil {
 			return "", fmt.Errorf("failed to save attachment record: %w", err)

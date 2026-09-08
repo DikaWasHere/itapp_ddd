@@ -485,3 +485,129 @@ func (h *DocumentCrHandler) Create(c *fiber.Ctx) error {
 		"data":    data,
 	})
 }
+
+// --- Request DTO untuk SendReview (simplified) ---
+type docCrSendReviewRequest struct {
+	DocCrID             uint                 `json:"doc_cr_id"`
+	DocCrName           string               `json:"doc_cr_name"`
+	FormId              string               `json:"form_id"`
+	DocReference        string               `json:"doc_reference"`
+	RequesterNIK        string               `json:"requester_nik"`
+	RequesterName       string               `json:"requester_name"`
+	RequesterDepartment string               `json:"requester_department"`
+	PICDevelopers       []picRequestDTO      `json:"pic_developer"`
+	PICFunctionals      []picRequestDTO      `json:"pic_functional"`
+	PICViewers          []picRequestDTO      `json:"pic_viewer"`
+	PICQAs              []picRequestDTO      `json:"pic_qa"`
+	ReasonDetail        string               `json:"reason_detail"`
+	ProblemDetail       string               `json:"problem_detail"`
+	ServerType          string               `json:"server_type"`
+	CrType              string               `json:"cr_type"`
+	CrPriority          string               `json:"cr_priority"`
+	GitMergeRequest     string               `json:"git_merge_request"`
+	GitRepository       string               `json:"git_repository"`
+	DocNotes            string               `json:"doc_notes"`
+	DocAttachment       []string             `json:"doc_attachment"`
+	DocStatus           string               `json:"doc_status"`
+	ApplicationName     string               `json:"application_name"`
+	ReviewNote          string               `json:"review_note"`
+	NikLog              string               `json:"nik_log"`
+	NameLog             string               `json:"name_log"`
+	NoteLog             string               `json:"note_log"`
+	Approvals           []approvalRequestDTO `json:"approval"`
+}
+
+type picRequestDTO struct {
+	PICNik        string `json:"pic_nik"`
+	PICName       string `json:"pic_name"`
+	PICDepartment string `json:"pic_department"`
+}
+
+type approvalRequestDTO struct {
+	ApprovalNik        string `json:"approval_nik"`
+	ApprovalName       string `json:"approval_name"`
+	ApprovalDepartment string `json:"approval_department"`
+}
+
+// SendReview menangani request untuk submit review CR
+func (h *DocumentCrHandler) SendReview(c *fiber.Ctx) error {
+	req := new(docCrSendReviewRequest)
+	if err := c.BodyParser(req); err != nil {
+		h.logger.Error("Failed to parse request body", err)
+		return pkg.BadRequestResponse(c, "Failed to parse request body")
+	}
+
+	// Map ke domain request
+	picsDev := make([]domainDocCr.PIC, 0, len(req.PICDevelopers))
+	for _, p := range req.PICDevelopers {
+		picsDev = append(picsDev, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
+	}
+
+	picsFunc := make([]domainDocCr.PIC, 0, len(req.PICFunctionals))
+	for _, p := range req.PICFunctionals {
+		picsFunc = append(picsFunc, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
+	}
+
+	picsView := make([]domainDocCr.PIC, 0, len(req.PICViewers))
+	for _, p := range req.PICViewers {
+		picsView = append(picsView, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
+	}
+
+	picsQA := make([]domainDocCr.PIC, 0, len(req.PICQAs))
+	for _, p := range req.PICQAs {
+		picsQA = append(picsQA, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
+	}
+
+	approvals := make([]*domainDocCr.Approval, 0, len(req.Approvals))
+	for _, a := range req.Approvals {
+		aid := a.ApprovalNik
+		and := a.ApprovalName
+		adept := a.ApprovalDepartment
+		approvals = append(approvals, &domainDocCr.Approval{
+			ApprovalNik:        &aid,
+			ApprovalName:       &and,
+			ApprovalDepartment: &adept,
+		})
+	}
+
+	domainReq := domainDocCr.SendReviewRequest{
+		DocCrID:             req.DocCrID,
+		DocCrName:           req.DocCrName,
+		FormId:              req.FormId,
+		DocReference:        req.DocReference,
+		RequesterNIK:        req.RequesterNIK,
+		RequesterName:       req.RequesterName,
+		RequesterDepartment: req.RequesterDepartment,
+		PICDevelopers:       picsDev,
+		PICFunctionals:      picsFunc,
+		PICViewers:          picsView,
+		PICQAs:              picsQA,
+		ReasonDetail:        req.ReasonDetail,
+		ProblemDetail:       req.ProblemDetail,
+		ServerType:          req.ServerType,
+		CrType:              req.CrType,
+		CrPriority:          req.CrPriority,
+		GitMergeRequest:     req.GitMergeRequest,
+		GitRepository:       req.GitRepository,
+		DocNotes:            req.DocNotes,
+		DocAttachment:       req.DocAttachment,
+		DocStatus:           req.DocStatus,
+		ApplicationName:     req.ApplicationName,
+		ReviewNote:          req.ReviewNote,
+		NikLog:              req.NikLog,
+		NameLog:             req.NameLog,
+		NoteLog:             req.NoteLog,
+		Approvals:           approvals,
+	}
+
+	result, err := h.service.SendReview(c.Context(), domainReq)
+	if err != nil {
+		h.logger.Error("Failed to send review", err)
+		return pkg.BadRequestResponse(c, "Failed to send review: "+err.Error())
+	}
+
+	h.logger.Info("[%s] %s | Status: 200 | Review submitted for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
+	return pkg.SuccessResponse(c, fiber.Map{
+		"doc_cr_id": result.DocCrID,
+	})
+}

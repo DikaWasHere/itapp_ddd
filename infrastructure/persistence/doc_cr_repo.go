@@ -3,6 +3,7 @@ package persistence
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -681,15 +682,139 @@ func (r *DocumentCrRepositoryDB) Create(ctx context.Context, req domainDocCr.Cre
     return docModel.toEntity(), nil
 }
 
-// CountByYear menghitung jumlah DocumentCr berdasarkan tahun
+// CountByYear menghitung jumlah DocumentCr berdasarkan tahun (range query berbasis indeks)
 func (r *DocumentCrRepositoryDB) CountByYear(ctx context.Context, year string) (int64, error) {
-    var count int64
-    err := r.db.WithContext(ctx).
-        Model(&DocumentCrModel{}).
-        Where("created_at::TEXT ILIKE ?", year+"%").
-        Count(&count).Error
-    if err != nil {
-        return 0, fmt.Errorf("failed to count DocumentCr by year: %w", err)
-    }
-    return count, nil
+	var count int64
+
+	// Pembatas rentang waktu: awal tahun sampai awal tahun berikutnya
+	startOfYear := fmt.Sprintf("%s-01-01 00:00:00", year)
+
+	yearInt, err := strconv.Atoi(year)
+	if err != nil {
+		return 0, fmt.Errorf("invalid year format: %w", err)
+	}
+	endOfYear := fmt.Sprintf("%d-01-01 00:00:00", yearInt+1)
+
+	err = r.db.WithContext(ctx).
+		Model(&DocumentCrModel{}).
+		Where("created_at >= ? AND created_at < ?", startOfYear, endOfYear).
+		Count(&count).Error
+	if err != nil {
+		return 0, fmt.Errorf("failed to count DocumentCr by year: %w", err)
+	}
+	return count, nil
+}
+
+type SendReviewUpdateModel struct {
+	DocCrName       string
+	FormId          string
+	DocReference    string
+	ReasonDetail    string
+	ProblemDetail   string
+	ServerType      string
+	CrType          string
+	CrPriority      string
+	GitMergeRequest string
+	GitRepository   string
+	DocNotes        string
+	DocAttachment   string
+	DocStatus       string
+	ApplicationName string
+}
+
+// SendReview implementasi persistensi untuk review CR
+func (r *DocumentCrRepositoryDB) SendReview(ctx context.Context, req domainDocCr.SendReviewRequest) (*domainDocCr.SendReviewResult, error) {
+	// 1. Update document CR (partial update)
+	updateDoc := SendReviewUpdateModel{
+		DocCrName:       req.DocCrName,
+		FormId:          req.FormId,
+		DocReference:    req.DocReference,
+		ReasonDetail:    req.ReasonDetail,
+		ProblemDetail:   req.ProblemDetail,
+		ServerType:      req.ServerType,
+		CrType:          req.CrType,
+		CrPriority:      req.CrPriority,
+		GitMergeRequest: req.GitMergeRequest,
+		GitRepository:   req.GitRepository,
+		DocNotes:        req.DocNotes,
+		DocAttachment:   strings.Join(req.DocAttachment, "|"),
+		DocStatus:       req.DocStatus,
+		ApplicationName: req.ApplicationName,
+	}
+
+	// guaranteed baris ini dijalankan walau nanti ada error di steps berikutnya
+	if err := r.db.WithContext(ctx).Model(&DocumentCrModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(updateDoc).Error; err != nil {
+		return nil, fmt.Errorf("failed to update document cr: %w", err)
+	}
+
+	// 2. Log aktivitas
+	logModel := DocumentCrLogModel{
+		DocCrID:     req.DocCrID,
+		LogActivity: "Reviewed",
+		NikLog:      req.NikLog,
+		NameLog:     req.NameLog,
+		NoteLog:     req.NoteLog,
+	}
+	if err := r.db.WithContext(ctx).Create(&logModel).Error; err != nil {
+		return nil, fmt.Errorf("failed to create log: %w", err)
+	}
+
+	// 3. Reset PIC (hapus lama, insert baru)
+	if err := r.db.WithContext(ctx).Delete(&PICModel{}, "doc_cr_id = ?", req.DocCrID).Error; err != nil {
+		return nil, fmt.Errorf("failed to delete old pics: %w", err)
+	}
+
+	pics := make([]PICModel, 0, len(req.PICDevelopers)+len(req.PICFunctionals)+len(req.PICViewers)+len(req.PICQAs))
+	for i := range req.PICDevelopers {
+		pics = append(pics, PICModel{DocCrID: req.DocCrID, PICNik: req.PICDevelopers[i].PICNik, PICName: req.PICDevelopers[i].PICName, PICDepartment: req.PICDevelopers[i].PICDepartment})
+	}
+	for i := range req.PICFunctionals {
+		pics = append(pics, PICModel{DocCrID: req.DocCrID, PICNik: req.PICFunctionals[i].PICNik, PICName: req.PICFunctionals[i].PICName, PICDepartment: req.PICFunctionals[i].PICDepartment})
+	}
+	for i := range req.PICViewers {
+		pics = append(pics, PICModel{DocCrID: req.DocCrID, PICNik: req.PICViewers[i].PICNik, PICName: req.PICViewers[i].PICName, PICDepartment: req.PICViewers[i].PICDepartment})
+	}
+	for i := range req.PICQAs {
+		pics = append(pics, PICModel{DocCrID: req.DocCrID, PICNik: req.PICQAs[i].PICNik, PICName: req.PICQAs[i].PICName, PICDepartment: "QA"})
+	}
+
+	if len(pics) > 0 {
+		if err := r.db.WithContext(ctx).Create(&pics).Error; err != nil {
+			return nil, fmt.Errorf("failed to create new pics: %w", err)
+		}
+	}
+
+	// 4. Insert approvals
+	approvals := make([]ApprovalModel, 0, len(req.Approvals))
+	for _, a := range req.Approvals {
+		if a == nil || a.ApprovalNik == nil || a.ApprovalName == nil || a.ApprovalDepartment == nil {
+			continue
+		}
+		approvals = append(approvals, ApprovalModel{
+			ApprovalNik:        *a.ApprovalNik,
+			ApprovalName:       *a.ApprovalName,
+			ApprovalDepartment: *a.ApprovalDepartment,
+			ApprovalStatus:     "Waiting",
+			DocCrID:            req.DocCrID,
+		})
+	}
+
+	if len(approvals) > 0 {
+		if err := r.db.WithContext(ctx).Create(&approvals).Error; err != nil {
+			return nil, fmt.Errorf("failed to create approvals: %w", err)
+		}
+	}
+
+	// 5. Update review
+	now := time.Now()
+	reviewUpdate := ReviewModel{
+		ReviewDate:   func() *string { s := now.Format(time.RFC3339); return &s }(),
+		ReviewStatus: "Reviewed",
+		ReviewNote:   req.ReviewNote,
+	}
+	if err := r.db.WithContext(ctx).Model(&ReviewModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(reviewUpdate).Error; err != nil {
+		return nil, fmt.Errorf("failed to update review: %w", err)
+	}
+
+	return &domainDocCr.SendReviewResult{DocCrID: req.DocCrID}, nil
 }

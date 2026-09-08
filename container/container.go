@@ -30,7 +30,7 @@ func NewContainer() *Container {
 
 	// 3. Init Application Service
 	attachmentService := attachmentApp.NewService(attachmentRepo, fileStorage)
-	docCrService := docCrApp.NewService(docCrRepo, &infraLogger.LoggerImpl{})
+	docCrService := docCrApp.NewService(docCrRepo, &infraLogger.LoggerImpl{}, fileStorage)
 
 	// 4. Init Handler
 	attachmentHandler := handler.NewAttachmentHandler(attachmentService)
