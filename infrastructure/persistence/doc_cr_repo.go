@@ -912,3 +912,102 @@ func (r *DocumentCrRepositoryDB) SendRevision(ctx context.Context, req domainDoc
  
 	return &domainDocCr.SendRevisionResult{DocCrID: req.DocCrID}, nil
 }
+
+// SendApprove implementasi persistensi untuk approve CR
+func (r *DocumentCrRepositoryDB) SendApprove(ctx context.Context, req domainDocCr.SendApproveRequest) (*domainDocCr.SendApproveResult, error) {
+ 
+	// 1. Update approval record (status, tanggal, catatan)
+	now := time.Now()
+	nowStr := now.Format(time.RFC3339)
+	approvalUpdate := struct {
+		ApprovalDate   *string
+		ApprovalStatus string
+		ApprovalNote   string
+	}{
+		ApprovalDate:   &nowStr,
+		ApprovalStatus: req.ApprovalStatus,
+		ApprovalNote:   req.ApprovalNote,
+	}
+ 
+	if err := r.db.WithContext(ctx).Model(&ApprovalModel{}).Where("approval_id = ?", req.ApprovalID).Updates(approvalUpdate).Error; err != nil {
+		return nil, fmt.Errorf("failed to update approval: %w", err)
+	}
+ 
+	// 2. Ambil semua approval yang sudah "Approve" untuk CR ini
+	var approvedApprovals []ApprovalModel
+	if err := r.db.WithContext(ctx).
+		Where("doc_cr_id = ? AND approval_status = ?", req.DocCrID, "Approve").
+		Find(&approvedApprovals).Error; err != nil {
+		return nil, fmt.Errorf("failed to fetch approvals: %w", err)
+	}
+ 
+	// 3. Cek business rule
+	hasSameDepartment := false
+	hasITServices := false
+ 
+	for _, approval := range approvedApprovals {
+		if approval.ApprovalDepartment == req.RequesterDepartment {
+			hasSameDepartment = true
+		}
+		if approval.ApprovalDepartment == "IT SERVICES & IMPLEMENTATION" {
+			hasITServices = true
+		}
+	}
+ 
+	// 4. Update status document jika syarat terpenuhi
+	if hasSameDepartment {
+		shouldDeploy := false
+ 
+		if req.CrPriority == "Not Urgent" {
+			// Not Urgent: butuh IT SERVICES juga approve
+			if hasITServices {
+				shouldDeploy = true
+			}
+		} else {
+			// Urgent: langsung deploy
+			shouldDeploy = true
+		}
+ 
+		if shouldDeploy {
+			docUpdate := struct {
+				DocStatus string
+			}{
+				DocStatus: "Waiting Deploy",
+			}
+ 
+			if err := r.db.WithContext(ctx).Model(&DocumentCrModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(docUpdate).Error; err != nil {
+				return nil, fmt.Errorf("failed to update document status: %w", err)
+			}
+ 
+			// Buat log "Approved"
+			logModel := DocumentCrLogModel{
+				DocCrID:     req.DocCrID,
+				LogActivity: "Approved",
+				NikLog:      req.NikLog,
+				NameLog:     req.NameLog,
+				NoteLog:     req.NoteLog,
+			}
+			if err := r.db.WithContext(ctx).Create(&logModel).Error; err != nil {
+				return nil, fmt.Errorf("failed to create log: %w", err)
+			}
+		}
+	}
+ 
+	// 5. Map hasil ke domain DTO
+	var approveItems []*domainDocCr.ApproveItem
+	for i := range approvedApprovals {
+		item := &domainDocCr.ApproveItem{
+			ApprovalID:         &approvedApprovals[i].ApprovalID,
+			ApprovalNik:        &approvedApprovals[i].ApprovalNik,
+			ApprovalName:       &approvedApprovals[i].ApprovalName,
+			ApprovalDate:       approvedApprovals[i].ApprovalDate,
+			ApprovalStatus:     &approvedApprovals[i].ApprovalStatus,
+			ApprovalDepartment: &approvedApprovals[i].ApprovalDepartment,
+			ApprovalNote:       &approvedApprovals[i].ApprovalNote,
+			DocCrID:            &approvedApprovals[i].DocCrID,
+		}
+		approveItems = append(approveItems, item)
+	}
+ 
+	return &domainDocCr.SendApproveResult{Approvals: approveItems}, nil
+}

@@ -1,3 +1,10 @@
 2026-09-09T10:12:39.4825459+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
 2026-09-09T10:13:23.0508264+07:00 | INFO | service.go:165 | doc_cr.(*Service).SendRevision | Revision submitted for DocCrID: 1
 2026-09-09T10:13:23.0513883+07:00 | INFO | doc_cr_handler.go:747 | handler.(*DocumentCrHandler).SendRevision | [POST] /api/v1/doc-cr-revision | Status: 200 | Revision submitted for DocCrID: 1
+2026-09-09T10:45:37.6616123+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-09T10:45:44.5549461+07:00 | ERROR | doc_cr_handler.go:783 | handler.(*DocumentCrHandler).SendApprove | Failed to parse request body: json: cannot unmarshal string into Go struct field docCrSendApproveRequest.approval_id of type uint
+2026-09-09T10:47:36.9859494+07:00 | INFO | service.go:189 | doc_cr.(*Service).SendApprove | Approval submitted for DocCrID: 1
+2026-09-09T10:47:36.9859494+07:00 | INFO | doc_cr_handler.go:831 | handler.(*DocumentCrHandler).SendApprove | [POST] /api/v1/doc-cr-approve | Status: 200 | Approval submitted for DocCrID: 1
+2026-09-09T10:51:29.5862408+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-09T10:51:39.2626022+07:00 | INFO | service.go:189 | doc_cr.(*Service).SendApprove | Approval submitted for DocCrID: 1
+2026-09-09T10:51:39.2626022+07:00 | INFO | doc_cr_handler.go:831 | handler.(*DocumentCrHandler).SendApprove | [POST] /api/v1/doc-cr-approve | Status: 200 | Approval submitted for DocCrID: 1

@@ -20,4 +20,5 @@ func RouteInit(app *fiber.App, attachmentHandler *handler.AttachmentHandler, doc
 	v1.Post("/doc-cr-review", docCrHandler.SendReview)
 	v1.Post("/doc-cr-reject", docCrHandler.SendReviewReject)
 	v1.Post("/doc-cr-revision", docCrHandler.SendRevision)
+	v1.Post("/doc-cr-approve", docCrHandler.SendApprove)
 }

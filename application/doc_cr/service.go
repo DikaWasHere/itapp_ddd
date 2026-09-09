@@ -165,3 +165,27 @@ func (s *Service) SendRevision(ctx context.Context, req domainDocCr.SendRevision
 	s.logger.Info("Revision submitted for DocCrID: %d", result.DocCrID)
 	return result, nil
 }
+
+// SendApprove mengirim approve CR
+func (s *Service) SendApprove(ctx context.Context, req domainDocCr.SendApproveRequest) (*domainDocCr.SendApproveResult, error) {
+	// 1. Validasi input
+	if req.ApprovalID == 0 {
+		s.logger.Warn("SendApprove failed: ApprovalID is required")
+		return nil, fmt.Errorf("ApprovalID is required")
+	}
+ 
+	if req.DocCrID == 0 {
+		s.logger.Warn("SendApprove failed: DocCrID is required")
+		return nil, fmt.Errorf("DocCrID is required")
+	}
+ 
+	// 2. Panggil repository (service tidak tahu detail DB)
+	result, err := s.repo.SendApprove(ctx, req)
+	if err != nil {
+		s.logger.Error("SendApprove failed", err)
+		return nil, err
+	}
+ 
+	s.logger.Info("Approval submitted for DocCrID: %d", req.DocCrID)
+	return result, nil
+}

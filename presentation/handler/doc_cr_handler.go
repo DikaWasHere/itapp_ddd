@@ -749,3 +749,85 @@ func (h *DocumentCrHandler) SendRevision(c *fiber.Ctx) error {
 		"doc_cr_id": result.DocCrID,
 	})
 }
+
+// --- Request DTO untuk SendApprove ---
+type docCrSendApproveRequest struct {
+	ApprovalID          uint   `json:"approval_id"`
+	ApprovalStatus      string `json:"approval_status"`
+	ApprovalNote        string `json:"approval_note"`
+	NikLog              string `json:"nik_log"`
+	NameLog             string `json:"name_log"`
+	NoteLog             string `json:"note_log"`
+	DocCrID             uint   `json:"doc_cr_id"`
+	CrPriority          string `json:"cr_priority"`
+	RequesterDepartment string `json:"requester_department"`
+}
+ 
+// --- Response DTO untuk SendApprove (termasuk ApprovalNote) ---
+type approvalApproveResponse struct {
+	ApprovalID         *uint   `json:"approval_id"`
+	ApprovalNik        *string `json:"approval_nik"`
+	ApprovalName       *string `json:"approval_name"`
+	ApprovalDate       *string `json:"approval_date"`
+	ApprovalStatus     *string `json:"approval_status"`
+	ApprovalDepartment *string `json:"approval_department"`
+	ApprovalNote       *string `json:"approval_note"`
+	DocCrID            *uint   `json:"doc_cr_id"`
+}
+ 
+// SendApprove menangani request untuk approve CR
+func (h *DocumentCrHandler) SendApprove(c *fiber.Ctx) error {
+	// 1. Parse JSON
+	req := new(docCrSendApproveRequest)
+	if err := c.BodyParser(req); err != nil {
+		h.logger.Error("Failed to parse request body", err)
+		return pkg.BadRequestResponse(c, "Failed to parse request body")
+	}
+ 
+	// 2. Validasi input
+	if req.ApprovalID == 0 {
+		return pkg.BadRequestResponse(c, "approval_id is required")
+	}
+	if req.DocCrID == 0 {
+		return pkg.BadRequestResponse(c, "doc_cr_id is required")
+	}
+ 
+	// 3. Map ke domain request
+	domainReq := domainDocCr.SendApproveRequest{
+		ApprovalID:          req.ApprovalID,
+		ApprovalStatus:      req.ApprovalStatus,
+		ApprovalNote:        req.ApprovalNote,
+		NikLog:              req.NikLog,
+		NameLog:             req.NameLog,
+		NoteLog:             req.NoteLog,
+		DocCrID:             req.DocCrID,
+		CrPriority:          req.CrPriority,
+		RequesterDepartment: req.RequesterDepartment,
+	}
+ 
+	// 4. Panggil service
+	result, err := h.service.SendApprove(c.Context(), domainReq)
+	if err != nil {
+		h.logger.Error("Failed to send approve", err)
+		return pkg.BadRequestResponse(c, "Failed to send approve: "+err.Error())
+	}
+ 
+	// 5. Map result ke response DTO
+	var approvals []approvalApproveResponse
+	for _, a := range result.Approvals {
+		approvals = append(approvals, approvalApproveResponse{
+			ApprovalID:         a.ApprovalID,
+			ApprovalNik:        a.ApprovalNik,
+			ApprovalName:       a.ApprovalName,
+			ApprovalDate:       a.ApprovalDate,
+			ApprovalStatus:     a.ApprovalStatus,
+			ApprovalDepartment: a.ApprovalDepartment,
+			ApprovalNote:       a.ApprovalNote,
+			DocCrID:            a.DocCrID,
+		})
+	}
+ 
+	// 6. Return response
+	h.logger.Info("[%s] %s | Status: 200 | Approval submitted for DocCrID: %d", c.Method(), c.Path(), req.DocCrID)
+	return pkg.SuccessResponse(c, approvals)
+}
