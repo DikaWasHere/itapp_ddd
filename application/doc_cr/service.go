@@ -136,3 +136,32 @@ func (s *Service) SendReviewReject(ctx context.Context, req domainDocCr.SendRevi
 	s.logger.Info("Review rejected for DocCrID: %d", result.DocCrID)
 	return result, nil
 }
+
+// SendRevision mengirim revisi CR (mengubah status ke "Waiting Review")
+func (s *Service) SendRevision(ctx context.Context, req domainDocCr.SendRevisionRequest) (*domainDocCr.SendRevisionResult, error) {
+	if req.DocCrID == 0 {
+		s.logger.Warn("SendRevision failed: DocCrID is required")
+		return nil, fmt.Errorf("DocCrID is required")
+	}
+ 
+	// Handle base64 attachment jika ada
+	if req.DocAttachment != "" {
+		imageFileName := fmt.Sprintf("%s.png", req.FormId)
+		imageFilePath := fmt.Sprintf("public/attachment/%s", imageFileName)
+ 
+		if err := s.fileStore.Save(req.DocAttachment, imageFilePath); err != nil {
+			s.logger.Error("Failed to save attachment", err)
+			return nil, fmt.Errorf("failed to save attachment: %w", err)
+		}
+		req.DocAttachment = imageFileName
+	}
+ 
+	result, err := s.repo.SendRevision(ctx, req)
+	if err != nil {
+		s.logger.Error("SendRevision failed", err)
+		return nil, err
+	}
+ 
+	s.logger.Info("Revision submitted for DocCrID: %d", result.DocCrID)
+	return result, nil
+}

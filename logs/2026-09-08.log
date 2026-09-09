@@ -26,3 +26,10 @@
 2026-09-08T13:27:59.5699134+07:00 | INFO | doc_cr_handler.go:657 | handler.(*DocumentCrHandler).SendReviewReject | [POST] /api/v1/doc-cr-reject | Status: 200 | Review rejected for DocCrID: 1
 2026-09-08T13:29:56.4744542+07:00 | INFO | service.go:136 | doc_cr.(*Service).SendReviewReject | Review rejected for DocCrID: 1
 2026-09-08T13:29:56.4744542+07:00 | INFO | doc_cr_handler.go:657 | handler.(*DocumentCrHandler).SendReviewReject | [POST] /api/v1/doc-cr-reject | Status: 200 | Review rejected for DocCrID: 1
+2026-09-08T15:08:50.3178588+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-08T15:09:05.1082992+07:00 | INFO | service.go:165 | doc_cr.(*Service).SendRevision | Revision submitted for DocCrID: 1
+2026-09-08T15:09:05.1082992+07:00 | INFO | doc_cr_handler.go:747 | handler.(*DocumentCrHandler).SendRevision | [POST] /api/v1/doc-cr-revision | Status: 200 | Revision submitted for DocCrID: 1
+2026-09-08T15:09:31.0120455+07:00 | INFO | service.go:165 | doc_cr.(*Service).SendRevision | Revision submitted for DocCrID: 1121212
+2026-09-08T15:09:31.0120455+07:00 | INFO | doc_cr_handler.go:747 | handler.(*DocumentCrHandler).SendRevision | [POST] /api/v1/doc-cr-revision | Status: 200 | Revision submitted for DocCrID: 1121212
+2026-09-08T15:43:07.3429961+07:00 | INFO | service.go:165 | doc_cr.(*Service).SendRevision | Revision submitted for DocCrID: 1
+2026-09-08T15:43:07.343427+07:00 | INFO | doc_cr_handler.go:747 | handler.(*DocumentCrHandler).SendRevision | [POST] /api/v1/doc-cr-revision | Status: 200 | Revision submitted for DocCrID: 1

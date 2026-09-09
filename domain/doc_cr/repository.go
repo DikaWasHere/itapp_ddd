@@ -31,6 +31,7 @@ type DocumentCrRepository interface {
 	CountByYear(ctx context.Context, year string) (int64, error)
 	SendReview(ctx context.Context, req SendReviewRequest) (*SendReviewResult, error)
 	SendReviewReject(ctx context.Context, req SendReviewRejectRequest) (*SendReviewRejectResult, error)
+	SendRevision(ctx context.Context, req SendRevisionRequest) (*SendRevisionResult, error)
 }
 
 // GetDetailRequest adalah parameter untuk mengambil detail DocumentCr
@@ -121,5 +122,47 @@ type SendReviewRejectRequest struct {
  
 // SendReviewRejectResult adalah hasil dari operasi reject review
 type SendReviewRejectResult struct {
+	DocCrID uint
+}
+
+// SendRevisionRequest adalah request untuk merevisi CR
+type SendRevisionRequest struct {
+	DocCrID             uint
+	DocCrName           string
+	FormId              string
+	DocReference        string
+	RequesterNIK        string
+	RequesterName       string
+	RequesterDepartment string
+	PICDevelopers       []PIC
+	PICFunctionals      []PIC
+	PICViewers          []PIC
+	PICQAs              []PIC
+	ReasonDetail        string
+	ProblemDetail       string
+	ServerType          string
+	CrType              string
+	CrPriority          string
+	GitMergeRequest     string
+	GitRepository       string
+	DocNotes            string
+	DocAttachment       string  // single base64 string (berbeda dengan review yang []
+	DocStatus           string
+	ApplicationName     string
+	ReviewNote          string
+	NikLog              string
+	NameLog             string
+	NoteLog             string
+	Review              ReviewCreateRequest
+}
+ 
+// ReviewCreateRequest adalah data review untuk revision
+type ReviewCreateRequest struct {
+	ReviewNik  string
+	ReviewName string
+}
+ 
+// SendRevisionResult adalah hasil dari operasi send revision
+type SendRevisionResult struct {
 	DocCrID uint
 }

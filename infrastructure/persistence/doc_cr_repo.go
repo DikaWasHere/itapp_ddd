@@ -857,3 +857,58 @@ func (r *DocumentCrRepositoryDB) SendReviewReject(ctx context.Context, req domai
  
 	return &domainDocCr.SendReviewRejectResult{DocCrID: req.DocCrID}, nil
 }
+
+// SendRevisionUpdateModel adalah model untuk partial update document CR saat revision
+type SendRevisionUpdateModel struct {
+	DocCrName       string
+	DocReference    string
+	ReasonDetail    string
+	ProblemDetail   string
+	ServerType      string
+	CrType          string
+	CrPriority      string
+	GitMergeRequest string
+	GitRepository   string
+	DocNotes        string
+	DocAttachment   string
+	DocStatus       string
+	ApplicationName string
+}
+ 
+// SendRevision implementasi persistensi untuk merevisi CR
+func (r *DocumentCrRepositoryDB) SendRevision(ctx context.Context, req domainDocCr.SendRevisionRequest) (*domainDocCr.SendRevisionResult, error) {
+	// 1. Update document CR
+	updateDoc := SendRevisionUpdateModel{
+		DocCrName:       req.DocCrName,
+		DocReference:    req.DocReference,
+		ReasonDetail:    req.ReasonDetail,
+		ProblemDetail:   req.ProblemDetail,
+		ServerType:      req.ServerType,
+		CrType:          req.CrType,
+		CrPriority:      req.CrPriority,
+		GitMergeRequest: req.GitMergeRequest,
+		GitRepository:   req.GitRepository,
+		DocNotes:        req.DocNotes,
+		DocAttachment:   req.DocAttachment,
+		DocStatus:       "Waiting Review",
+		ApplicationName: req.ApplicationName,
+	}
+ 
+	if err := r.db.WithContext(ctx).Model(&DocumentCrModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(updateDoc).Error; err != nil {
+		return nil, fmt.Errorf("failed to update document cr: %w", err)
+	}
+ 
+	// 2. Log aktivitas "Revised"
+	logModel := DocumentCrLogModel{
+		DocCrID:     req.DocCrID,
+		LogActivity: "Revised",
+		NikLog:      req.NikLog,
+		NameLog:     req.NameLog,
+		NoteLog:     req.NoteLog,
+	}
+	if err := r.db.WithContext(ctx).Create(&logModel).Error; err != nil {
+		return nil, fmt.Errorf("failed to create log: %w", err)
+	}
+ 
+	return &domainDocCr.SendRevisionResult{DocCrID: req.DocCrID}, nil
+}

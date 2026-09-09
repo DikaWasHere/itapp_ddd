@@ -1,0 +1,3 @@
+2026-09-09T10:12:39.4825459+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-09T10:13:23.0508264+07:00 | INFO | service.go:165 | doc_cr.(*Service).SendRevision | Revision submitted for DocCrID: 1
+2026-09-09T10:13:23.0513883+07:00 | INFO | doc_cr_handler.go:747 | handler.(*DocumentCrHandler).SendRevision | [POST] /api/v1/doc-cr-revision | Status: 200 | Revision submitted for DocCrID: 1

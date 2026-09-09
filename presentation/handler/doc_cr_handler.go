@@ -659,3 +659,93 @@ func (h *DocumentCrHandler) SendReviewReject(c *fiber.Ctx) error {
 		"doc_cr_id": result.DocCrID,
 	})
 }
+
+// --- Request DTO untuk SendRevision ---
+type docCrSendRevisionRequest struct {
+	DocCrID             uint   `json:"doc_cr_id"`
+	DocCrName           string `json:"doc_cr_name"`
+	FormId              string `json:"form_id"`
+	DocReference        string `json:"doc_reference"`
+	RequesterNIK        string `json:"requester_nik"`
+	RequesterName       string `json:"requester_name"`
+	RequesterDepartment string `json:"requester_department"`
+	PICDevelopers       []picRequestDTO `json:"pic_developer"`
+	PICFunctionals      []picRequestDTO `json:"pic_functional"`
+	PICViewers          []picRequestDTO `json:"pic_viewer"`
+	PICQAs              []picRequestDTO `json:"pic_qa"`
+	ReasonDetail        string `json:"reason_detail"`
+	ProblemDetail       string `json:"problem_detail"`
+	ServerType          string `json:"server_type"`
+	CrType              string `json:"cr_type"`
+	CrPriority          string `json:"cr_priority"`
+	GitMergeRequest     string `json:"git_merge_request"`
+	GitRepository       string `json:"git_repository"`
+	DocNotes            string `json:"doc_notes"`
+	DocAttachment       string `json:"doc_attachment"`
+	ApplicationName     string `json:"application_name"`
+	ReviewNote          string `json:"review_note"`
+	NikLog              string `json:"nik_log"`
+	NameLog             string `json:"name_log"`
+	NoteLog             string `json:"note_log"`
+	Review              reviewRequestDTO `json:"review"`
+}
+ 
+type reviewRequestDTO struct {
+	ReviewNik  string `json:"review_nik"`
+	ReviewName string `json:"review_name"`
+}
+ 
+// SendRevision menangani request untuk merevisi CR
+func (h *DocumentCrHandler) SendRevision(c *fiber.Ctx) error {
+	req := new(docCrSendRevisionRequest)
+	if err := c.BodyParser(req); err != nil {
+		h.logger.Error("Failed to parse request body", err)
+		return pkg.BadRequestResponse(c, "Failed to parse request body")
+	}
+ 
+	// Validasi input
+	if req.DocCrID == 0 {
+		return pkg.BadRequestResponse(c, "doc_cr_id is required")
+	}
+ 
+	// Map ke domain request
+	domainReq := domainDocCr.SendRevisionRequest{
+		DocCrID:             req.DocCrID,
+		DocCrName:           req.DocCrName,
+		FormId:              req.FormId,
+		DocReference:        req.DocReference,
+		RequesterNIK:        req.RequesterNIK,
+		RequesterName:       req.RequesterName,
+		RequesterDepartment: req.RequesterDepartment,
+		ReasonDetail:        req.ReasonDetail,
+		ProblemDetail:       req.ProblemDetail,
+		ServerType:          req.ServerType,
+		CrType:              req.CrType,
+		CrPriority:          req.CrPriority,
+		GitMergeRequest:     req.GitMergeRequest,
+		GitRepository:       req.GitRepository,
+		DocNotes:            req.DocNotes,
+		DocAttachment:       req.DocAttachment,
+		ApplicationName:     req.ApplicationName,
+		ReviewNote:          req.ReviewNote,
+		NikLog:              req.NikLog,
+		NameLog:             req.NameLog,
+		NoteLog:             req.NoteLog,
+		Review: domainDocCr.ReviewCreateRequest{
+			ReviewNik:  req.Review.ReviewNik,
+			ReviewName: req.Review.ReviewName,
+		},
+	}
+ 
+	// Panggil service
+	result, err := h.service.SendRevision(c.Context(), domainReq)
+	if err != nil {
+		h.logger.Error("Failed to send revision", err)
+		return pkg.BadRequestResponse(c, "Failed to send revision: "+err.Error())
+	}
+ 
+	h.logger.Info("[%s] %s | Status: 200 | Revision submitted for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
+	return pkg.SuccessResponse(c, fiber.Map{
+		"doc_cr_id": result.DocCrID,
+	})
+}
