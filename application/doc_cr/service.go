@@ -189,3 +189,20 @@ func (s *Service) SendApprove(ctx context.Context, req domainDocCr.SendApproveRe
 	s.logger.Info("Approval submitted for DocCrID: %d", req.DocCrID)
 	return result, nil
 }
+
+// SendApproveReject menolak hasil approval CR
+func (s *Service) SendApproveReject(ctx context.Context, req domainDocCr.SendApproveRejectRequest) (*domainDocCr.SendApproveRejectResult, error) {
+	if req.DocCrID == 0 {
+		s.logger.Warn("SendApproveReject failed: DocCrID is required")
+		return nil, fmt.Errorf("DocCrID is required")
+	}
+ 
+	result, err := s.repo.SendApproveReject(ctx, req)
+	if err != nil {
+		s.logger.Error("SendApproveReject failed", err)
+		return nil, err
+	}
+ 
+	s.logger.Info("Approval rejected for DocCrID: %d", result.DocCrID)
+	return result, nil
+}

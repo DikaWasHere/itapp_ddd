@@ -277,8 +277,8 @@ func (r *DocumentCrRepositoryDB) GetAll(ctx context.Context, req domainDocCr.Get
 		r.db.Where("doc_cr_id IN ? AND approval_status != ?", docIDs, "Cancel").Find(&approvalModels)
 		for i := range approvalModels {
 			appr := approvalModels[i].toEntity()
-			if appr.DocCrID != nil { // ✅ Tambah check ini
-				approvalMap[*appr.DocCrID] = append(approvalMap[*appr.DocCrID], appr) // ✅ Dereference
+			if appr.DocCrID != nil { 
+				approvalMap[*appr.DocCrID] = append(approvalMap[*appr.DocCrID], appr) 
 			}
 		}
 	}
@@ -1010,4 +1010,48 @@ func (r *DocumentCrRepositoryDB) SendApprove(ctx context.Context, req domainDocC
 	}
  
 	return &domainDocCr.SendApproveResult{Approvals: approveItems}, nil
+}
+
+// SendApproveReject menolak hasil approval CR
+func (r *DocumentCrRepositoryDB) SendApproveReject(ctx context.Context, req domainDocCr.SendApproveRejectRequest) (*domainDocCr.SendApproveRejectResult, error) {
+	// 1. Update status dokumen ke "Waiting Review"
+	docUpdate := struct {
+		DocStatus string
+	}{
+		DocStatus: "Waiting Review",
+	}
+ 
+	if err := r.db.WithContext(ctx).Model(&DocumentCrModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(docUpdate).Error; err != nil {
+		return nil, fmt.Errorf("failed to update document status: %w", err)
+	}
+ 
+	// 2. Cancel semua approval_status pada CR tersebut
+	if err := r.db.WithContext(ctx).Model(&ApprovalModel{}).Where("doc_cr_id = ?", req.DocCrID).Update("approval_status", "Cancel").Error; err != nil {
+		return nil, fmt.Errorf("failed to cancel approvals: %w", err)
+	}
+ 
+	// 3. Update data review
+	now := time.Now()
+	reviewUpdate := ReviewModel{
+		ReviewDate:   func() *string { s := now.Format(time.RFC3339); return &s }(),
+		ReviewStatus: "Waiting Review",
+		ReviewNote:   "Reject Approve",
+	}
+	if err := r.db.WithContext(ctx).Model(&ReviewModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(reviewUpdate).Error; err != nil {
+		return nil, fmt.Errorf("failed to update review: %w", err)
+	}
+ 
+	// 4. Buat log aktivitas "Rejected"
+	logModel := DocumentCrLogModel{
+		DocCrID:     req.DocCrID,
+		LogActivity: "Rejected",
+		NikLog:      req.NikLog,
+		NameLog:     req.NameLog,
+		NoteLog:     req.NoteLog,
+	}
+	if err := r.db.WithContext(ctx).Create(&logModel).Error; err != nil {
+		return nil, fmt.Errorf("failed to create log: %w", err)
+	}
+ 
+	return &domainDocCr.SendApproveRejectResult{DocCrID: req.DocCrID}, nil
 }

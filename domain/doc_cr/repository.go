@@ -33,6 +33,7 @@ type DocumentCrRepository interface {
 	SendReviewReject(ctx context.Context, req SendReviewRejectRequest) (*SendReviewRejectResult, error)
 	SendRevision(ctx context.Context, req SendRevisionRequest) (*SendRevisionResult, error)
 	SendApprove(ctx context.Context, req SendApproveRequest) (*SendApproveResult, error)
+	SendApproveReject(ctx context.Context, req SendApproveRejectRequest) (*SendApproveRejectResult, error)
 }
 
 // GetDetailRequest adalah parameter untuk mengambil detail DocumentCr
@@ -196,4 +197,18 @@ type SendApproveRequest struct {
 // SendApproveResult adalah hasil dari operasi approve
 type SendApproveResult struct {
 	Approvals []*ApproveItem
+}
+
+// SendApproveRejectRequest adalah request untuk menolak hasil approval
+type SendApproveRejectRequest struct {
+	DocCrID       uint
+	RequesterName string
+	NikLog        string
+	NameLog       string
+	NoteLog       string
+}
+
+// SendApproveRejectResult adalah hasil dari operasi approve reject
+type SendApproveRejectResult struct {
+	DocCrID uint
 }

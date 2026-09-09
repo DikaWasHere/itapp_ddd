@@ -831,3 +831,47 @@ func (h *DocumentCrHandler) SendApprove(c *fiber.Ctx) error {
 	h.logger.Info("[%s] %s | Status: 200 | Approval submitted for DocCrID: %d", c.Method(), c.Path(), req.DocCrID)
 	return pkg.SuccessResponse(c, approvals)
 }
+
+// --- Request DTO untuk SendApproveReject ---
+type docCrSendApproveRejectRequest struct {
+	DocCrID       uint   `json:"doc_cr_id"`
+	RequesterName string `json:"requester_name"`
+	NikLog        string `json:"nik_log"`
+	NameLog       string `json:"name_log"`
+	NoteLog       string `json:"note_log"`
+}
+
+// SendApproveReject menangani request untuk menolak hasil approval CR
+func (h *DocumentCrHandler) SendApproveReject(c *fiber.Ctx) error {
+	req := new(docCrSendApproveRejectRequest)
+	if err := c.BodyParser(req); err != nil {
+		h.logger.Error("Failed to parse request body", err)
+		return pkg.BadRequestResponse(c, "Failed to parse request body")
+	}
+ 
+	// Validasi input
+	if req.DocCrID == 0 {
+		return pkg.BadRequestResponse(c, "doc_cr_id is required")
+	}
+ 
+	// Map ke domain request
+	domainReq := domainDocCr.SendApproveRejectRequest{
+		DocCrID:       req.DocCrID,
+		RequesterName: req.RequesterName,
+		NikLog:        req.NikLog,
+		NameLog:       req.NameLog,
+		NoteLog:       req.NoteLog,
+	}
+ 
+	// Panggil service
+	result, err := h.service.SendApproveReject(c.Context(), domainReq)
+	if err != nil {
+		h.logger.Error("Failed to reject approval", err)
+		return pkg.BadRequestResponse(c, "Failed to reject approval: "+err.Error())
+	}
+ 
+	h.logger.Info("[%s] %s | Status: 200 | Approval rejected for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
+	return pkg.SuccessResponse(c, fiber.Map{
+		"doc_cr_id": result.DocCrID,
+	})
+}
