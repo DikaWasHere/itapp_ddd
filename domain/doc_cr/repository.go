@@ -34,6 +34,7 @@ type DocumentCrRepository interface {
 	SendRevision(ctx context.Context, req SendRevisionRequest) (*SendRevisionResult, error)
 	SendApprove(ctx context.Context, req SendApproveRequest) (*SendApproveResult, error)
 	SendApproveReject(ctx context.Context, req SendApproveRejectRequest) (*SendApproveRejectResult, error)
+	UpdateStatus(ctx context.Context, req UpdateStatusRequest) (*UpdateStatusResult, error)
 }
 
 // GetDetailRequest adalah parameter untuk mengambil detail DocumentCr
@@ -211,4 +212,18 @@ type SendApproveRejectRequest struct {
 // SendApproveRejectResult adalah hasil dari operasi approve reject
 type SendApproveRejectResult struct {
 	DocCrID uint
+}
+// UpdateStatusRequest adalah request untuk update status dokumen CR
+type UpdateStatusRequest struct {
+	DocCrID   uint
+	DocStatus string
+	NikLog    string
+	NameLog   string
+	NoteLog   string
+}
+
+// UpdateStatusResult adalah hasil dari operasi update status
+type UpdateStatusResult struct {
+	DocCrID   uint
+	DocStatus string
 }

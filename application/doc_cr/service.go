@@ -206,3 +206,25 @@ func (s *Service) SendApproveReject(ctx context.Context, req domainDocCr.SendApp
 	s.logger.Info("Approval rejected for DocCrID: %d", result.DocCrID)
 	return result, nil
 }
+
+// UpdateStatus mengubah status dokumen CR
+func (s *Service) UpdateStatus(ctx context.Context, req domainDocCr.UpdateStatusRequest) (*domainDocCr.UpdateStatusResult, error) {
+	if req.DocCrID == 0 {
+		s.logger.Warn("UpdateStatus failed: DocCrID is required")
+		return nil, fmt.Errorf("DocCrID is required")
+	}
+ 
+	if req.DocStatus == "" {
+		s.logger.Warn("UpdateStatus failed: DocStatus is required")
+		return nil, fmt.Errorf("DocStatus is required")
+	}
+ 
+	result, err := s.repo.UpdateStatus(ctx, req)
+	if err != nil {
+		s.logger.Error("UpdateStatus failed", err)
+		return nil, err
+	}
+ 
+	s.logger.Info("Document status updated to '%s' for DocCrID: %d", result.DocStatus, result.DocCrID)
+	return result, nil
+}

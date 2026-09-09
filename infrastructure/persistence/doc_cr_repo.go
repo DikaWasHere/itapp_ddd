@@ -1055,3 +1055,68 @@ func (r *DocumentCrRepositoryDB) SendApproveReject(ctx context.Context, req doma
  
 	return &domainDocCr.SendApproveRejectResult{DocCrID: req.DocCrID}, nil
 }
+
+// UpdateStatus mengubah status dokumen CR
+func (r *DocumentCrRepositoryDB) UpdateStatus(ctx context.Context, req domainDocCr.UpdateStatusRequest) (*domainDocCr.UpdateStatusResult, error) {
+	// 1. Update status dokumen
+	docUpdate := struct {
+		DocStatus    string
+		DeployedDate *time.Time
+	}{
+		DocStatus: req.DocStatus,
+	}
+ 
+	// 2. Jika status "Deployed", set deployed_date dan cancel approval yang masih "Waiting"
+	if req.DocStatus == "Deployed" {
+		now := time.Now()
+		docUpdate.DeployedDate = &now
+ 
+		// Cari semua approval yang masih "Waiting"
+		var waitingApprovals []ApprovalModel
+		if err := r.db.WithContext(ctx).
+			Where("doc_cr_id = ? AND approval_status = ?", req.DocCrID, "Waiting").
+			Find(&waitingApprovals).Error; err != nil {
+			return nil, fmt.Errorf("failed to fetch waiting approvals: %w", err)
+		}
+ 
+		// Update approval yang masih "Waiting" → "No Action"
+		for _, approval := range waitingApprovals {
+			approvalUpdate := struct {
+				ApprovalDate   *string
+				ApprovalStatus string
+				ApprovalNote   string
+			}{
+				ApprovalStatus: "No Action",
+				ApprovalNote:   "",
+			}
+			nowStr := time.Now().Format(time.RFC3339)
+			approvalUpdate.ApprovalDate = &nowStr
+ 
+			if err := r.db.WithContext(ctx).Model(&ApprovalModel{}).Where("approval_id = ?", approval.ApprovalID).Updates(approvalUpdate).Error; err != nil {
+				return nil, fmt.Errorf("failed to update approval status: %w", err)
+			}
+		}
+	}
+ 
+	// 3. Simpan perubahan status dokumen
+	if err := r.db.WithContext(ctx).Model(&DocumentCrModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(docUpdate).Error; err != nil {
+		return nil, fmt.Errorf("failed to update document status: %w", err)
+	}
+ 
+	// 4. Buat log aktivitas
+	logModel := DocumentCrLogModel{
+		DocCrID:     req.DocCrID,
+		LogActivity: req.DocStatus,
+		NikLog:      req.NikLog,
+		NameLog:     req.NameLog,
+		NoteLog:     req.NoteLog,
+	}
+	if err := r.db.WithContext(ctx).Create(&logModel).Error; err != nil {
+		return nil, fmt.Errorf("failed to create log: %w", err)
+	}
+ 
+	return &domainDocCr.UpdateStatusResult{
+		DocCrID:   req.DocCrID,
+		DocStatus: req.DocStatus,
+	}, nil
+}

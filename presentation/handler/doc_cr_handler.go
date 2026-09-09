@@ -875,3 +875,51 @@ func (h *DocumentCrHandler) SendApproveReject(c *fiber.Ctx) error {
 		"doc_cr_id": result.DocCrID,
 	})
 }
+
+// --- Request DTO untuk UpdateStatus ---
+type docCrUpdateStatusRequest struct {
+	DocCrID   uint   `json:"doc_cr_id"`
+	DocStatus string `json:"doc_status"`
+	NikLog    string `json:"nik_log"`
+	NameLog   string `json:"name_log"`
+	NoteLog   string `json:"note_log"`
+}
+
+// UpdateStatus menangani request untuk update status dokumen CR
+func (h *DocumentCrHandler) UpdateStatus(c *fiber.Ctx) error {
+	req := new(docCrUpdateStatusRequest)
+	if err := c.BodyParser(req); err != nil {
+		h.logger.Error("Failed to parse request body", err)
+		return pkg.BadRequestResponse(c, "Failed to parse request body")
+	}
+ 
+	// Validasi input
+	if req.DocCrID == 0 {
+		return pkg.BadRequestResponse(c, "doc_cr_id is required")
+	}
+	if req.DocStatus == "" {
+		return pkg.BadRequestResponse(c, "doc_status is required")
+	}
+ 
+	// Map ke domain request
+	domainReq := domainDocCr.UpdateStatusRequest{
+		DocCrID:   req.DocCrID,
+		DocStatus: req.DocStatus,
+		NikLog:    req.NikLog,
+		NameLog:   req.NameLog,
+		NoteLog:   req.NoteLog,
+	}
+ 
+	// Panggil service
+	result, err := h.service.UpdateStatus(c.Context(), domainReq)
+	if err != nil {
+		h.logger.Error("Failed to update status", err)
+		return pkg.BadRequestResponse(c, "Failed to update status: "+err.Error())
+	}
+ 
+	h.logger.Info("[%s] %s | Status: 200 | Document status updated to '%s' for DocCrID: %d", c.Method(), c.Path(), result.DocStatus, result.DocCrID)
+	return pkg.SuccessResponse(c, fiber.Map{
+		"doc_cr_id":   result.DocCrID,
+		"doc_status": result.DocStatus,
+	})
+}

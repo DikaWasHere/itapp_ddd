@@ -16,3 +16,13 @@
 2026-09-09T13:40:14.1060881+07:00 | ERROR | doc_cr_handler.go:848 | handler.(*DocumentCrHandler).SendApproveReject | Failed to parse request body: invalid character '}' looking for beginning of object key string
 2026-09-09T13:40:27.0571296+07:00 | INFO | service.go:206 | doc_cr.(*Service).SendApproveReject | Approval rejected for DocCrID: 2
 2026-09-09T13:40:27.0571296+07:00 | INFO | doc_cr_handler.go:873 | handler.(*DocumentCrHandler).SendApproveReject | [POST] /api/v1/doc-cr-approve-reject | Status: 200 | Approval rejected for DocCrID: 2
+2026-09-09T13:51:44.340453+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-09T13:59:58.1000948+07:00 | INFO | service.go:228 | doc_cr.(*Service).UpdateStatus | Document status updated to 'waiting deploy' for DocCrID: 2
+2026-09-09T13:59:58.1000948+07:00 | INFO | doc_cr_handler.go:920 | handler.(*DocumentCrHandler).UpdateStatus | [POST] /api/v1/doc-cr-update-status | Status: 200 | Document status updated to 'waiting deploy' for DocCrID: 2
+2026-09-09T14:03:44.1571235+07:00 | INFO | service.go:228 | doc_cr.(*Service).UpdateStatus | Document status updated to 'boleh' for DocCrID: 2
+2026-09-09T14:03:44.1579925+07:00 | INFO | doc_cr_handler.go:920 | handler.(*DocumentCrHandler).UpdateStatus | [POST] /api/v1/doc-cr-update-status | Status: 200 | Document status updated to 'boleh' for DocCrID: 2
+2026-09-09T14:05:09.969272+07:00 | ERROR | doc_cr_handler.go:892 | handler.(*DocumentCrHandler).UpdateStatus | Failed to parse request body: invalid character '"' after object key:value pair
+2026-09-09T14:05:21.2311802+07:00 | INFO | service.go:228 | doc_cr.(*Service).UpdateStatus | Document status updated to 'boleh' for DocCrID: 3
+2026-09-09T14:05:21.2311802+07:00 | INFO | doc_cr_handler.go:920 | handler.(*DocumentCrHandler).UpdateStatus | [POST] /api/v1/doc-cr-update-status | Status: 200 | Document status updated to 'boleh' for DocCrID: 3
+2026-09-09T14:06:19.8034067+07:00 | INFO | service.go:228 | doc_cr.(*Service).UpdateStatus | Document status updated to 'boleh' for DocCrID: 1
+2026-09-09T14:06:19.8034067+07:00 | INFO | doc_cr_handler.go:920 | handler.(*DocumentCrHandler).UpdateStatus | [POST] /api/v1/doc-cr-update-status | Status: 200 | Document status updated to 'boleh' for DocCrID: 1
