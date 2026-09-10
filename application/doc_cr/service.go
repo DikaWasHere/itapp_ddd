@@ -228,3 +228,20 @@ func (s *Service) UpdateStatus(ctx context.Context, req domainDocCr.UpdateStatus
 	s.logger.Info("Document status updated to '%s' for DocCrID: %d", result.DocStatus, result.DocCrID)
 	return result, nil
 }
+
+// Delete menghapus dokumen CR
+func (s *Service) Delete(ctx context.Context, req domainDocCr.DeleteRequest) (*domainDocCr.DeleteResult, error) {
+	if req.DocCrID == 0 {
+		s.logger.Warn("Delete failed: DocCrId is required")
+		return nil, fmt.Errorf("DocCrID is required")
+	}
+
+	result, err := s.repo.Delete(ctx, req)
+	if err != nil {
+		s.logger.Error("Delete failed", err)
+		return nil, err
+	}
+
+	s.logger.Info("document telah berhasil dihapus dengan ID: %d", result.DocCrID)
+	return result,nil
+}

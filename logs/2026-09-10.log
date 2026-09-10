@@ -1,0 +1,49 @@
+2026-09-10T09:47:32.3217066+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-10T09:54:55.5474431+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-10T09:55:07.0723025+07:00 | INFO | service.go:245 | doc_cr.(*Service).Delete | document telah berhasil dihapus dengan ID: 2
+2026-09-10T09:55:07.0723025+07:00 | INFO | doc_cr_handler.go:952 | handler.(*DocumentCrHandler).Delete | [POST] /api/v1/doc-cr-delete | Status: 200 | DocumentCr deleted successfully for DocCrID: 2
+2026-09-10T09:58:05.6237537+07:00 | INFO | service.go:228 | doc_cr.(*Service).UpdateStatus | Document status updated to 'Deployed' for DocCrID: 1
+2026-09-10T09:58:05.6237537+07:00 | INFO | doc_cr_handler.go:920 | handler.(*DocumentCrHandler).UpdateStatus | [POST] /api/v1/doc-cr-update-status | Status: 200 | Document status updated to 'Deployed' for DocCrID: 1
+2026-09-10T10:01:54.8010659+07:00 | INFO | service.go:136 | doc_cr.(*Service).SendReviewReject | Review rejected for DocCrID: 2
+2026-09-10T10:01:54.8010659+07:00 | INFO | doc_cr_handler.go:657 | handler.(*DocumentCrHandler).SendReviewReject | [POST] /api/v1/doc-cr-reject | Status: 200 | Review rejected for DocCrID: 2
+2026-09-10T10:03:31.4544872+07:00 | INFO | service.go:189 | doc_cr.(*Service).SendApprove | Approval submitted for DocCrID: 1
+2026-09-10T10:03:31.4544872+07:00 | INFO | doc_cr_handler.go:831 | handler.(*DocumentCrHandler).SendApprove | [POST] /api/v1/doc-cr-approve | Status: 200 | Approval submitted for DocCrID: 1
+2026-09-10T10:09:04.0291658+07:00 | INFO | service.go:189 | doc_cr.(*Service).SendApprove | Approval submitted for DocCrID: 76
+2026-09-10T10:09:04.0291658+07:00 | INFO | doc_cr_handler.go:831 | handler.(*DocumentCrHandler).SendApprove | [POST] /api/v1/doc-cr-approve | Status: 200 | Approval submitted for DocCrID: 76
+2026-09-10T10:09:13.5088541+07:00 | INFO | service.go:189 | doc_cr.(*Service).SendApprove | Approval submitted for DocCrID: 1
+2026-09-10T10:09:13.5088541+07:00 | INFO | doc_cr_handler.go:831 | handler.(*DocumentCrHandler).SendApprove | [POST] /api/v1/doc-cr-approve | Status: 200 | Approval submitted for DocCrID: 1
+2026-09-10T10:09:38.354758+07:00 | INFO | service.go:189 | doc_cr.(*Service).SendApprove | Approval submitted for DocCrID: 1
+2026-09-10T10:09:38.354758+07:00 | INFO | doc_cr_handler.go:831 | handler.(*DocumentCrHandler).SendApprove | [POST] /api/v1/doc-cr-approve | Status: 200 | Approval submitted for DocCrID: 1
+2026-09-10T10:12:37.810444+07:00 | ERROR | service.go:42 | doc_cr.(*Service).GetDetail | GetDetail failed: document not found
+2026-09-10T10:12:37.810444+07:00 | ERROR | doc_cr_handler.go:257 | handler.(*DocumentCrHandler).GetDetail | Failed to parse request body: document not found
+2026-09-10T10:13:57.1929373+07:00 | ERROR | service.go:42 | doc_cr.(*Service).GetDetail | GetDetail failed: document not found
+2026-09-10T10:13:57.1929373+07:00 | ERROR | doc_cr_handler.go:257 | handler.(*DocumentCrHandler).GetDetail | Failed to parse request body: document not found
+2026-09-10T10:14:16.4784691+07:00 | INFO | doc_cr_handler.go:366 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 | Berhasil mengambil semua data
+2026-09-10T10:18:35.9213562+07:00 | INFO | doc_cr_handler.go:236 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-10T10:19:54.0069271+07:00 | INFO | doc_cr_handler.go:236 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-10T10:30:04.9270036+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-10T10:31:17.3519109+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-10T10:31:56.5192999+07:00 | ERROR | doc_cr_handler.go:934 | handler.(*DocumentCrHandler).Delete | Failed to parse request body: invalid character ',' after object key
+2026-09-10T10:33:56.9920954+07:00 | INFO | service.go:245 | doc_cr.(*Service).Delete | document telah berhasil dihapus dengan ID: 2
+2026-09-10T10:33:56.9920954+07:00 | INFO | doc_cr_handler.go:953 | handler.(*DocumentCrHandler).Delete | [POST] /api/v1/doc-cr-delete | Status: 200 | DocumentCr deleted successfully for DocCrID: 2
+2026-09-10T10:37:09.1913852+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-10T10:37:17.772067+07:00 | ERROR | service.go:241 | doc_cr.(*Service).Delete | Delete failed: failed to delete document: ERROR: column "application_id" does not exist (SQLSTATE 42703)
+2026-09-10T10:37:17.772067+07:00 | ERROR | doc_cr_handler.go:949 | handler.(*DocumentCrHandler).Delete | Failed to delete DocumentCr: failed to delete document: ERROR: column "application_id" does not exist (SQLSTATE 42703)
+2026-09-10T10:38:43.1408579+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-10T10:38:49.5103506+07:00 | ERROR | service.go:241 | doc_cr.(*Service).Delete | Delete failed: failed to delete document: ERROR: column "application_id" does not exist (SQLSTATE 42703)
+2026-09-10T10:38:49.5103506+07:00 | ERROR | doc_cr_handler.go:949 | handler.(*DocumentCrHandler).Delete | Failed to delete DocumentCr: failed to delete document: ERROR: column "application_id" does not exist (SQLSTATE 42703)
+2026-09-10T10:39:30.0781993+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-10T10:39:37.0065207+07:00 | INFO | service.go:245 | doc_cr.(*Service).Delete | document telah berhasil dihapus dengan ID: 2
+2026-09-10T10:39:37.0065207+07:00 | INFO | doc_cr_handler.go:953 | handler.(*DocumentCrHandler).Delete | [POST] /api/v1/doc-cr-delete | Status: 200 | DocumentCr deleted successfully for DocCrID: 2
+2026-09-10T10:41:15.2716715+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-10T10:41:31.401324+07:00 | INFO | service.go:245 | doc_cr.(*Service).Delete | document telah berhasil dihapus dengan ID: 2
+2026-09-10T10:41:31.401324+07:00 | INFO | doc_cr_handler.go:953 | handler.(*DocumentCrHandler).Delete | [POST] /api/v1/doc-cr-delete | Status: 200 | DocumentCr deleted successfully for DocCrID: 2
+2026-09-10T10:42:28.1374072+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-10T10:42:39.6569194+07:00 | INFO | service.go:245 | doc_cr.(*Service).Delete | document telah berhasil dihapus dengan ID: 2
+2026-09-10T10:42:39.6569194+07:00 | INFO | doc_cr_handler.go:953 | handler.(*DocumentCrHandler).Delete | [POST] /api/v1/doc-cr-delete | Status: 200 | DocumentCr deleted successfully for DocCrID: 2
+2026-09-10T10:44:36.2702558+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-10T10:44:48.8258167+07:00 | INFO | service.go:245 | doc_cr.(*Service).Delete | document telah berhasil dihapus dengan ID: 2
+2026-09-10T10:44:48.8258167+07:00 | INFO | doc_cr_handler.go:953 | handler.(*DocumentCrHandler).Delete | [POST] /api/v1/doc-cr-delete | Status: 200 | DocumentCr deleted successfully for DocCrID: 2
+2026-09-10T10:47:05.3348907+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-10T10:47:14.4079174+07:00 | INFO | service.go:245 | doc_cr.(*Service).Delete | document telah berhasil dihapus dengan ID: 2
+2026-09-10T10:47:14.4088636+07:00 | INFO | doc_cr_handler.go:954 | handler.(*DocumentCrHandler).Delete | [POST] /api/v1/doc-cr-delete | Status: 200 | DocumentCr deleted successfully for DocCrID: 2

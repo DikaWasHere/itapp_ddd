@@ -662,39 +662,39 @@ func (h *DocumentCrHandler) SendReviewReject(c *fiber.Ctx) error {
 
 // --- Request DTO untuk SendRevision ---
 type docCrSendRevisionRequest struct {
-	DocCrID             uint   `json:"doc_cr_id"`
-	DocCrName           string `json:"doc_cr_name"`
-	FormId              string `json:"form_id"`
-	DocReference        string `json:"doc_reference"`
-	RequesterNIK        string `json:"requester_nik"`
-	RequesterName       string `json:"requester_name"`
-	RequesterDepartment string `json:"requester_department"`
-	PICDevelopers       []picRequestDTO `json:"pic_developer"`
-	PICFunctionals      []picRequestDTO `json:"pic_functional"`
-	PICViewers          []picRequestDTO `json:"pic_viewer"`
-	PICQAs              []picRequestDTO `json:"pic_qa"`
-	ReasonDetail        string `json:"reason_detail"`
-	ProblemDetail       string `json:"problem_detail"`
-	ServerType          string `json:"server_type"`
-	CrType              string `json:"cr_type"`
-	CrPriority          string `json:"cr_priority"`
-	GitMergeRequest     string `json:"git_merge_request"`
-	GitRepository       string `json:"git_repository"`
-	DocNotes            string `json:"doc_notes"`
-	DocAttachment       string `json:"doc_attachment"`
-	ApplicationName     string `json:"application_name"`
-	ReviewNote          string `json:"review_note"`
-	NikLog              string `json:"nik_log"`
-	NameLog             string `json:"name_log"`
-	NoteLog             string `json:"note_log"`
+	DocCrID             uint             `json:"doc_cr_id"`
+	DocCrName           string           `json:"doc_cr_name"`
+	FormId              string           `json:"form_id"`
+	DocReference        string           `json:"doc_reference"`
+	RequesterNIK        string           `json:"requester_nik"`
+	RequesterName       string           `json:"requester_name"`
+	RequesterDepartment string           `json:"requester_department"`
+	PICDevelopers       []picRequestDTO  `json:"pic_developer"`
+	PICFunctionals      []picRequestDTO  `json:"pic_functional"`
+	PICViewers          []picRequestDTO  `json:"pic_viewer"`
+	PICQAs              []picRequestDTO  `json:"pic_qa"`
+	ReasonDetail        string           `json:"reason_detail"`
+	ProblemDetail       string           `json:"problem_detail"`
+	ServerType          string           `json:"server_type"`
+	CrType              string           `json:"cr_type"`
+	CrPriority          string           `json:"cr_priority"`
+	GitMergeRequest     string           `json:"git_merge_request"`
+	GitRepository       string           `json:"git_repository"`
+	DocNotes            string           `json:"doc_notes"`
+	DocAttachment       string           `json:"doc_attachment"`
+	ApplicationName     string           `json:"application_name"`
+	ReviewNote          string           `json:"review_note"`
+	NikLog              string           `json:"nik_log"`
+	NameLog             string           `json:"name_log"`
+	NoteLog             string           `json:"note_log"`
 	Review              reviewRequestDTO `json:"review"`
 }
- 
+
 type reviewRequestDTO struct {
 	ReviewNik  string `json:"review_nik"`
 	ReviewName string `json:"review_name"`
 }
- 
+
 // SendRevision menangani request untuk merevisi CR
 func (h *DocumentCrHandler) SendRevision(c *fiber.Ctx) error {
 	req := new(docCrSendRevisionRequest)
@@ -702,12 +702,12 @@ func (h *DocumentCrHandler) SendRevision(c *fiber.Ctx) error {
 		h.logger.Error("Failed to parse request body", err)
 		return pkg.BadRequestResponse(c, "Failed to parse request body")
 	}
- 
+
 	// Validasi input
 	if req.DocCrID == 0 {
 		return pkg.BadRequestResponse(c, "doc_cr_id is required")
 	}
- 
+
 	// Map ke domain request
 	domainReq := domainDocCr.SendRevisionRequest{
 		DocCrID:             req.DocCrID,
@@ -736,14 +736,14 @@ func (h *DocumentCrHandler) SendRevision(c *fiber.Ctx) error {
 			ReviewName: req.Review.ReviewName,
 		},
 	}
- 
+
 	// Panggil service
 	result, err := h.service.SendRevision(c.Context(), domainReq)
 	if err != nil {
 		h.logger.Error("Failed to send revision", err)
 		return pkg.BadRequestResponse(c, "Failed to send revision: "+err.Error())
 	}
- 
+
 	h.logger.Info("[%s] %s | Status: 200 | Revision submitted for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
 	return pkg.SuccessResponse(c, fiber.Map{
 		"doc_cr_id": result.DocCrID,
@@ -762,7 +762,7 @@ type docCrSendApproveRequest struct {
 	CrPriority          string `json:"cr_priority"`
 	RequesterDepartment string `json:"requester_department"`
 }
- 
+
 // --- Response DTO untuk SendApprove (termasuk ApprovalNote) ---
 type approvalApproveResponse struct {
 	ApprovalID         *uint   `json:"approval_id"`
@@ -774,7 +774,7 @@ type approvalApproveResponse struct {
 	ApprovalNote       *string `json:"approval_note"`
 	DocCrID            *uint   `json:"doc_cr_id"`
 }
- 
+
 // SendApprove menangani request untuk approve CR
 func (h *DocumentCrHandler) SendApprove(c *fiber.Ctx) error {
 	// 1. Parse JSON
@@ -783,7 +783,7 @@ func (h *DocumentCrHandler) SendApprove(c *fiber.Ctx) error {
 		h.logger.Error("Failed to parse request body", err)
 		return pkg.BadRequestResponse(c, "Failed to parse request body")
 	}
- 
+
 	// 2. Validasi input
 	if req.ApprovalID == 0 {
 		return pkg.BadRequestResponse(c, "approval_id is required")
@@ -791,7 +791,7 @@ func (h *DocumentCrHandler) SendApprove(c *fiber.Ctx) error {
 	if req.DocCrID == 0 {
 		return pkg.BadRequestResponse(c, "doc_cr_id is required")
 	}
- 
+
 	// 3. Map ke domain request
 	domainReq := domainDocCr.SendApproveRequest{
 		ApprovalID:          req.ApprovalID,
@@ -804,14 +804,14 @@ func (h *DocumentCrHandler) SendApprove(c *fiber.Ctx) error {
 		CrPriority:          req.CrPriority,
 		RequesterDepartment: req.RequesterDepartment,
 	}
- 
+
 	// 4. Panggil service
 	result, err := h.service.SendApprove(c.Context(), domainReq)
 	if err != nil {
 		h.logger.Error("Failed to send approve", err)
 		return pkg.BadRequestResponse(c, "Failed to send approve: "+err.Error())
 	}
- 
+
 	// 5. Map result ke response DTO
 	var approvals []approvalApproveResponse
 	for _, a := range result.Approvals {
@@ -826,7 +826,7 @@ func (h *DocumentCrHandler) SendApprove(c *fiber.Ctx) error {
 			DocCrID:            a.DocCrID,
 		})
 	}
- 
+
 	// 6. Return response
 	h.logger.Info("[%s] %s | Status: 200 | Approval submitted for DocCrID: %d", c.Method(), c.Path(), req.DocCrID)
 	return pkg.SuccessResponse(c, approvals)
@@ -848,12 +848,12 @@ func (h *DocumentCrHandler) SendApproveReject(c *fiber.Ctx) error {
 		h.logger.Error("Failed to parse request body", err)
 		return pkg.BadRequestResponse(c, "Failed to parse request body")
 	}
- 
+
 	// Validasi input
 	if req.DocCrID == 0 {
 		return pkg.BadRequestResponse(c, "doc_cr_id is required")
 	}
- 
+
 	// Map ke domain request
 	domainReq := domainDocCr.SendApproveRejectRequest{
 		DocCrID:       req.DocCrID,
@@ -862,14 +862,14 @@ func (h *DocumentCrHandler) SendApproveReject(c *fiber.Ctx) error {
 		NameLog:       req.NameLog,
 		NoteLog:       req.NoteLog,
 	}
- 
+
 	// Panggil service
 	result, err := h.service.SendApproveReject(c.Context(), domainReq)
 	if err != nil {
 		h.logger.Error("Failed to reject approval", err)
 		return pkg.BadRequestResponse(c, "Failed to reject approval: "+err.Error())
 	}
- 
+
 	h.logger.Info("[%s] %s | Status: 200 | Approval rejected for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
 	return pkg.SuccessResponse(c, fiber.Map{
 		"doc_cr_id": result.DocCrID,
@@ -892,7 +892,7 @@ func (h *DocumentCrHandler) UpdateStatus(c *fiber.Ctx) error {
 		h.logger.Error("Failed to parse request body", err)
 		return pkg.BadRequestResponse(c, "Failed to parse request body")
 	}
- 
+
 	// Validasi input
 	if req.DocCrID == 0 {
 		return pkg.BadRequestResponse(c, "doc_cr_id is required")
@@ -900,7 +900,7 @@ func (h *DocumentCrHandler) UpdateStatus(c *fiber.Ctx) error {
 	if req.DocStatus == "" {
 		return pkg.BadRequestResponse(c, "doc_status is required")
 	}
- 
+
 	// Map ke domain request
 	domainReq := domainDocCr.UpdateStatusRequest{
 		DocCrID:   req.DocCrID,
@@ -909,17 +909,53 @@ func (h *DocumentCrHandler) UpdateStatus(c *fiber.Ctx) error {
 		NameLog:   req.NameLog,
 		NoteLog:   req.NoteLog,
 	}
- 
+
 	// Panggil service
 	result, err := h.service.UpdateStatus(c.Context(), domainReq)
 	if err != nil {
 		h.logger.Error("Failed to update status", err)
 		return pkg.BadRequestResponse(c, "Failed to update status: "+err.Error())
 	}
- 
+
 	h.logger.Info("[%s] %s | Status: 200 | Document status updated to '%s' for DocCrID: %d", c.Method(), c.Path(), result.DocStatus, result.DocCrID)
 	return pkg.SuccessResponse(c, fiber.Map{
-		"doc_cr_id":   result.DocCrID,
+		"doc_cr_id":  result.DocCrID,
 		"doc_status": result.DocStatus,
+	})
+}
+
+type docCrDeleteRequest struct {
+	DocCrID uint `json:"application_id"`
+	ApplicationName string `json:"application_name"`
+}
+
+func (h *DocumentCrHandler) Delete(c *fiber.Ctx) error {
+	req := new(docCrDeleteRequest)
+	if err := c.BodyParser(req); err != nil {
+		h.logger.Error("Failed to parse request body", err)
+		return pkg.BadRequestResponse(c, "Failed to parse request body")
+	}
+
+	if req.DocCrID == 0 {
+		return pkg.BadRequestResponse(c, "doc_cr_id is required")
+	}
+
+	domainReq := domainDocCr.DeleteRequest{
+		DocCrID: req.DocCrID,
+		ApplicationName: req.ApplicationName,
+	}
+
+	result, err := h.service.Delete(c.Context(), domainReq)
+	if err != nil {
+		h.logger.Error("Failed to delete DocumentCr", err)
+		return pkg.BadRequestResponse(c, "Failed to delete DocumentCr: "+err.Error())
+	}
+
+	h.logger.Info("[%s] %s | Status: 200 | DocumentCr deleted successfully for DocCrID: %d", c.Method(), c.Path(), req.DocCrID)
+	return pkg.SuccessResponse(c, fiber.Map{
+		"application_id":   result.DocCrID,
+		"application_name": result.ApplicationName,
+		"created_at":      result.CreatedAt,
+		"updated_at":      result.UpdatedAt,
 	})
 }

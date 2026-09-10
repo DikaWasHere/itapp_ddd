@@ -35,6 +35,7 @@ type DocumentCrRepository interface {
 	SendApprove(ctx context.Context, req SendApproveRequest) (*SendApproveResult, error)
 	SendApproveReject(ctx context.Context, req SendApproveRejectRequest) (*SendApproveRejectResult, error)
 	UpdateStatus(ctx context.Context, req UpdateStatusRequest) (*UpdateStatusResult, error)
+	Delete(ctx context.Context, req DeleteRequest) (*DeleteResult, error)
 }
 
 // GetDetailRequest adalah parameter untuk mengambil detail DocumentCr
@@ -114,15 +115,15 @@ type SendReviewResult struct {
 
 // SendReviewRejectRequest adalah request untuk menolak CR dari review
 type SendReviewRejectRequest struct {
-	DocCrID       uint
-	RequesterNIK  string
-	FormId        string
-	ReviewNote    string
-	NikLog        string
-	NameLog       string
-	NoteLog       string
+	DocCrID      uint
+	RequesterNIK string
+	FormId       string
+	ReviewNote   string
+	NikLog       string
+	NameLog      string
+	NoteLog      string
 }
- 
+
 // SendReviewRejectResult adalah hasil dari operasi reject review
 type SendReviewRejectResult struct {
 	DocCrID uint
@@ -149,7 +150,7 @@ type SendRevisionRequest struct {
 	GitMergeRequest     string
 	GitRepository       string
 	DocNotes            string
-	DocAttachment       string  // single base64 string (berbeda dengan review yang []
+	DocAttachment       string // single base64 string (berbeda dengan review yang []
 	DocStatus           string
 	ApplicationName     string
 	ReviewNote          string
@@ -158,13 +159,13 @@ type SendRevisionRequest struct {
 	NoteLog             string
 	Review              ReviewCreateRequest
 }
- 
+
 // ReviewCreateRequest adalah data review untuk revision
 type ReviewCreateRequest struct {
 	ReviewNik  string
 	ReviewName string
 }
- 
+
 // SendRevisionResult adalah hasil dari operasi send revision
 type SendRevisionResult struct {
 	DocCrID uint
@@ -181,7 +182,7 @@ type ApproveItem struct {
 	ApprovalNote       *string
 	DocCrID            *uint
 }
- 
+
 // SendApproveRequest adalah request untuk approve CR
 type SendApproveRequest struct {
 	ApprovalID          uint
@@ -194,7 +195,7 @@ type SendApproveRequest struct {
 	CrPriority          string
 	RequesterDepartment string
 }
- 
+
 // SendApproveResult adalah hasil dari operasi approve
 type SendApproveResult struct {
 	Approvals []*ApproveItem
@@ -213,6 +214,7 @@ type SendApproveRejectRequest struct {
 type SendApproveRejectResult struct {
 	DocCrID uint
 }
+
 // UpdateStatusRequest adalah request untuk update status dokumen CR
 type UpdateStatusRequest struct {
 	DocCrID   uint
@@ -226,4 +228,16 @@ type UpdateStatusRequest struct {
 type UpdateStatusResult struct {
 	DocCrID   uint
 	DocStatus string
+}
+
+type DeleteRequest struct {
+	DocCrID         uint
+	ApplicationName string
+}
+
+type DeleteResult struct {
+	DocCrID         uint
+	ApplicationName string
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 }

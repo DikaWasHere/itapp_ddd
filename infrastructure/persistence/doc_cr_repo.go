@@ -667,7 +667,7 @@ func (r *DocumentCrRepositoryDB) Create(ctx context.Context, req domainDocCr.Cre
         GitMergeRequest:     req.GitMergeRequest,
         GitRepository:       req.GitRepository,
         DocNotes:            req.DocNotes,
-        DocAttachment:       docAttachmentStr,  // ← SEKARANG VALID
+        DocAttachment:       docAttachmentStr,  
         DocStatus:           req.DocStatus,
         ApplicationName:     req.ApplicationName,
         DeployedDate:        req.DeployedDate,
@@ -1119,4 +1119,12 @@ func (r *DocumentCrRepositoryDB) UpdateStatus(ctx context.Context, req domainDoc
 		DocCrID:   req.DocCrID,
 		DocStatus: req.DocStatus,
 	}, nil
+}
+
+
+func (r *DocumentCrRepositoryDB) Delete (ctx context.Context,req domainDocCr.DeleteRequest) (*domainDocCr.DeleteResult,error){
+	if err := r.db.WithContext(ctx).Delete(&DocumentCrModel{}, "doc_cr_id = ?", req.DocCrID).Error; err != nil {
+		return nil, fmt.Errorf("failed to delete document: %w", err)
+	}
+	return &domainDocCr.DeleteResult{DocCrID: req.DocCrID,ApplicationName: req.ApplicationName,CreatedAt: time.Now(),UpdatedAt: time.Now()}, nil
 }
