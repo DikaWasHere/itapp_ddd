@@ -918,10 +918,7 @@ func (h *DocumentCrHandler) UpdateStatus(c *fiber.Ctx) error {
 	}
 
 	h.logger.Info("[%s] %s | Status: 200 | Document status updated to '%s' for DocCrID: %d", c.Method(), c.Path(), result.DocStatus, result.DocCrID)
-	return pkg.SuccessResponse(c, fiber.Map{
-		"doc_cr_id":  result.DocCrID,
-		"doc_status": result.DocStatus,
-	})
+	return pkg.SuccessResponse(c, result.DocCrID)
 }
 
 type docCrDeleteRequest struct {

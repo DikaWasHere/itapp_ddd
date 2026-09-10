@@ -150,7 +150,7 @@ type SendRevisionRequest struct {
 	GitMergeRequest     string
 	GitRepository       string
 	DocNotes            string
-	DocAttachment       string // single base64 string (berbeda dengan review yang []
+	DocAttachment       string 
 	DocStatus           string
 	ApplicationName     string
 	ReviewNote          string

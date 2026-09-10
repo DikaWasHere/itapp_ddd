@@ -1126,5 +1126,9 @@ func (r *DocumentCrRepositoryDB) Delete (ctx context.Context,req domainDocCr.Del
 	if err := r.db.WithContext(ctx).Delete(&DocumentCrModel{}, "doc_cr_id = ?", req.DocCrID).Error; err != nil {
 		return nil, fmt.Errorf("failed to delete document: %w", err)
 	}
-	return &domainDocCr.DeleteResult{DocCrID: req.DocCrID,ApplicationName: req.ApplicationName,CreatedAt: time.Now(),UpdatedAt: time.Now()}, nil
+	return &domainDocCr.DeleteResult{
+		DocCrID: req.DocCrID,
+		ApplicationName: req.ApplicationName,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now()}, nil
 }

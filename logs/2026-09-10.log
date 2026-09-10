@@ -47,3 +47,20 @@
 2026-09-10T10:47:05.3348907+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
 2026-09-10T10:47:14.4079174+07:00 | INFO | service.go:245 | doc_cr.(*Service).Delete | document telah berhasil dihapus dengan ID: 2
 2026-09-10T10:47:14.4088636+07:00 | INFO | doc_cr_handler.go:954 | handler.(*DocumentCrHandler).Delete | [POST] /api/v1/doc-cr-delete | Status: 200 | DocumentCr deleted successfully for DocCrID: 2
+2026-09-10T11:10:58.225849+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-10T11:11:15.2366095+07:00 | INFO | service.go:228 | doc_cr.(*Service).UpdateStatus | Document status updated to 'Deleted' for DocCrID: 101
+2026-09-10T11:11:15.2366095+07:00 | INFO | doc_cr_handler.go:920 | handler.(*DocumentCrHandler).UpdateStatus | [POST] /api/v1/doc-cr-update-status | Status: 200 | Document status updated to 'Deleted' for DocCrID: 101
+2026-09-10T11:12:23.3964882+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-10T11:12:30.3727603+07:00 | INFO | service.go:228 | doc_cr.(*Service).UpdateStatus | Document status updated to 'Deleted' for DocCrID: 101
+2026-09-10T11:12:30.3727603+07:00 | INFO | doc_cr_handler.go:920 | handler.(*DocumentCrHandler).UpdateStatus | [POST] /api/v1/doc-cr-update-status | Status: 200 | Document status updated to 'Deleted' for DocCrID: 101%!(EXTRA string=)
+2026-09-10T11:15:46.9772807+07:00 | INFO | service.go:228 | doc_cr.(*Service).UpdateStatus | Document status updated to 'Deleted' for DocCrID: 101
+2026-09-10T11:15:46.9777529+07:00 | INFO | doc_cr_handler.go:920 | handler.(*DocumentCrHandler).UpdateStatus | [POST] /api/v1/doc-cr-update-status | Status: 200 | Document status updated to 'Deleted' for DocCrID: 101%!(EXTRA string=)
+2026-09-10T11:33:51.3630208+07:00 | INFO | service.go:245 | doc_cr.(*Service).Delete | document telah berhasil dihapus dengan ID: 23
+2026-09-10T11:33:51.3630208+07:00 | INFO | doc_cr_handler.go:955 | handler.(*DocumentCrHandler).Delete | [POST] /api/v1/doc-cr-delete | Status: 200 | DocumentCr deleted successfully for DocCrID: 23
+2026-09-10T14:07:28.7731141+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-10T14:08:20.9199142+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-10T14:08:41.4153623+07:00 | INFO | service.go:228 | doc_cr.(*Service).UpdateStatus | Document status updated to 'Deleted' for DocCrID: 101
+2026-09-10T14:08:41.4153623+07:00 | INFO | doc_cr_handler.go:920 | handler.(*DocumentCrHandler).UpdateStatus | [POST] /api/v1/doc-cr-update-status | Status: 200 | Document status updated to 'Deleted' for DocCrID: 101
+2026-09-10T14:20:20.1516502+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-10T14:20:30.2549173+07:00 | INFO | service.go:228 | doc_cr.(*Service).UpdateStatus | Document status updated to 'Deleted' for DocCrID: 101
+2026-09-10T14:20:30.2549173+07:00 | INFO | doc_cr_handler.go:920 | handler.(*DocumentCrHandler).UpdateStatus | [POST] /api/v1/doc-cr-update-status | Status: 200 | Document status updated to 'Deleted' for DocCrID: 101
