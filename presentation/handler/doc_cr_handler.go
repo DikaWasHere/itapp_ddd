@@ -105,33 +105,34 @@ type milestoneResponse struct {
 
 // Response DTO untuk DocumentCr Detail
 type docCrDetailResponse struct {
-	DocCrID             uint                `json:"doc_cr_id"`
-	DocCrName           string              `json:"doc_cr_name"`
-	FormId              string              `json:"form_id"`
-	DocReference        string              `json:"doc_reference"`
-	RequesterNIK        string              `json:"requester_nik"`
-	RequesterName       string              `json:"requester_name"`
-	RequesterDepartment string              `json:"requester_department"`
-	ReasonDetail        string              `json:"reason_detail"`
-	ProblemDetail       string              `json:"problem_detail"`
-	ServerType          string              `json:"server_type"`
-	CrType              string              `json:"cr_type"`
-	CrPriority          string              `json:"cr_priority"`
-	GitMergeRequest     string              `json:"git_merge_request"`
-	GitRepository       string              `json:"git_repository"`
-	DocNotes            string              `json:"doc_notes"`
-	DocAttachment       string              `json:"doc_attachment"`
-	DocStatus           string              `json:"doc_status"`
-	ApplicationName     string              `json:"application_name"`
-	DeployedDate        *time.Time          `json:"deployed_date"`
-	CreatedAt           time.Time           `json:"created_at"`
-	PICDevelopers       []picResponse       `json:"pic_developer"`
-	PICFunctionals      []picResponse       `json:"pic_functional"`
-	PICViewer           []picResponse       `json:"pic_viewer"`
-	PICQAs              []picResponse       `json:"pic_qa"`
-	Approval            []approvalResponse  `json:"approval"`
-	Review              *reviewResponse     `json:"review"`
-	Milestones          []milestoneResponse `json:"milestones"`
+	DocCrID             uint                   `json:"doc_cr_id" gorm:"primarykey"`
+	DocCrName           string                 `json:"doc_cr_name"`
+	FormId              string                 `json:"form_id"`
+	DocReference        string                 `json:"doc_reference"`
+	RequesterNIK        string                 `json:"requester_nik"`
+	RequesterName       string                 `json:"requester_name"`
+	RequesterDepartment string                 `json:"requester_department"`
+	PICDevelopers       []picResponse          `json:"pic_developer" gorm:"many2many:document_cr_pic_developers;"`
+	PICFunctionals      []picResponse          `json:"pic_functional" gorm:"many2many:document_cr_pic_functionals;"`
+	PICViewer           []picResponse          `json:"pic_viewer" gorm:"many2many:document_cr_pic_viewers;"`
+	PICQAs              []picResponse          `json:"pic_qa" gorm:"many2many:document_cr_pic_qas;"`
+	ReasonDetail        string                 `json:"reason_detail"`
+	ProblemDetail       string                 `json:"problem_detail"`
+	ServerType          string                 `json:"server_type"`
+	CrType              string                 `json:"cr_type"`
+	CrPriority          string                 `json:"cr_priority"`
+	GitMergeRequest     string                 `json:"git_merge_request"`
+	GitRepository       string                 `json:"git_repository"`
+	DocNotes            string                 `json:"doc_notes"`
+	DocAttachment       string                 `json:"doc_attachment"`
+	DocStatus           string                 `json:"doc_status"`
+	ApplicationName     string                 `json:"application_name"`
+	DeployedDate        *time.Time             `json:"deployed_date"`
+	CreatedAt           time.Time              `json:"created_at"`
+	Approval            []approvalResponse `json:"approval" gorm:"foreignKey:DocCrID;references:DocCrID"`
+	Review              reviewResponse         `json:"review" gorm:"foreignKey:DocCrID;references:DocCrID"`
+	Milestones          []milestoneResponse    `json:"milestones" gorm:"-"`
+
 }
 
 // GetAll menangani request untuk mengambil semua DocumentCr
@@ -290,7 +291,7 @@ func (h *DocumentCrHandler) GetDetail(c *fiber.Ctx) error {
 
 	// Map Review
 	if item.Review != nil {
-		doc.Review = &reviewResponse{
+		doc.Review = reviewResponse{
 			ReviewID:     item.Review.ReviewID,
 			ReviewNik:    item.Review.ReviewNik,
 			ReviewName:   item.Review.ReviewName,
@@ -440,8 +441,8 @@ func (h *DocumentCrHandler) Create(c *fiber.Ctx) error {
 		GitMergeRequest:        req.GitMergeRequest,
 		GitRepository:          req.GitRepository,
 		DocNotes:               req.DocNotes,
-		DocAttachment:          req.DocAttachment,          // Now []string
-		DocAttachmentExtension: req.DocAttachmentExtension, // NEW
+		DocAttachment:          req.DocAttachment,
+		DocAttachmentExtension: req.DocAttachmentExtension,
 		DocStatus:              req.DocStatus,
 		ApplicationName:        req.ApplicationName,
 		DeployedDate:           req.DeployedDate,
@@ -765,14 +766,16 @@ type docCrSendApproveRequest struct {
 
 // --- Response DTO untuk SendApprove (termasuk ApprovalNote) ---
 type approvalApproveResponse struct {
-	ApprovalID         *uint   `json:"approval_id"`
-	ApprovalNik        *string `json:"approval_nik"`
-	ApprovalName       *string `json:"approval_name"`
-	ApprovalDate       *string `json:"approval_date"`
-	ApprovalStatus     *string `json:"approval_status"`
-	ApprovalDepartment *string `json:"approval_department"`
-	ApprovalNote       *string `json:"approval_note"`
-	DocCrID            *uint   `json:"doc_cr_id"`
+	ApprovalID         *uint     `json:"approval_id"`
+	ApprovalNik        *string   `json:"approval_nik"`
+	ApprovalName       *string   `json:"approval_name"`
+	ApprovalDate       *string   `json:"approval_date"`
+	ApprovalStatus     *string   `json:"approval_status"`
+	ApprovalNote       *string   `json:"approval_note"`
+	DocCrID            *uint     `json:"doc_cr_id"`
+	ApprovalDepartment *string   `json:"approval_department"`
+	CreatedAt          *time.Time `json:"created_at"`
+	UpdatedAt          *time.Time `json:"updated_at"`
 }
 
 // SendApprove menangani request untuk approve CR
@@ -824,6 +827,8 @@ func (h *DocumentCrHandler) SendApprove(c *fiber.Ctx) error {
 			ApprovalDepartment: a.ApprovalDepartment,
 			ApprovalNote:       a.ApprovalNote,
 			DocCrID:            a.DocCrID,
+			CreatedAt:          a.CreatedAt,
+			UpdatedAt:          a.UpdatedAt,
 		})
 	}
 
@@ -922,7 +927,7 @@ func (h *DocumentCrHandler) UpdateStatus(c *fiber.Ctx) error {
 }
 
 type docCrDeleteRequest struct {
-	DocCrID uint `json:"application_id"`
+	DocCrID         uint   `json:"application_id"`
 	ApplicationName string `json:"application_name"`
 }
 
@@ -938,7 +943,7 @@ func (h *DocumentCrHandler) Delete(c *fiber.Ctx) error {
 	}
 
 	domainReq := domainDocCr.DeleteRequest{
-		DocCrID: req.DocCrID,
+		DocCrID:         req.DocCrID,
 		ApplicationName: req.ApplicationName,
 	}
 
@@ -952,7 +957,7 @@ func (h *DocumentCrHandler) Delete(c *fiber.Ctx) error {
 	return pkg.SuccessResponse(c, fiber.Map{
 		"application_id":   result.DocCrID,
 		"application_name": result.ApplicationName,
-		"created_at":      result.CreatedAt,
-		"updated_at":      result.UpdatedAt,
+		"created_at":       result.CreatedAt,
+		"updated_at":       result.UpdatedAt,
 	})
 }

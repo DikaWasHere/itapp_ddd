@@ -64,3 +64,27 @@
 2026-09-10T14:20:20.1516502+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
 2026-09-10T14:20:30.2549173+07:00 | INFO | service.go:228 | doc_cr.(*Service).UpdateStatus | Document status updated to 'Deleted' for DocCrID: 101
 2026-09-10T14:20:30.2549173+07:00 | INFO | doc_cr_handler.go:920 | handler.(*DocumentCrHandler).UpdateStatus | [POST] /api/v1/doc-cr-update-status | Status: 200 | Document status updated to 'Deleted' for DocCrID: 101
+2026-09-10T14:24:29.3138512+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-10T14:24:41.9509596+07:00 | INFO | service.go:189 | doc_cr.(*Service).SendApprove | Approval submitted for DocCrID: 1
+2026-09-10T14:24:41.9509596+07:00 | INFO | doc_cr_handler.go:831 | handler.(*DocumentCrHandler).SendApprove | [POST] /api/v1/doc-cr-approve | Status: 200 | Approval submitted for DocCrID: 1
+2026-09-10T14:37:20.0833108+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-10T14:37:37.5026462+07:00 | INFO | service.go:189 | doc_cr.(*Service).SendApprove | Approval submitted for DocCrID: 1
+2026-09-10T14:37:37.5026462+07:00 | INFO | doc_cr_handler.go:833 | handler.(*DocumentCrHandler).SendApprove | [POST] /api/v1/doc-cr-approve | Status: 200 | Approval submitted for DocCrID: 1
+2026-09-10T14:41:55.1164823+07:00 | INFO | service.go:189 | doc_cr.(*Service).SendApprove | Approval submitted for DocCrID: 24
+2026-09-10T14:41:55.1164823+07:00 | INFO | doc_cr_handler.go:833 | handler.(*DocumentCrHandler).SendApprove | [POST] /api/v1/doc-cr-approve | Status: 200 | Approval submitted for DocCrID: 24
+2026-09-10T14:42:10.1838403+07:00 | INFO | service.go:189 | doc_cr.(*Service).SendApprove | Approval submitted for DocCrID: 1
+2026-09-10T14:42:10.1838403+07:00 | INFO | doc_cr_handler.go:833 | handler.(*DocumentCrHandler).SendApprove | [POST] /api/v1/doc-cr-approve | Status: 200 | Approval submitted for DocCrID: 1
+2026-09-10T14:42:17.8102714+07:00 | INFO | service.go:189 | doc_cr.(*Service).SendApprove | Approval submitted for DocCrID: 21
+2026-09-10T14:42:17.8102714+07:00 | INFO | doc_cr_handler.go:833 | handler.(*DocumentCrHandler).SendApprove | [POST] /api/v1/doc-cr-approve | Status: 200 | Approval submitted for DocCrID: 21
+2026-09-10T14:42:28.7635874+07:00 | INFO | service.go:189 | doc_cr.(*Service).SendApprove | Approval submitted for DocCrID: 2
+2026-09-10T14:42:28.7635874+07:00 | INFO | doc_cr_handler.go:833 | handler.(*DocumentCrHandler).SendApprove | [POST] /api/v1/doc-cr-approve | Status: 200 | Approval submitted for DocCrID: 2
+2026-09-10T14:42:36.6094855+07:00 | INFO | service.go:189 | doc_cr.(*Service).SendApprove | Approval submitted for DocCrID: 3
+2026-09-10T14:42:36.6094855+07:00 | INFO | doc_cr_handler.go:833 | handler.(*DocumentCrHandler).SendApprove | [POST] /api/v1/doc-cr-approve | Status: 200 | Approval submitted for DocCrID: 3
+2026-09-10T15:04:50.7443129+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-10T15:05:04.655984+07:00 | INFO | service.go:189 | doc_cr.(*Service).SendApprove | Approval submitted for DocCrID: 1
+2026-09-10T15:05:04.655984+07:00 | INFO | doc_cr_handler.go:835 | handler.(*DocumentCrHandler).SendApprove | [POST] /api/v1/doc-cr-approve | Status: 200 | Approval submitted for DocCrID: 1
+2026-09-10T15:24:00.9092521+07:00 | INFO | service.go:165 | doc_cr.(*Service).SendRevision | Revision submitted for DocCrID: 1
+2026-09-10T15:24:00.9092521+07:00 | INFO | doc_cr_handler.go:747 | handler.(*DocumentCrHandler).SendRevision | [POST] /api/v1/doc-cr-revision | Status: 200 | Revision submitted for DocCrID: 1
+2026-09-10T15:30:26.0369993+07:00 | ERROR | doc_cr_handler.go:702 | handler.(*DocumentCrHandler).SendRevision | Failed to parse request body: json: cannot unmarshal string into Go struct field docCrSendRevisionRequest.pic_developer of type []handler.picRequestDTO
+2026-09-10T15:32:40.9435035+07:00 | INFO | service.go:136 | doc_cr.(*Service).SendReviewReject | Review rejected for DocCrID: 1
+2026-09-10T15:32:40.9435035+07:00 | INFO | doc_cr_handler.go:657 | handler.(*DocumentCrHandler).SendReviewReject | [POST] /api/v1/doc-cr-reject | Status: 200 | Review rejected for DocCrID: 1

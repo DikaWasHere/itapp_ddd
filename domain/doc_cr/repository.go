@@ -181,6 +181,8 @@ type ApproveItem struct {
 	ApprovalDepartment *string
 	ApprovalNote       *string
 	DocCrID            *uint
+	CreatedAt          *time.Time
+	UpdatedAt          *time.Time
 }
 
 // SendApproveRequest adalah request untuk approve CR

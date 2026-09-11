@@ -117,8 +117,8 @@ type ApprovalModel struct {
 	ApprovalNote       string    `gorm:"column:approval_note"`
 	DocCrID            uint      `gorm:"column:doc_cr_id"`
 	ApprovalDepartment string    `gorm:"column:approval_department"`
-	CreatedAt          time.Time `gorm:"column:created_at"`
-	UpdatedAt          time.Time `gorm:"column:updated_at"`
+	CreatedAt          *time.Time `gorm:"column:created_at"`
+	UpdatedAt          *time.Time `gorm:"column:updated_at"`
 }
 
 func (ApprovalModel) TableName() string {
@@ -1005,6 +1005,8 @@ func (r *DocumentCrRepositoryDB) SendApprove(ctx context.Context, req domainDocC
 			ApprovalDepartment: &approvedApprovals[i].ApprovalDepartment,
 			ApprovalNote:       &approvedApprovals[i].ApprovalNote,
 			DocCrID:            &approvedApprovals[i].DocCrID,
+			CreatedAt:          approvedApprovals[i].CreatedAt,
+			UpdatedAt:          approvedApprovals[i].UpdatedAt,
 		}
 		approveItems = append(approveItems, item)
 	}
