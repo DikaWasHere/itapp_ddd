@@ -1134,3 +1134,100 @@ func (r *DocumentCrRepositoryDB) Delete (ctx context.Context,req domainDocCr.Del
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now()}, nil
 }
+
+// ===== METHOD BARU UNTUK UPSERT =====
+ 
+// GetByID mengambil satu document berdasarkan ID
+func (r *DocumentCrRepositoryDB) GetByID(ctx context.Context, docCrID uint) (*domainDocCr.DocumentCr, error) {
+	var model DocumentCrModel
+	err := r.db.WithContext(ctx).Where("doc_cr_id = ?", docCrID).First(&model).Error
+	if err != nil {
+		return nil, err
+	}
+	return model.toEntity(), nil
+}
+ 
+// Update memperbarui document yang sudah ada
+func (r *DocumentCrRepositoryDB) Update(ctx context.Context, docCrID uint, req domainDocCr.CreateDocCrRequest) (*domainDocCr.DocumentCr, error) {
+	updates := map[string]interface{}{
+		"doc_cr_name":           req.DocCrName,
+		"form_id":               req.FormId,
+		"doc_reference":         req.DocReference,
+		"requester_nik":         req.RequesterNIK,
+		"requester_name":        req.RequesterName,
+		"requester_department":  req.RequesterDepartment,
+		"reason_detail":         req.ReasonDetail,
+		"problem_detail":        req.ProblemDetail,
+		"server_type":           req.ServerType,
+		"cr_type":               req.CrType,
+		"cr_priority":           req.CrPriority,
+		"git_merge_request":     req.GitMergeRequest,
+		"git_repository":        req.GitRepository,
+		"doc_notes":             req.DocNotes,
+		"doc_attachment":        "",
+		"application_name":      req.ApplicationName,
+	}
+ 
+	err := r.db.WithContext(ctx).
+		Model(&DocumentCrModel{}).
+		Where("doc_cr_id = ?", docCrID).
+		Updates(updates).Error
+ 
+	if err != nil {
+		return nil, err
+	}
+ 
+	return r.GetByID(ctx, docCrID)
+}
+ 
+// DeletePICsByDocCrID menghapus semua PIC milik document (hard delete)
+func (r  *DocumentCrRepositoryDB) DeletePICsByDocCrID(ctx context.Context, docCrID uint) error {
+	return r.db.WithContext(ctx).Unscoped().Delete(&PICModel{}, "doc_cr_id = ?", docCrID).Error
+}
+ 
+// DeleteReviewsByDocCrID menghapus semua Review milik document
+func (r  *DocumentCrRepositoryDB) DeleteReviewsByDocCrID(ctx context.Context, docCrID uint) error {
+	return r.db.WithContext(ctx).Unscoped().Delete(&ReviewModel{}, "doc_cr_id = ?", docCrID).Error
+}
+ 
+// CreatePICs bulk insert PIC baru
+func (r *DocumentCrRepositoryDB) CreatePICs(ctx context.Context, docCrID uint, pics []domainDocCr.PIC) error {
+	if len(pics) == 0 {
+		return nil
+	}
+ 
+	models := make([]PICModel, len(pics))
+	for i, p := range pics {
+		models[i] = PICModel{
+			DocCrID:       docCrID,
+			PICNik:        p.PICNik,
+			PICName:       p.PICName,
+			PICDepartment: p.PICDepartment,
+		}
+	}
+	return r.db.WithContext(ctx).Create(&models).Error
+}
+ 
+// CreateReview insert review baru dengan status "Waiting"
+func (r *DocumentCrRepositoryDB) CreateReview(ctx context.Context, docCrID uint, review domainDocCr.ReviewCreateRequest) error {
+	model := ReviewModel{
+		DocCrID:      docCrID,
+		ReviewNik:    review.ReviewNik,
+		ReviewName:   review.ReviewName,
+		ReviewStatus: "Waiting",
+	}
+	return r.db.WithContext(ctx).Create(&model).Error
+}
+ 
+// CreateLog insert log aktivitas ke trs_document_cr_log
+func (r *DocumentCrRepositoryDB) CreateLog(ctx context.Context, log domainDocCr.Milestone) error {
+	model := DocumentCrLogModel{
+		DocCrID:     log.DocCrID,
+		LogActivity: log.LogActivity,
+		NikLog:      log.NikLog,
+		NameLog:     log.NameLog,
+		NoteLog:     log.NoteLog,
+		CreatedAt:   time.Now(),
+	}
+	return r.db.WithContext(ctx).Create(&model).Error
+}

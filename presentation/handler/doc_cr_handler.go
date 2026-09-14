@@ -389,6 +389,17 @@ type docCrCreateRequest struct {
 	DocStatus              string     `json:"doc_status"`
 	ApplicationName        string     `json:"application_name"`
 	DeployedDate           *time.Time `json:"deployed_date"`
+
+
+	DocCrID          uint                     `json:"doc_cr_id"`           // Deteksi upsert
+	PICDevelopers    []picRequestDTO          `json:"pic_developer"`       // PIC Developer
+	PICFunctionals   []picRequestDTO          `json:"pic_functional"`      // PIC Functional
+	PICViewers       []picRequestDTO          `json:"pic_viewer"`          // PIC Viewer
+	PICQAs           []picRequestDTO          `json:"pic_qa"`              // PIC QA
+	Review           *reviewRequestDTO        `json:"review"`              // Review (optional)
+	NikLog           string                   `json:"nik_log"`             // Log: NIK
+	NameLog          string                   `json:"name_log"`            // Log: Nama
+	NoteLog          string                   `json:"note_log"`            // Log: Catatan
 }
 
 // --- Response DTO untuk Create ---
@@ -416,17 +427,48 @@ type docCrCreateResponse struct {
 }
 
 // go
-// Create menangani request untuk membuat DocumentCr baru
+// go
 func (h *DocumentCrHandler) Create(c *fiber.Ctx) error {
 	req := new(docCrCreateRequest)
-
+ 
 	if err := c.BodyParser(req); err != nil {
 		h.logger.Error("Failed to parse request body", err)
 		return pkg.BadRequestResponse(c, "Failed to parse request body")
 	}
-
+ 
+	// Map PIC ke domain
+	picsDev := make([]domainDocCr.PIC, 0)
+	for _, p := range req.PICDevelopers {
+		picsDev = append(picsDev, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
+	}
+ 
+	picsFunc := make([]domainDocCr.PIC, 0)
+	for _, p := range req.PICFunctionals {
+		picsFunc = append(picsFunc, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
+	}
+ 
+	picsView := make([]domainDocCr.PIC, 0)
+	for _, p := range req.PICViewers {
+		picsView = append(picsView, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
+	}
+ 
+	picsQA := make([]domainDocCr.PIC, 0)
+	for _, p := range req.PICQAs {
+		picsQA = append(picsQA, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
+	}
+ 
+	// Map Review ke domain (pointer, optional)
+	var review *domainDocCr.ReviewCreateRequest
+	if req.Review != nil {
+		review = &domainDocCr.ReviewCreateRequest{
+			ReviewNik:  req.Review.ReviewNik,
+			ReviewName: req.Review.ReviewName,
+		}
+	}
+ 
 	// Map request ke domain request
 	domainReq := domainDocCr.CreateDocCrRequest{
+		DocCrID:                req.DocCrID,
 		DocCrName:              req.DocCrName,
 		FormId:                 req.FormId,
 		DocReference:           req.DocReference,
@@ -446,45 +488,24 @@ func (h *DocumentCrHandler) Create(c *fiber.Ctx) error {
 		DocStatus:              req.DocStatus,
 		ApplicationName:        req.ApplicationName,
 		DeployedDate:           req.DeployedDate,
+		PICDevelopers:          picsDev,
+		PICFunctionals:         picsFunc,
+		PICViewers:             picsView,
+		PICQAs:                 picsQA,
+		Review:                 review,
+		NikLog:                 req.NikLog,
+		NameLog:                req.NameLog,
+		NoteLog:                req.NoteLog,
 	}
-
-	// Panggil service
+ 
 	doc, err := h.service.Create(c.Context(), domainReq)
 	if err != nil {
 		h.logger.Error("Failed to create DocumentCr", err)
 		return pkg.BadRequestResponse(c, "Failed to create DocumentCr: "+err.Error())
 	}
-
-	// Map domain response ke response DTO
-	data := docCrCreateResponse{
-		DocCrID:             doc.DocCrID,
-		DocCrName:           doc.DocCrName,
-		FormId:              doc.FormId,
-		DocReference:        doc.DocReference,
-		RequesterNIK:        doc.RequesterNIK,
-		RequesterName:       doc.RequesterName,
-		RequesterDepartment: doc.RequesterDepartment,
-		ReasonDetail:        doc.ReasonDetail,
-		ProblemDetail:       doc.ProblemDetail,
-		ServerType:          doc.ServerType,
-		CrType:              doc.CrType,
-		CrPriority:          doc.CrPriority,
-		GitMergeRequest:     doc.GitMergeRequest,
-		GitRepository:       doc.GitRepository,
-		DocNotes:            doc.DocNotes,
-		DocAttachment:       doc.DocAttachment,
-		DocStatus:           doc.DocStatus,
-		ApplicationName:     doc.ApplicationName,
-		DeployedDate:        doc.DeployedDate,
-		CreatedAt:           doc.CreatedAt,
-	}
-
+ 
 	h.logger.Info("[%s] %s | Status: 201 | DocumentCr created successfully", c.Method(), c.Path())
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"status":  fiber.StatusCreated,
-		"message": "DocumentCr created successfully",
-		"data":    data,
-	})
+	return pkg.SuccessResponse(c, doc.DocCrID)
 }
 
 // --- Request DTO untuk SendReview (simplified) ---
@@ -608,9 +629,7 @@ func (h *DocumentCrHandler) SendReview(c *fiber.Ctx) error {
 	}
 
 	h.logger.Info("[%s] %s | Status: 200 | Review submitted for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
-	return pkg.SuccessResponse(c, fiber.Map{
-		"doc_cr_id": result.DocCrID,
-	})
+	return pkg.SuccessResponse(c, result.DocCrID)
 }
 
 // --- Request DTO untuk SendReviewReject ---
@@ -656,9 +675,7 @@ func (h *DocumentCrHandler) SendReviewReject(c *fiber.Ctx) error {
 	}
 
 	h.logger.Info("[%s] %s | Status: 200 | Review rejected for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
-	return pkg.SuccessResponse(c, fiber.Map{
-		"doc_cr_id": result.DocCrID,
-	})
+	return pkg.SuccessResponse(c, nil)
 }
 
 // --- Request DTO untuk SendRevision ---
@@ -927,7 +944,7 @@ func (h *DocumentCrHandler) UpdateStatus(c *fiber.Ctx) error {
 }
 
 type docCrDeleteRequest struct {
-	DocCrID         uint   `json:"application_id"`
+	DocCrID         uint   `json:"doc_cr_id"`
 	ApplicationName string `json:"application_name"`
 }
 

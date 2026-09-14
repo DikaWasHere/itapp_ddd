@@ -36,6 +36,13 @@ type DocumentCrRepository interface {
 	SendApproveReject(ctx context.Context, req SendApproveRejectRequest) (*SendApproveRejectResult, error)
 	UpdateStatus(ctx context.Context, req UpdateStatusRequest) (*UpdateStatusResult, error)
 	Delete(ctx context.Context, req DeleteRequest) (*DeleteResult, error)
+	Update(ctx context.Context, docCrID uint, req CreateDocCrRequest) (*DocumentCr, error)
+	GetByID(ctx context.Context, docCrID uint) (*DocumentCr, error)
+	DeletePICsByDocCrID(ctx context.Context, docCrID uint) error
+	DeleteReviewsByDocCrID(ctx context.Context, docCrID uint) error
+	CreatePICs(ctx context.Context, docCrID uint, pics []PIC) error
+	CreateReview(ctx context.Context, docCrID uint, review ReviewCreateRequest) error
+	CreateLog(ctx context.Context, log Milestone) error
 }
 
 // GetDetailRequest adalah parameter untuk mengambil detail DocumentCr
@@ -75,6 +82,15 @@ type CreateDocCrRequest struct {
 	DocStatus              string
 	ApplicationName        string
 	DeployedDate           *time.Time
+
+	PICDevelopers  []PIC           // PIC Developer
+	PICFunctionals []PIC           // PIC Functional
+	PICViewers     []PIC           // PIC Viewer
+	PICQAs         []PIC           // PIC QA
+	Review         *ReviewCreateRequest            // Review (optional)
+	NikLog         string             // Log: NIK yang melakukan aksi
+	NameLog        string             // Log: Nama yang melakukan aksi
+	NoteLog        string             // Log: Catatan
 }
 
 // SendReviewRequest adalah request untuk me-review CR (DDD-simplified)

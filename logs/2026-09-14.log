@@ -1,0 +1,40 @@
+2026-09-14T08:54:15.8939702+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T08:54:45.8886051+07:00 | ERROR | doc_cr_handler.go:503 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: record not found
+2026-09-14T08:55:45.9208202+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T08:56:38.2601244+07:00 | ERROR | doc_cr_handler.go:503 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: record not found
+2026-09-14T08:57:23.4857422+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T09:01:16.0798135+07:00 | ERROR | doc_cr_handler.go:503 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: record not found
+2026-09-14T09:05:48.5796701+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T09:39:25.9104651+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T09:40:15.895226+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T09:40:36.05854+07:00 | ERROR | doc_cr_handler.go:503 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: record not found
+2026-09-14T09:40:48.2619422+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T09:42:56.034885+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T09:43:04.4172674+07:00 | INFO | doc_cr_handler.go:486 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T09:47:37.2337789+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T09:47:45.5986417+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T09:49:38.9247553+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T09:49:49.3232548+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T09:53:46.0690055+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T09:53:59.2441225+07:00 | INFO | service.go:159 | doc_cr.(*Service).SendReview | Review submitted for DocCrID: 1
+2026-09-14T09:53:59.2441225+07:00 | INFO | doc_cr_handler.go:635 | handler.(*DocumentCrHandler).SendReview | [POST] /api/v1/doc-cr-review | Status: 200 | Review submitted for DocCrID: 1
+2026-09-14T09:55:52.7270586+07:00 | INFO | service.go:159 | doc_cr.(*Service).SendReview | Review submitted for DocCrID: 1
+2026-09-14T09:55:52.7270586+07:00 | INFO | doc_cr_handler.go:635 | handler.(*DocumentCrHandler).SendReview | [POST] /api/v1/doc-cr-review | Status: 200 | Review submitted for DocCrID: 1
+2026-09-14T10:00:01.6731348+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T10:00:09.4364523+07:00 | INFO | service.go:159 | doc_cr.(*Service).SendReview | Review submitted for DocCrID: 1
+2026-09-14T10:00:09.4369598+07:00 | INFO | doc_cr_handler.go:635 | handler.(*DocumentCrHandler).SendReview | [POST] /api/v1/doc-cr-review | Status: 200 | Review submitted for DocCrID: 1
+2026-09-14T10:09:15.8181679+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T10:09:27.6389096+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T10:14:33.333475+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T10:14:40.9652895+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T10:16:13.940767+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T10:16:27.0455807+07:00 | INFO | service.go:159 | doc_cr.(*Service).SendReview | Review submitted for DocCrID: 1
+2026-09-14T10:16:27.0455807+07:00 | INFO | doc_cr_handler.go:631 | handler.(*DocumentCrHandler).SendReview | [POST] /api/v1/doc-cr-review | Status: 200 | Review submitted for DocCrID: 1
+2026-09-14T10:18:00.2144887+07:00 | INFO | service.go:176 | doc_cr.(*Service).SendReviewReject | Review rejected for DocCrID: 1
+2026-09-14T10:18:00.2144887+07:00 | INFO | doc_cr_handler.go:677 | handler.(*DocumentCrHandler).SendReviewReject | [POST] /api/v1/doc-cr-reject | Status: 200 | Review rejected for DocCrID: 1
+2026-09-14T10:22:30.3655838+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T10:22:43.5027852+07:00 | INFO | service.go:176 | doc_cr.(*Service).SendReviewReject | Review rejected for DocCrID: 1
+2026-09-14T10:22:43.5027852+07:00 | INFO | doc_cr_handler.go:677 | handler.(*DocumentCrHandler).SendReviewReject | [POST] /api/v1/doc-cr-reject | Status: 200 | Review rejected for DocCrID: 1
+2026-09-14T10:23:30.7930604+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T10:23:37.0310041+07:00 | INFO | service.go:176 | doc_cr.(*Service).SendReviewReject | Review rejected for DocCrID: 1
+2026-09-14T10:23:37.0310041+07:00 | INFO | doc_cr_handler.go:677 | handler.(*DocumentCrHandler).SendReviewReject | [POST] /api/v1/doc-cr-reject | Status: 200 | Review rejected for DocCrID: 1

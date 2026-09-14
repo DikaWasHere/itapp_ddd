@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 	domainDocCr "itapp_ddd/domain/doc_cr"
-	"itapp_ddd/pkg"
+	
 )
 
 // Service adalah application service untuk DocumentCr
@@ -46,63 +46,103 @@ func (s *Service) GetDetail(ctx context.Context, req domainDocCr.GetDetailReques
 	return item, nil
 }
 
-// Create membuat DocumentCr baru dengan auto-generate FormId dan handle attachment
+// Create membuat atau memperbarui DocumentCr (upsert)
 func (s *Service) Create(ctx context.Context, req domainDocCr.CreateDocCrRequest) (*domainDocCr.DocumentCr, error) {
-    // Validasi input
-    if req.DocCrName == "" {
-        s.logger.Warn("Create failed: DocCrName is required")
-        return nil, fmt.Errorf("DocCrName is required")
-    }
  
-    // Auto-generate FormId jika DocCrID tidak ada (create baru)
-    nowYear := time.Now().Format("2006")
-    nowYearId := time.Now().Format("06")
+	// ===== LOGIKA UPSERT =====
+	if req.DocCrID > 0 {
+		// ===== MODE UPDATE =====
+		doc, err := s.repo.Update(ctx, req.DocCrID, req)
+		if err != nil {
+			return nil, err
+		}
  
-    FormId := req.FormId // Default gunakan dari request
+		// Hapus PIC & Review lama
+		_ = s.repo.DeletePICsByDocCrID(ctx, req.DocCrID)
+		_ = s.repo.DeleteReviewsByDocCrID(ctx, req.DocCrID)
  
-    if req.DocCrID == 0 { // Create baru
-        count, err := s.repo.CountByYear(ctx, nowYear)
-        if err != nil {
-            s.logger.Error("Failed to count documents by year", err)
-            return nil, err
-        }
-        FormId = "IT.CR." + nowYearId + "." + pkg.PadLeft(strconv.Itoa(int(count+1)))
-    }
+		// Buat PIC baru
+		allPICs := append(req.PICDevelopers, req.PICFunctionals...)
+		allPICs = append(allPICs, req.PICViewers...)
+		allPICs = append(allPICs, req.PICQAs...)
+		if len(allPICs) > 0 {
+			_ = s.repo.CreatePICs(ctx, req.DocCrID, allPICs)
+		}
  
-    // Handle base64 attachments
-    var imageFileNames []string
-    if len(req.DocAttachment) > 0 {
-        for index, item := range req.DocAttachment {
-            // Decode base64 dan simpan lewat FileStorage (DRY — pakai utilitas yang sama dengan attachment service)
-            ext := ""
-            if index < len(req.DocAttachmentExtension) {
-                ext = req.DocAttachmentExtension[index]
-            }
-            fileName := fmt.Sprintf("%s_%d%s", FormId, index+1, ext)
-            filePath := fmt.Sprintf("public/attachment/%s", fileName)
+		// Buat Review baru (jika ada)
+		if req.Review != nil {
+			_ = s.repo.CreateReview(ctx, req.DocCrID, *req.Review)
+		}
+ 
+		// Buat Log "Updated"
+		_ = s.repo.CreateLog(ctx, domainDocCr.Milestone{
+			DocCrID:     req.DocCrID,
+			LogActivity: "Updated",
+			NikLog:      req.NikLog,
+			NameLog:     req.NameLog,
+			NoteLog:     req.NoteLog,
+		})
+ 
+		return doc, nil
+	}
+ 
+	// ===== MODE CREATE (original) =====
+	nowYear := time.Now().Format("2006")
+	nowYearId := time.Now().Format("06")
+ 
+	count, err := s.repo.CountByYear(ctx, nowYear)
+	if err != nil {
+		return nil, err
+	}
 
-            if err := s.fileStore.Save(item, filePath); err != nil {
-                s.logger.Error("Failed to save attachment", err)
-                return nil, fmt.Errorf("failed to save attachment: %w", err)
-            }
-
-            imageFileNames = append(imageFileNames, fileName)
-        }
-    }
+	formId := "IT.CR." + nowYearId + "." + padLeft(strconv.Itoa(int(count+1)),4)
+	if req.FormId != "" {
+		formId = req.FormId
+	}
  
-    // Update request dengan FormId dan nama file attachment
-    req.FormId = FormId
-    req.DocAttachment = imageFileNames
+	req.FormId = formId
+	req.DocStatus = "Waiting Submit"
  
-    result, err := s.repo.Create(ctx, req)
-    if err != nil {
-        s.logger.Error("Create failed", err)
-        return nil, err
-    }
+	doc, err := s.repo.Create(ctx, req)
+	if err != nil {
+		return nil, err
+	}
  
-    s.logger.Info("DocumentCr created successfully with ID: %d", result.DocCrID)
-    return result, nil
+	docCrID := doc.DocCrID
+ 
+	// Buat PIC
+	allPICs := append(req.PICDevelopers, req.PICFunctionals...)
+	allPICs = append(allPICs, req.PICViewers...)
+	allPICs = append(allPICs, req.PICQAs...)
+	if len(allPICs) > 0 {
+		_ = s.repo.CreatePICs(ctx, docCrID, allPICs)
+	}
+ 
+	// Buat Review (jika ada)
+	if req.Review != nil {
+		_ = s.repo.CreateReview(ctx, docCrID, *req.Review)
+	}
+ 
+	// Buat Log "Created"
+	_ = s.repo.CreateLog(ctx, domainDocCr.Milestone{
+		DocCrID:     docCrID,
+		LogActivity: "Created",
+		NikLog:      req.NikLog,
+		NameLog:     req.NameLog,
+		NoteLog:     req.NoteLog,
+	})
+ 
+	return doc, nil
 }
+ 
+// padLeft menambahkan leading zeros
+func padLeft(str string, length int) string {
+	for len(str) < length {
+		str = "0" + str
+	}
+	return str
+}
+
 
 func (s *Service) SendReview(ctx context.Context, req domainDocCr.SendReviewRequest) (*domainDocCr.SendReviewResult, error) {
 	if req.DocCrID == 0 {
