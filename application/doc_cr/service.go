@@ -47,46 +47,14 @@ func (s *Service) GetDetail(ctx context.Context, req domainDocCr.GetDetailReques
 }
 
 // Create membuat atau memperbarui DocumentCr (upsert)
+// Create membuat atau memperbarui DocumentCr (upsert, atomik dalam 1 transaksi)
 func (s *Service) Create(ctx context.Context, req domainDocCr.CreateDocCrRequest) (*domainDocCr.DocumentCr, error) {
- 
-	// ===== LOGIKA UPSERT =====
+	// ===== MODE UPDATE: langsung serahkan ke repo =====
 	if req.DocCrID > 0 {
-		// ===== MODE UPDATE =====
-		doc, err := s.repo.Update(ctx, req.DocCrID, req)
-		if err != nil {
-			return nil, err
-		}
- 
-		// Hapus PIC & Review lama
-		_ = s.repo.DeletePICsByDocCrID(ctx, req.DocCrID)
-		_ = s.repo.DeleteReviewsByDocCrID(ctx, req.DocCrID)
- 
-		// Buat PIC baru
-		allPICs := append(req.PICDevelopers, req.PICFunctionals...)
-		allPICs = append(allPICs, req.PICViewers...)
-		allPICs = append(allPICs, req.PICQAs...)
-		if len(allPICs) > 0 {
-			_ = s.repo.CreatePICs(ctx, req.DocCrID, allPICs)
-		}
- 
-		// Buat Review baru (jika ada)
-		if req.Review != nil {
-			_ = s.repo.CreateReview(ctx, req.DocCrID, *req.Review)
-		}
- 
-		// Buat Log "Updated"
-		_ = s.repo.CreateLog(ctx, domainDocCr.Milestone{
-			DocCrID:     req.DocCrID,
-			LogActivity: "Updated",
-			NikLog:      req.NikLog,
-			NameLog:     req.NameLog,
-			NoteLog:     req.NoteLog,
-		})
- 
-		return doc, nil
+		return s.repo.Upsert(ctx, req)
 	}
  
-	// ===== MODE CREATE (original) =====
+	// ===== MODE CREATE: generate form_id & status dulu =====
 	nowYear := time.Now().Format("2006")
 	nowYearId := time.Now().Format("06")
  
@@ -94,8 +62,8 @@ func (s *Service) Create(ctx context.Context, req domainDocCr.CreateDocCrRequest
 	if err != nil {
 		return nil, err
 	}
-
-	formId := "IT.CR." + nowYearId + "." + padLeft(strconv.Itoa(int(count+1)),4)
+ 
+	formId := "IT.CR." + nowYearId + "." + padLeft(strconv.Itoa(int(count+1)), 4)
 	if req.FormId != "" {
 		formId = req.FormId
 	}
@@ -103,36 +71,7 @@ func (s *Service) Create(ctx context.Context, req domainDocCr.CreateDocCrRequest
 	req.FormId = formId
 	req.DocStatus = "Waiting Submit"
  
-	doc, err := s.repo.Create(ctx, req)
-	if err != nil {
-		return nil, err
-	}
- 
-	docCrID := doc.DocCrID
- 
-	// Buat PIC
-	allPICs := append(req.PICDevelopers, req.PICFunctionals...)
-	allPICs = append(allPICs, req.PICViewers...)
-	allPICs = append(allPICs, req.PICQAs...)
-	if len(allPICs) > 0 {
-		_ = s.repo.CreatePICs(ctx, docCrID, allPICs)
-	}
- 
-	// Buat Review (jika ada)
-	if req.Review != nil {
-		_ = s.repo.CreateReview(ctx, docCrID, *req.Review)
-	}
- 
-	// Buat Log "Created"
-	_ = s.repo.CreateLog(ctx, domainDocCr.Milestone{
-		DocCrID:     docCrID,
-		LogActivity: "Created",
-		NikLog:      req.NikLog,
-		NameLog:     req.NameLog,
-		NoteLog:     req.NoteLog,
-	})
- 
-	return doc, nil
+	return s.repo.Upsert(ctx, req)
 }
  
 // padLeft menambahkan leading zeros

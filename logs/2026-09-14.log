@@ -38,3 +38,16 @@
 2026-09-14T10:23:30.7930604+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
 2026-09-14T10:23:37.0310041+07:00 | INFO | service.go:176 | doc_cr.(*Service).SendReviewReject | Review rejected for DocCrID: 1
 2026-09-14T10:23:37.0310041+07:00 | INFO | doc_cr_handler.go:677 | handler.(*DocumentCrHandler).SendReviewReject | [POST] /api/v1/doc-cr-reject | Status: 200 | Review rejected for DocCrID: 1
+2026-09-14T11:53:20.7595105+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T11:54:06.1860444+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T11:54:21.1654727+07:00 | ERROR | doc_cr_handler.go:503 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: document with doc_cr_id 1 not found: record not found
+2026-09-14T13:35:09.6092082+07:00 | ERROR | doc_cr_handler.go:503 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: document with doc_cr_id 1 not found: record not found
+2026-09-14T13:36:07.0307698+07:00 | ERROR | doc_cr_handler.go:503 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: document with doc_cr_id 2 not found: record not found
+2026-09-14T13:37:13.0333479+07:00 | ERROR | doc_cr_handler.go:503 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: document with doc_cr_id 2 not found: record not found
+2026-09-14T13:41:41.2735156+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T13:41:51.7045672+07:00 | ERROR | doc_cr_handler.go:503 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: document with doc_cr_id 1 not found: record not found
+2026-09-14T14:14:54.211752+07:00 | ERROR | doc_cr_handler.go:503 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: document with doc_cr_id 1 not found: record not found
+2026-09-14T14:15:12.6014082+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T14:15:40.739819+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T14:15:52.6425616+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T14:18:48.4848961+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully

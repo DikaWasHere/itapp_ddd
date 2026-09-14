@@ -28,6 +28,7 @@ type DocumentCrRepository interface {
 	GetAll(ctx context.Context, req GetListRequest) ([]*DocumentCrListItem, error)
 	GetDetail(ctx context.Context, req GetDetailRequest) (*DocumentCrDetailItem, error)
 	Create(ctx context.Context, req CreateDocCrRequest) (*DocumentCr, error)
+	Upsert(ctx context.Context, req CreateDocCrRequest) (*DocumentCr, error)
 	CountByYear(ctx context.Context, year string) (int64, error)
 	SendReview(ctx context.Context, req SendReviewRequest) (*SendReviewResult, error)
 	SendReviewReject(ctx context.Context, req SendReviewRejectRequest) (*SendReviewRejectResult, error)
