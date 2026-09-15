@@ -394,37 +394,6 @@ func (r *DocumentCrRepositoryDB) fetchApprovals(ctx context.Context, docCrID uin
 	return nil
 }
 
-// fetchPICs mengambil data PIC dan mengkategorikan berdasarkan department
-// func (r *DocumentCrRepositoryDB) fetchPICs(ctx context.Context, docCrID uint, item *domainDocCr.DocumentCrDetailItem) error {
-// 	rows, err := r.db.WithContext(ctx).Raw(`
-// 		SELECT *
-// 		FROM trs.trs_pic
-// 		WHERE doc_cr_id = ?;
-// 	`, docCrID).Rows()
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer rows.Close()
-
-// 	for rows.Next() {
-// 		var picModel PICModel
-// 		r.db.ScanRows(rows, &picModel)
-// 		pic := picModel.toEntity()
-
-// 		switch pic.PICDepartment {
-// 		case "IT FUNCTIONAL":
-// 			item.PICFunctionals = append(item.PICFunctionals, pic)
-// 		case "IT DEVELOPMENT":
-// 			item.PICDevelopers = append(item.PICDevelopers, pic)
-// 		case "IT SERVICES & IMPLEMENTATION":
-// 			item.PICViewers = append(item.PICViewers, pic)
-// 		case "QA":
-// 			item.PICQAs = append(item.PICQAs, pic)
-// 		}
-// 	}
-// 	return nil
-// }
-
 // fetchReview mengambil data review (optional)
 func (r *DocumentCrRepositoryDB) fetchReview(ctx context.Context, docCrID uint, item *domainDocCr.DocumentCrDetailItem) {
 	var reviewModel ReviewModel
@@ -604,45 +573,6 @@ func toDocumentCrDetailItem(rows []DocumentCrDetailJoinModel) (*domainDocCr.Docu
 
 	return item, nil
 }
-
-// ini N+1 karena melakukan 3 query yaitu review, approval, dan pic. Namun, ini dilakukan untuk menghindari query yang terlalu kompleks dan tetap menjaga performa. Jika diperlukan, bisa dioptimalkan dengan join query, tetapi harus dipastikan hasilnya tetap sesuai dengan kebutuhan.
-// func (r *DocumentCrRepositoryDB) fetchRelatedData(ctx context.Context, docCrID uint, item *domainDocCr.DocumentCrListItem) {
-// 	// Review
-// 	var reviewModel ReviewModel
-// 	err := r.db.Raw(`SELECT * FROM trs.trs_review WHERE doc_cr_id = ?;`, docCrID).Scan(&reviewModel).Error
-// 	if err == nil {
-// 		item.Review = reviewModel.toEntity()
-// 	}
-
-// 	// Approvals
-// 	approvalRows, err := r.db.Raw(`SELECT * FROM trs.trs_approval WHERE doc_cr_id = ? AND approval_status != 'Cancel';`, docCrID).Rows()
-// 	if err == nil {
-// 		defer approvalRows.Close()
-// 		for approvalRows.Next() {
-// 			var approvalModel ApprovalModel
-// 			r.db.ScanRows(approvalRows, &approvalModel)
-// 			item.Approvals = append(item.Approvals, approvalModel.toEntity())
-// 		}
-// 	}
-
-// 	// PICs
-// 	picRows, err := r.db.Raw(`SELECT * FROM trs.trs_pic WHERE doc_cr_id = ?;`, docCrID).Rows()
-// 	if err == nil {
-// 		defer picRows.Close()
-// 		for picRows.Next() {
-// 			var picModel PICModel
-// 			r.db.ScanRows(picRows, &picModel)
-// 			pic := picModel.toEntity()
-
-// 			if pic.PICDepartment == "IT FUNCTIONAL" {
-// 				item.PICFunctionals = append(item.PICFunctionals, pic)
-// 			}
-// 			if pic.PICDepartment == "IT DEVELOPMENT" {
-// 				item.PICDevelopers = append(item.PICDevelopers, pic)
-// 			}
-// 		}
-// 	}
-// }
 
 // Create membuat DocumentCr baru
 func (r *DocumentCrRepositoryDB) Create(ctx context.Context, req domainDocCr.CreateDocCrRequest) (*domainDocCr.DocumentCr, error) {
@@ -916,7 +846,6 @@ func (r *DocumentCrRepositoryDB) SendRevision(ctx context.Context, req domainDoc
 // SendApprove implementasi persistensi untuk approve CR
 func (r *DocumentCrRepositoryDB) SendApprove(ctx context.Context, req domainDocCr.SendApproveRequest) (*domainDocCr.SendApproveResult, error) {
  
-	// 1. Update approval record (status, tanggal, catatan)
 	now := time.Now()
 	nowStr := now.Format(time.RFC3339)
 	approvalUpdate := struct {
@@ -933,7 +862,6 @@ func (r *DocumentCrRepositoryDB) SendApprove(ctx context.Context, req domainDocC
 		return nil, fmt.Errorf("failed to update approval: %w", err)
 	}
  
-	// 2. Ambil semua approval yang sudah "Approve" untuk CR ini
 	var approvedApprovals []ApprovalModel
 	if err := r.db.WithContext(ctx).
 		Where("doc_cr_id = ? AND approval_status = ?", req.DocCrID, "Approve").
@@ -941,7 +869,6 @@ func (r *DocumentCrRepositoryDB) SendApprove(ctx context.Context, req domainDocC
 		return nil, fmt.Errorf("failed to fetch approvals: %w", err)
 	}
  
-	// 3. Cek business rule
 	hasSameDepartment := false
 	hasITServices := false
  
@@ -954,17 +881,14 @@ func (r *DocumentCrRepositoryDB) SendApprove(ctx context.Context, req domainDocC
 		}
 	}
  
-	// 4. Update status document jika syarat terpenuhi
 	if hasSameDepartment {
 		shouldDeploy := false
  
 		if req.CrPriority == "Not Urgent" {
-			// Not Urgent: butuh IT SERVICES juga approve
 			if hasITServices {
 				shouldDeploy = true
 			}
 		} else {
-			// Urgent: langsung deploy
 			shouldDeploy = true
 		}
  
@@ -979,7 +903,6 @@ func (r *DocumentCrRepositoryDB) SendApprove(ctx context.Context, req domainDocC
 				return nil, fmt.Errorf("failed to update document status: %w", err)
 			}
  
-			// Buat log "Approved"
 			logModel := DocumentCrLogModel{
 				DocCrID:     req.DocCrID,
 				LogActivity: "Approved",
@@ -993,7 +916,6 @@ func (r *DocumentCrRepositoryDB) SendApprove(ctx context.Context, req domainDocC
 		}
 	}
  
-	// 5. Map hasil ke domain DTO
 	var approveItems []*domainDocCr.ApproveItem
 	for i := range approvedApprovals {
 		item := &domainDocCr.ApproveItem{
@@ -1016,7 +938,6 @@ func (r *DocumentCrRepositoryDB) SendApprove(ctx context.Context, req domainDocC
 
 // SendApproveReject menolak hasil approval CR
 func (r *DocumentCrRepositoryDB) SendApproveReject(ctx context.Context, req domainDocCr.SendApproveRejectRequest) (*domainDocCr.SendApproveRejectResult, error) {
-	// 1. Update status dokumen ke "Waiting Review"
 	docUpdate := struct {
 		DocStatus string
 	}{
@@ -1134,8 +1055,6 @@ func (r *DocumentCrRepositoryDB) Delete (ctx context.Context,req domainDocCr.Del
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now()}, nil
 }
-
-// ===== METHOD BARU UNTUK UPSERT =====
  
 // GetByID mengambil satu document berdasarkan ID
 func (r *DocumentCrRepositoryDB) GetByID(ctx context.Context, docCrID uint) (*domainDocCr.DocumentCr, error) {
@@ -1147,7 +1066,6 @@ func (r *DocumentCrRepositoryDB) GetByID(ctx context.Context, docCrID uint) (*do
 	return model.toEntity(), nil
 }
  
-// Update memperbarui document yang sudah ada
 func (r *DocumentCrRepositoryDB) Update(ctx context.Context, docCrID uint, req domainDocCr.CreateDocCrRequest) (*domainDocCr.DocumentCr, error) {
 	updates := map[string]interface{}{
 		"doc_cr_name":           req.DocCrName,
@@ -1256,7 +1174,6 @@ func (r *DocumentCrRepositoryDB) Upsert(ctx context.Context, req domainDocCr.Cre
 				return fmt.Errorf("failed to delete old reviews: %w", err)
 			}
 		} else {
-			// ===== MODE CREATE =====
 			created, err := r.createInTx(tx, req)
 			if err != nil {
 				return err

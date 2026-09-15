@@ -105,34 +105,33 @@ type milestoneResponse struct {
 
 // Response DTO untuk DocumentCr Detail
 type docCrDetailResponse struct {
-	DocCrID             uint                   `json:"doc_cr_id" gorm:"primarykey"`
-	DocCrName           string                 `json:"doc_cr_name"`
-	FormId              string                 `json:"form_id"`
-	DocReference        string                 `json:"doc_reference"`
-	RequesterNIK        string                 `json:"requester_nik"`
-	RequesterName       string                 `json:"requester_name"`
-	RequesterDepartment string                 `json:"requester_department"`
-	PICDevelopers       []picResponse          `json:"pic_developer" gorm:"many2many:document_cr_pic_developers;"`
-	PICFunctionals      []picResponse          `json:"pic_functional" gorm:"many2many:document_cr_pic_functionals;"`
-	PICViewer           []picResponse          `json:"pic_viewer" gorm:"many2many:document_cr_pic_viewers;"`
-	PICQAs              []picResponse          `json:"pic_qa" gorm:"many2many:document_cr_pic_qas;"`
-	ReasonDetail        string                 `json:"reason_detail"`
-	ProblemDetail       string                 `json:"problem_detail"`
-	ServerType          string                 `json:"server_type"`
-	CrType              string                 `json:"cr_type"`
-	CrPriority          string                 `json:"cr_priority"`
-	GitMergeRequest     string                 `json:"git_merge_request"`
-	GitRepository       string                 `json:"git_repository"`
-	DocNotes            string                 `json:"doc_notes"`
-	DocAttachment       string                 `json:"doc_attachment"`
-	DocStatus           string                 `json:"doc_status"`
-	ApplicationName     string                 `json:"application_name"`
-	DeployedDate        *time.Time             `json:"deployed_date"`
-	CreatedAt           time.Time              `json:"created_at"`
-	Approval            []approvalResponse `json:"approval" gorm:"foreignKey:DocCrID;references:DocCrID"`
-	Review              reviewResponse         `json:"review" gorm:"foreignKey:DocCrID;references:DocCrID"`
-	Milestones          []milestoneResponse    `json:"milestones" gorm:"-"`
-
+	DocCrID             uint                `json:"doc_cr_id" gorm:"primarykey"`
+	DocCrName           string              `json:"doc_cr_name"`
+	FormId              string              `json:"form_id"`
+	DocReference        string              `json:"doc_reference"`
+	RequesterNIK        string              `json:"requester_nik"`
+	RequesterName       string              `json:"requester_name"`
+	RequesterDepartment string              `json:"requester_department"`
+	PICDevelopers       []picResponse       `json:"pic_developer" gorm:"many2many:document_cr_pic_developers;"`
+	PICFunctionals      []picResponse       `json:"pic_functional" gorm:"many2many:document_cr_pic_functionals;"`
+	PICViewer           []picResponse       `json:"pic_viewer" gorm:"many2many:document_cr_pic_viewers;"`
+	PICQAs              []picResponse       `json:"pic_qa" gorm:"many2many:document_cr_pic_qas;"`
+	ReasonDetail        string              `json:"reason_detail"`
+	ProblemDetail       string              `json:"problem_detail"`
+	ServerType          string              `json:"server_type"`
+	CrType              string              `json:"cr_type"`
+	CrPriority          string              `json:"cr_priority"`
+	GitMergeRequest     string              `json:"git_merge_request"`
+	GitRepository       string              `json:"git_repository"`
+	DocNotes            string              `json:"doc_notes"`
+	DocAttachment       string              `json:"doc_attachment"`
+	DocStatus           string              `json:"doc_status"`
+	ApplicationName     string              `json:"application_name"`
+	DeployedDate        *time.Time          `json:"deployed_date"`
+	CreatedAt           time.Time           `json:"created_at"`
+	Approval            []approvalResponse  `json:"approval" gorm:"foreignKey:DocCrID;references:DocCrID"`
+	Review              reviewResponse      `json:"review" gorm:"foreignKey:DocCrID;references:DocCrID"`
+	Milestones          []milestoneResponse `json:"milestones" gorm:"-"`
 }
 
 // GetAll menangani request untuk mengambil semua DocumentCr
@@ -390,16 +389,15 @@ type docCrCreateRequest struct {
 	ApplicationName        string     `json:"application_name"`
 	DeployedDate           *time.Time `json:"deployed_date"`
 
-
-	DocCrID          uint                     `json:"doc_cr_id"`           // Deteksi upsert
-	PICDevelopers    []picRequestDTO          `json:"pic_developer"`       // PIC Developer
-	PICFunctionals   []picRequestDTO          `json:"pic_functional"`      // PIC Functional
-	PICViewers       []picRequestDTO          `json:"pic_viewer"`          // PIC Viewer
-	PICQAs           []picRequestDTO          `json:"pic_qa"`              // PIC QA
-	Review           *reviewRequestDTO        `json:"review"`              // Review (optional)
-	NikLog           string                   `json:"nik_log"`             // Log: NIK
-	NameLog          string                   `json:"name_log"`            // Log: Nama
-	NoteLog          string                   `json:"note_log"`            // Log: Catatan
+	DocCrID        uint              `json:"doc_cr_id"`      // Deteksi upsert
+	PICDevelopers  []picRequestDTO   `json:"pic_developer"`  // PIC Developer
+	PICFunctionals []picRequestDTO   `json:"pic_functional"` // PIC Functional
+	PICViewers     []picRequestDTO   `json:"pic_viewer"`     // PIC Viewer
+	PICQAs         []picRequestDTO   `json:"pic_qa"`         // PIC QA
+	Review         *reviewRequestDTO `json:"review"`         // Review (optional)
+	NikLog         string            `json:"nik_log"`        // Log: NIK
+	NameLog        string            `json:"name_log"`       // Log: Nama
+	NoteLog        string            `json:"note_log"`       // Log: Catatan
 }
 
 // --- Response DTO untuk Create ---
@@ -430,33 +428,33 @@ type docCrCreateResponse struct {
 // go
 func (h *DocumentCrHandler) Create(c *fiber.Ctx) error {
 	req := new(docCrCreateRequest)
- 
+
 	if err := c.BodyParser(req); err != nil {
 		h.logger.Error("Failed to parse request body", err)
 		return pkg.BadRequestResponse(c, "Failed to parse request body")
 	}
- 
+
 	// Map PIC ke domain
 	picsDev := make([]domainDocCr.PIC, 0)
 	for _, p := range req.PICDevelopers {
 		picsDev = append(picsDev, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
 	}
- 
+
 	picsFunc := make([]domainDocCr.PIC, 0)
 	for _, p := range req.PICFunctionals {
 		picsFunc = append(picsFunc, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
 	}
- 
+
 	picsView := make([]domainDocCr.PIC, 0)
 	for _, p := range req.PICViewers {
 		picsView = append(picsView, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
 	}
- 
+
 	picsQA := make([]domainDocCr.PIC, 0)
 	for _, p := range req.PICQAs {
 		picsQA = append(picsQA, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
 	}
- 
+
 	// Map Review ke domain (pointer, optional)
 	var review *domainDocCr.ReviewCreateRequest
 	if req.Review != nil {
@@ -465,7 +463,7 @@ func (h *DocumentCrHandler) Create(c *fiber.Ctx) error {
 			ReviewName: req.Review.ReviewName,
 		}
 	}
- 
+
 	// Map request ke domain request
 	domainReq := domainDocCr.CreateDocCrRequest{
 		DocCrID:                req.DocCrID,
@@ -497,13 +495,13 @@ func (h *DocumentCrHandler) Create(c *fiber.Ctx) error {
 		NameLog:                req.NameLog,
 		NoteLog:                req.NoteLog,
 	}
- 
+
 	doc, err := h.service.Create(c.Context(), domainReq)
 	if err != nil {
-		h.logger.Error("Failed to create DocumentCr", err)
-		return pkg.BadRequestResponse(c, "Failed to create DocumentCr: "+err.Error())
+		h.logger.Error("Documentcr not found", err)
+		return pkg.NotFoundResponse(c, "Documentcr not found: "+err.Error())
 	}
- 
+
 	h.logger.Info("[%s] %s | Status: 201 | DocumentCr created successfully", c.Method(), c.Path())
 	return pkg.SuccessResponse(c, doc.DocCrID)
 }
@@ -783,14 +781,14 @@ type docCrSendApproveRequest struct {
 
 // --- Response DTO untuk SendApprove (termasuk ApprovalNote) ---
 type approvalApproveResponse struct {
-	ApprovalID         *uint     `json:"approval_id"`
-	ApprovalNik        *string   `json:"approval_nik"`
-	ApprovalName       *string   `json:"approval_name"`
-	ApprovalDate       *string   `json:"approval_date"`
-	ApprovalStatus     *string   `json:"approval_status"`
-	ApprovalNote       *string   `json:"approval_note"`
-	DocCrID            *uint     `json:"doc_cr_id"`
-	ApprovalDepartment *string   `json:"approval_department"`
+	ApprovalID         *uint      `json:"approval_id"`
+	ApprovalNik        *string    `json:"approval_nik"`
+	ApprovalName       *string    `json:"approval_name"`
+	ApprovalDate       *string    `json:"approval_date"`
+	ApprovalStatus     *string    `json:"approval_status"`
+	ApprovalNote       *string    `json:"approval_note"`
+	DocCrID            *uint      `json:"doc_cr_id"`
+	ApprovalDepartment *string    `json:"approval_department"`
 	CreatedAt          *time.Time `json:"created_at"`
 	UpdatedAt          *time.Time `json:"updated_at"`
 }
