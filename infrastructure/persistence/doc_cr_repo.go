@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -644,6 +645,31 @@ func toDocumentCrDetailItem(rows []DocumentCrDetailJoinModel) (*domainDocCr.Docu
 // 	}
 // }
 
+func (r *DocumentCrRepositoryDB) GetState(
+    ctx context.Context,
+    docCrID uint,
+) (domainDocCr.DocumentCrState, error) {
+    var model DocumentCrModel
+
+    err := r.db.WithContext(ctx).
+        Unscoped().
+        Where("doc_cr_id = ?", docCrID).
+        First(&model).Error
+
+    if errors.Is(err, gorm.ErrRecordNotFound) {
+        return domainDocCr.DocumentCrState{}, nil
+    }
+
+    if err != nil {
+        return domainDocCr.DocumentCrState{}, err
+    }
+
+    return domainDocCr.DocumentCrState{
+        Exists:      true,
+        SoftDeleted: model.DeletedAt.Valid,
+    }, nil
+}
+
 // Create membuat DocumentCr baru
 func (r *DocumentCrRepositoryDB) Create(ctx context.Context, req domainDocCr.CreateDocCrRequest) (*domainDocCr.DocumentCr, error) {
     // Konversi DocAttachment ([]string) ke string dengan join "|"
@@ -1239,77 +1265,122 @@ func (r *DocumentCrRepositoryDB) Upsert(ctx context.Context, req domainDocCr.Cre
 		var doc *domainDocCr.DocumentCr
 		var docCrID uint
  
-		if req.DocCrID > 0 {
-			// ===== MODE UPDATE =====
-			updated, err := r.updateInTx(tx, req)
-			if err != nil {
-				return err
-			}
-			doc = updated
-			docCrID = req.DocCrID
- 
-			// Hapus PIC & Review lama (hard delete, sama seperti perilaku lama)
-			if err := tx.Unscoped().Delete(&PICModel{}, "doc_cr_id = ?", docCrID).Error; err != nil {
-				return fmt.Errorf("failed to delete old pics: %w", err)
-			}
-			if err := tx.Unscoped().Delete(&ReviewModel{}, "doc_cr_id = ?", docCrID).Error; err != nil {
-				return fmt.Errorf("failed to delete old reviews: %w", err)
-			}
-		} else {
-			// ===== MODE CREATE =====
-			created, err := r.createInTx(tx, req)
-			if err != nil {
-				return err
-			}
-			doc = created
-			docCrID = doc.DocCrID
-		}
- 
-		// Buat PIC baru (berlaku untuk kedua mode)
-		allPICs := make([]domainDocCr.PIC, 0,
-			len(req.PICDevelopers)+len(req.PICFunctionals)+len(req.PICViewers)+len(req.PICQAs))
-		allPICs = append(allPICs, req.PICDevelopers...)
-		allPICs = append(allPICs, req.PICFunctionals...)
-		allPICs = append(allPICs, req.PICViewers...)
-		allPICs = append(allPICs, req.PICQAs...)
-		if len(allPICs) > 0 {
-			if err := createPICsInTx(tx, docCrID, allPICs); err != nil {
-				return fmt.Errorf("failed to create pics: %w", err)
-			}
-		}
- 
-		// Buat Review baru (jika ada)
-		if req.Review != nil {
-			if err := createReviewInTx(tx, docCrID, *req.Review); err != nil {
-				return fmt.Errorf("failed to create review: %w", err)
-			}
-		}
- 
-		// Buat log aktivitas
-		activity := "Created"
-		if req.DocCrID > 0 {
-			activity = "Updated"
-		}
-		if err := createLogInTx(tx, domainDocCr.Milestone{
-			DocCrID:     docCrID,
-			LogActivity: activity,
-			NikLog:      req.NikLog,
-			NameLog:     req.NameLog,
-			NoteLog:     req.NoteLog,
-		}); err != nil {
-			return fmt.Errorf("failed to create log: %w", err)
-		}
- 
-		result = doc
-		return nil // commit
-	})
- 
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
+if req.DocCrID > 0 {
+    var existing DocumentCrModel
+
+    err := tx.
+        Where("doc_cr_id = ?", req.DocCrID).
+        First(&existing).Error
+
+    if err == nil {
+        // Data aktif: update normal.
+        updated, err := r.updateInTx(tx, req)
+        if err != nil {
+            return err
+        }
+
+        doc = updated
+        docCrID = req.DocCrID
+
+        if err := tx.Unscoped().
+            Delete(&PICModel{}, "doc_cr_id = ?", docCrID).Error; err != nil {
+            return fmt.Errorf("failed to delete old pics: %w", err)
+        }
+
+        if err := tx.Unscoped().
+            Delete(&ReviewModel{}, "doc_cr_id = ?", docCrID).Error; err != nil {
+            return fmt.Errorf("failed to delete old reviews: %w", err)
+        }
+    } else if errors.Is(err, gorm.ErrRecordNotFound) {
+        // Cek ulang tanpa filter soft-delete.
+        var deleted DocumentCrModel
+
+        deletedErr := tx.Unscoped().
+            Where("doc_cr_id = ?", req.DocCrID).
+            First(&deleted).Error
+
+        if deletedErr == nil {
+            // Data soft-delete:
+            // hanya membuat log, tanpa update document.
+            if err := createLogInTx(tx, domainDocCr.Milestone{
+                DocCrID:     req.DocCrID,
+                LogActivity: "Update Deleted Document",
+                NikLog:      req.NikLog,
+                NameLog:     req.NameLog,
+                NoteLog:     req.NoteLog,
+            }); err != nil {
+                return fmt.Errorf("failed to create log: %w", err)
+            }
+
+            result = deleted.toEntity()
+            return nil
+        }
+
+        if !errors.Is(deletedErr, gorm.ErrRecordNotFound) {
+            return deletedErr
+        }
+
+        // ID benar-benar tidak ada.
+        // Buat document baru dengan ID auto-increment.
+        req.DocCrID = 0
+    } else {
+        return err
+    }
 }
+
+if req.DocCrID == 0 {
+    created, err := r.createInTx(tx, req)
+    if err != nil {
+        return err
+    }
+
+    doc = created
+    docCrID = doc.DocCrID
+}
+	// Buat PIC baru (berlaku untuk kedua mode)
+	allPICs := make([]domainDocCr.PIC, 0,
+		len(req.PICDevelopers)+len(req.PICFunctionals)+len(req.PICViewers)+len(req.PICQAs))
+	allPICs = append(allPICs, req.PICDevelopers...)
+	allPICs = append(allPICs, req.PICFunctionals...)
+	allPICs = append(allPICs, req.PICViewers...)
+	allPICs = append(allPICs, req.PICQAs...)
+	if len(allPICs) > 0 {
+		if err := createPICsInTx(tx, docCrID, allPICs); err != nil {
+			return fmt.Errorf("failed to create pics: %w", err)
+		}
+	}
  
+	// Buat Review baru (jika ada)
+	if req.Review != nil {
+		if err := createReviewInTx(tx, docCrID, *req.Review); err != nil {
+			return fmt.Errorf("failed to create review: %w", err)
+		}
+	}
+ 
+	// Buat log aktivitas
+	activity := "Created"
+	if req.DocCrID > 0 {
+		activity = "Updated"
+	}
+	if err := createLogInTx(tx, domainDocCr.Milestone{
+		DocCrID:     docCrID,
+		LogActivity: activity,
+		NikLog:      req.NikLog,
+		NameLog:     req.NameLog,
+		NoteLog:     req.NoteLog,
+	}); err != nil {
+		return fmt.Errorf("failed to create log: %w", err)
+	}
+ 
+	result = doc
+	return nil // commit
+})
+ 
+if err != nil {
+	return nil, err
+}
+return result, nil
+}
 // createInTx versi Create() yang berjalan di dalam transaksi
 func (r *DocumentCrRepositoryDB) createInTx(tx *gorm.DB, req domainDocCr.CreateDocCrRequest) (*domainDocCr.DocumentCr, error) {
 	var docAttachmentStr string
@@ -1362,15 +1433,15 @@ func (r *DocumentCrRepositoryDB) updateInTx(tx *gorm.DB, req domainDocCr.CreateD
 		"requester_nik":        req.RequesterNIK,
 		"requester_name":       req.RequesterName,
 		"requester_department": req.RequesterDepartment,
-		"reason_detail":        req.ReasonDetail,
-		"problem_detail":       req.ProblemDetail,
+		"reason_detail":         req.ReasonDetail,
+		"problem_detail":        req.ProblemDetail,
 		"server_type":          req.ServerType,
 		"cr_type":              req.CrType,
 		"cr_priority":          req.CrPriority,
 		"git_merge_request":    req.GitMergeRequest,
 		"git_repository":       req.GitRepository,
 		"doc_notes":            req.DocNotes,
-		"doc_attachment":       "",
+		"doc_attachment":       strings.Join(req.DocAttachment, "|"),
 		"application_name":     req.ApplicationName,
 	}
  

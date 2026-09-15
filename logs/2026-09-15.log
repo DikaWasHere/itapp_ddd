@@ -1,0 +1,16 @@
+2026-09-15T08:58:12.7207258+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-15T08:58:26.9924818+07:00 | ERROR | doc_cr_handler.go:506 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: document with doc_cr_id 1 not found: record not found
+2026-09-15T08:58:51.561166+07:00 | INFO | doc_cr_handler.go:513 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-15T09:15:02.0430758+07:00 | ERROR | doc_cr_handler.go:506 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: document with doc_cr_id 59 not found: record not found
+2026-09-15T09:16:09.603957+07:00 | INFO | doc_cr_handler.go:513 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-15T09:18:09.52166+07:00 | ERROR | doc_cr_handler.go:506 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: document with doc_cr_id 59 not found: record not found
+2026-09-15T09:18:48.9315522+07:00 | INFO | doc_cr_handler.go:513 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-15T09:44:07.5585364+07:00 | INFO | service.go:240 | doc_cr.(*Service).UpdateStatus | Document status updated to 'Waiting Review' for DocCrID: 135
+2026-09-15T09:44:07.5585364+07:00 | INFO | doc_cr_handler.go:948 | handler.(*DocumentCrHandler).UpdateStatus | [POST] /api/v1/doc-cr-update-status | Status: 200 | Document status updated to 'Waiting Review' for DocCrID: 135
+2026-09-15T09:56:48.7640951+07:00 | INFO | doc_cr_handler.go:240 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-15T10:07:10.0852317+07:00 | INFO | doc_cr_handler.go:513 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-15T11:02:53.0092621+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-15T11:03:10.5279672+07:00 | INFO | doc_cr_handler.go:513 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-15T11:03:20.6809222+07:00 | INFO | doc_cr_handler.go:513 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-15T11:13:08.7185796+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-15T11:13:26.3576268+07:00 | INFO | doc_cr_handler.go:513 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully

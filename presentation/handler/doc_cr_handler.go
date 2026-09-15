@@ -2,10 +2,13 @@ package handler
 
 import (
 	"time"
+	"errors"
 
 	docCrApp "itapp_ddd/application/doc_cr"
 	domainDocCr "itapp_ddd/domain/doc_cr"
 	"itapp_ddd/pkg"
+
+	gorm "gorm.io/gorm"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -498,9 +501,12 @@ func (h *DocumentCrHandler) Create(c *fiber.Ctx) error {
 		NoteLog:                req.NoteLog,
 	}
  
-	doc, err := h.service.Create(c.Context(), domainReq)
+doc, err := h.service.Create(c.Context(), domainReq)
 	if err != nil {
 		h.logger.Error("Failed to create DocumentCr", err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return pkg.NotFoundResponse(c, "DocumentCr not found")
+		}
 		return pkg.BadRequestResponse(c, "Failed to create DocumentCr: "+err.Error())
 	}
  

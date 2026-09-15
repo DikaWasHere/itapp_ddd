@@ -3,10 +3,9 @@ package doc_cr
 import (
 	"context"
 	"fmt"
+	domainDocCr "itapp_ddd/domain/doc_cr"
 	"strconv"
 	"time"
-	domainDocCr "itapp_ddd/domain/doc_cr"
-	
 )
 
 // Service adalah application service untuk DocumentCr
@@ -46,34 +45,93 @@ func (s *Service) GetDetail(ctx context.Context, req domainDocCr.GetDetailReques
 	return item, nil
 }
 
-// Create membuat atau memperbarui DocumentCr (upsert)
 // Create membuat atau memperbarui DocumentCr (upsert, atomik dalam 1 transaksi)
-func (s *Service) Create(ctx context.Context, req domainDocCr.CreateDocCrRequest) (*domainDocCr.DocumentCr, error) {
-	// ===== MODE UPDATE: langsung serahkan ke repo =====
+func (s *Service) Create(
+	ctx context.Context,
+	req domainDocCr.CreateDocCrRequest,
+) (*domainDocCr.DocumentCr, error) {
 	if req.DocCrID > 0 {
-		return s.repo.Upsert(ctx, req)
+		state, err := s.repo.GetState(ctx, req.DocCrID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Data soft-delete: hanya membuat log.
+		// Jangan simpan attachment dan jangan update document.
+		if state.SoftDeleted {
+			req.DocAttachment = nil
+			req.DocAttachmentExtension = nil
+
+			return s.repo.Upsert(ctx, req)
+		}
+
+		// Data aktif: update document.
+		if state.Exists {
+			if err := s.saveAttachments(req.FormId, &req); err != nil {
+				return nil, err
+			}
+
+			return s.repo.Upsert(ctx, req)
+		}
+
+		// ID tidak ditemukan sama sekali.
+		// Ubah menjadi mode create agar database membuat ID baru.
+		req.DocCrID = 0
 	}
- 
-	// ===== MODE CREATE: generate form_id & status dulu =====
+
+	// Mode create baru.
 	nowYear := time.Now().Format("2006")
-	nowYearId := time.Now().Format("06")
- 
+	nowYearID := time.Now().Format("06")
+
 	count, err := s.repo.CountByYear(ctx, nowYear)
 	if err != nil {
 		return nil, err
 	}
- 
-	formId := "IT.CR." + nowYearId + "." + padLeft(strconv.Itoa(int(count+1)), 4)
+
+	formID := "IT.CR." + nowYearID + "." +
+		padLeft(strconv.Itoa(int(count+1)), 4)
+
 	if req.FormId != "" {
-		formId = req.FormId
+		formID = req.FormId
 	}
- 
-	req.FormId = formId
+
+	req.FormId = formID
 	req.DocStatus = "Waiting Submit"
- 
+
+	if err := s.saveAttachments(formID, &req); err != nil {
+		return nil, err
+	}
+
 	return s.repo.Upsert(ctx, req)
 }
- 
+
+func (s *Service) saveAttachments(formId string, req *domainDocCr.CreateDocCrRequest) error {
+	if len(req.DocAttachment) == 0 {
+		return nil
+	}
+
+	fileNames := make([]string, 0, len(req.DocAttachment))
+	for i, item := range req.DocAttachment {
+		ext := ""
+		if i < len(req.DocAttachmentExtension) {
+			ext = req.DocAttachmentExtension[i]
+		}
+
+		fileName := fmt.Sprintf("%s_%d%s", formId, i+1, ext)
+		filePath := fmt.Sprintf("public/attachment/%s", fileName)
+
+		if err := s.fileStore.Save(item, filePath); err != nil {
+			s.logger.Error("Failed to save attachment", err)
+			return fmt.Errorf("invalid base64 data for DocAttachment index %d: %w", i, err)
+		}
+
+		fileNames = append(fileNames, fileName)
+	}
+
+	req.DocAttachment = fileNames
+	return nil
+}
+
 // padLeft menambahkan leading zeros
 func padLeft(str string, length int) string {
 	for len(str) < length {
@@ -82,19 +140,18 @@ func padLeft(str string, length int) string {
 	return str
 }
 
-
 func (s *Service) SendReview(ctx context.Context, req domainDocCr.SendReviewRequest) (*domainDocCr.SendReviewResult, error) {
 	if req.DocCrID == 0 {
 		s.logger.Warn("SendReview failed: DocCrID is required")
 		return nil, fmt.Errorf("DocCrID is required")
 	}
- 
+
 	result, err := s.repo.SendReview(ctx, req)
 	if err != nil {
 		s.logger.Error("SendReview failed", err)
 		return nil, err
 	}
- 
+
 	s.logger.Info("Review submitted for DocCrID: %d", result.DocCrID)
 	return result, nil
 }
@@ -105,13 +162,13 @@ func (s *Service) SendReviewReject(ctx context.Context, req domainDocCr.SendRevi
 		s.logger.Warn("SendReviewReject failed: DocCrID is required")
 		return nil, fmt.Errorf("DocCrID is required")
 	}
- 
+
 	result, err := s.repo.SendReviewReject(ctx, req)
 	if err != nil {
 		s.logger.Error("SendReviewReject failed", err)
 		return nil, err
 	}
- 
+
 	s.logger.Info("Review rejected for DocCrID: %d", result.DocCrID)
 	return result, nil
 }
@@ -122,25 +179,25 @@ func (s *Service) SendRevision(ctx context.Context, req domainDocCr.SendRevision
 		s.logger.Warn("SendRevision failed: DocCrID is required")
 		return nil, fmt.Errorf("DocCrID is required")
 	}
- 
+
 	// Handle base64 attachment jika ada
 	if req.DocAttachment != "" {
 		imageFileName := fmt.Sprintf("%s.png", req.FormId)
 		imageFilePath := fmt.Sprintf("public/attachment/%s", imageFileName)
- 
+
 		if err := s.fileStore.Save(req.DocAttachment, imageFilePath); err != nil {
 			s.logger.Error("Failed to save attachment", err)
 			return nil, fmt.Errorf("failed to save attachment: %w", err)
 		}
 		req.DocAttachment = imageFileName
 	}
- 
+
 	result, err := s.repo.SendRevision(ctx, req)
 	if err != nil {
 		s.logger.Error("SendRevision failed", err)
 		return nil, err
 	}
- 
+
 	s.logger.Info("Revision submitted for DocCrID: %d", result.DocCrID)
 	return result, nil
 }
@@ -152,19 +209,19 @@ func (s *Service) SendApprove(ctx context.Context, req domainDocCr.SendApproveRe
 		s.logger.Warn("SendApprove failed: ApprovalID is required")
 		return nil, fmt.Errorf("ApprovalID is required")
 	}
- 
+
 	if req.DocCrID == 0 {
 		s.logger.Warn("SendApprove failed: DocCrID is required")
 		return nil, fmt.Errorf("DocCrID is required")
 	}
- 
+
 	// 2. Panggil repository (service tidak tahu detail DB)
 	result, err := s.repo.SendApprove(ctx, req)
 	if err != nil {
 		s.logger.Error("SendApprove failed", err)
 		return nil, err
 	}
- 
+
 	s.logger.Info("Approval submitted for DocCrID: %d", req.DocCrID)
 	return result, nil
 }
@@ -175,13 +232,13 @@ func (s *Service) SendApproveReject(ctx context.Context, req domainDocCr.SendApp
 		s.logger.Warn("SendApproveReject failed: DocCrID is required")
 		return nil, fmt.Errorf("DocCrID is required")
 	}
- 
+
 	result, err := s.repo.SendApproveReject(ctx, req)
 	if err != nil {
 		s.logger.Error("SendApproveReject failed", err)
 		return nil, err
 	}
- 
+
 	s.logger.Info("Approval rejected for DocCrID: %d", result.DocCrID)
 	return result, nil
 }
@@ -192,18 +249,18 @@ func (s *Service) UpdateStatus(ctx context.Context, req domainDocCr.UpdateStatus
 		s.logger.Warn("UpdateStatus failed: DocCrID is required")
 		return nil, fmt.Errorf("DocCrID is required")
 	}
- 
+
 	if req.DocStatus == "" {
 		s.logger.Warn("UpdateStatus failed: DocStatus is required")
 		return nil, fmt.Errorf("DocStatus is required")
 	}
- 
+
 	result, err := s.repo.UpdateStatus(ctx, req)
 	if err != nil {
 		s.logger.Error("UpdateStatus failed", err)
 		return nil, err
 	}
- 
+
 	s.logger.Info("Document status updated to '%s' for DocCrID: %d", result.DocStatus, result.DocCrID)
 	return result, nil
 }
@@ -222,5 +279,5 @@ func (s *Service) Delete(ctx context.Context, req domainDocCr.DeleteRequest) (*d
 	}
 
 	s.logger.Info("document telah berhasil dihapus dengan ID: %d", result.DocCrID)
-	return result,nil
+	return result, nil
 }

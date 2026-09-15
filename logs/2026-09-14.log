@@ -51,3 +51,32 @@
 2026-09-14T14:15:40.739819+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
 2026-09-14T14:15:52.6425616+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
 2026-09-14T14:18:48.4848961+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T14:48:26.5230793+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T14:49:58.7784417+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T14:51:46.2490335+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T14:52:36.9710955+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T14:52:49.8093055+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T14:53:03.480646+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T14:53:21.4325726+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T14:53:45.5946383+07:00 | ERROR | doc_cr_handler.go:435 | handler.(*DocumentCrHandler).Create | Failed to parse request body: json: cannot unmarshal string into Go struct field docCrCreateRequest.pic_developer of type []handler.picRequestDTO
+2026-09-14T14:54:04.9316499+07:00 | ERROR | doc_cr_handler.go:435 | handler.(*DocumentCrHandler).Create | Failed to parse request body: json: cannot unmarshal string into Go struct field docCrCreateRequest.pic_developer of type handler.picRequestDTO
+2026-09-14T14:54:10.5594855+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T14:54:34.0600073+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T14:54:44.8509711+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T14:55:11.209623+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T14:55:36.5610278+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T14:56:57.7479136+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T14:57:21.9756639+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T14:57:27.9496071+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T15:11:54.1864097+07:00 | ERROR | doc_cr_handler.go:503 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: document with doc_cr_id 1 not found: record not found
+2026-09-14T16:18:34.3103631+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T16:22:57.65519+07:00 | ERROR | doc_cr_handler.go:503 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: document with doc_cr_id 1 not found: record not found
+2026-09-14T16:23:06.7979253+07:00 | INFO | doc_cr_handler.go:507 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-14T16:39:15.1191295+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T16:39:30.775621+07:00 | ERROR | doc_cr_handler.go:503 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: document with doc_cr_id 1 not found: record not found
+2026-09-14T16:41:10.0755331+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T16:41:19.454011+07:00 | ERROR | doc_cr_handler.go:503 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: document with doc_cr_id 1 not found: record not found
+2026-09-14T16:49:42.0518741+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T16:49:50.705253+07:00 | ERROR | doc_cr_handler.go:503 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: document with doc_cr_id 1 not found: record not found
+2026-09-14T16:53:00.1462348+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-14T16:53:07.6767152+07:00 | ERROR | doc_cr_handler.go:506 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: document with doc_cr_id 1 not found: record not found

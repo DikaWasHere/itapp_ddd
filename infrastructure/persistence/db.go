@@ -3,10 +3,13 @@ package persistence
 import (
 	"fmt"
 	"os"
+	"log"
+	"time"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var DB *gorm.DB
@@ -25,11 +28,24 @@ func DatabaseInit() {
 		host, port, user, password, dbname,
 	)
 
+	// Logger GORM: abaikan noise "record not found" dari query probing
+	// (misalnya pengecekan soft-delete di Upsert yang memang sering miss)
+	gormLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags),
+		logger.Config{
+			SlowThreshold:             200 * time.Millisecond,
+			LogLevel:                  logger.Warn,
+			IgnoreRecordNotFoundError: true,
+			Colorful:                  true,
+		},
+	)
+ 
 	var err error
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{Logger: gormLogger})
 	if err != nil {
 		panic("Cannot connect to database")
 	}
+
 
 	fmt.Println("Connected to database")
 }

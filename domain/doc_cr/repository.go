@@ -29,6 +29,7 @@ type DocumentCrRepository interface {
 	GetDetail(ctx context.Context, req GetDetailRequest) (*DocumentCrDetailItem, error)
 	Create(ctx context.Context, req CreateDocCrRequest) (*DocumentCr, error)
 	Upsert(ctx context.Context, req CreateDocCrRequest) (*DocumentCr, error)
+	GetState(ctx context.Context, docCrID uint) (DocumentCrState, error)
 	CountByYear(ctx context.Context, year string) (int64, error)
 	SendReview(ctx context.Context, req SendReviewRequest) (*SendReviewResult, error)
 	SendReviewReject(ctx context.Context, req SendReviewRejectRequest) (*SendReviewRejectResult, error)
@@ -61,6 +62,11 @@ type DocumentCrDetailItem struct {
 	PICViewers     []*PIC
 	PICQAs         []*PIC
 	Milestones     []*Milestone
+}
+
+type DocumentCrState struct {
+	SoftDeleted bool
+	Exists      bool
 }
 type CreateDocCrRequest struct {
 	DocCrID                uint
