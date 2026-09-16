@@ -4,6 +4,8 @@ import (
 	attachmentApp "itapp_ddd/application/attachment"
 	docCrApp "itapp_ddd/application/doc_cr"
 	infraLogger "itapp_ddd/infrastructure/logger"
+	notificationApp "itapp_ddd/application/notification"
+	infraNotification "itapp_ddd/infrastructure/notification"
 	"itapp_ddd/infrastructure/persistence"
 	"itapp_ddd/infrastructure/storage"
 	"itapp_ddd/presentation/handler"
@@ -17,6 +19,7 @@ type Container struct {
 	DocCrService      *docCrApp.Service
 	AttachmentHandler *handler.AttachmentHandler
 	DocCrHandler      *handler.DocumentCrHandler
+	NotificationService *notificationApp.Service
 }
 
 func NewContainer() *Container {
@@ -31,10 +34,11 @@ func NewContainer() *Container {
 	// 3. Init Application Service
 	attachmentService := attachmentApp.NewService(attachmentRepo, fileStorage)
 	docCrService := docCrApp.NewService(docCrRepo, &infraLogger.LoggerImpl{}, fileStorage)
+	notificationService := notificationApp.NewService(infraNotification.NewHTTPNotifier(), &infraLogger.LoggerImpl{})
 
 	// 4. Init Handler
 	attachmentHandler := handler.NewAttachmentHandler(attachmentService)
-	docCrHandler := handler.NewDocumentCrHandler(docCrService, &infraLogger.LoggerImpl{})
+	docCrHandler := handler.NewDocumentCrHandler(docCrService, &infraLogger.LoggerImpl{}, notificationService)
 
 	return &Container{
 		AttachmentRepo:    attachmentRepo,
@@ -44,5 +48,6 @@ func NewContainer() *Container {
 		DocCrService:      docCrService,
 		AttachmentHandler: attachmentHandler,
 		DocCrHandler:      docCrHandler,
+		NotificationService: notificationService,
 	}
 }

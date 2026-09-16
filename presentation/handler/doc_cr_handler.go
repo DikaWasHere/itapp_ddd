@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"fmt"
 	"time"
 
 	docCrApp "itapp_ddd/application/doc_cr"
+	notificationApp "itapp_ddd/application/notification"
 	domainDocCr "itapp_ddd/domain/doc_cr"
 	"itapp_ddd/pkg"
 
@@ -12,13 +14,14 @@ import (
 
 // DocumentCrHandler adalah handler untuk DocumentCr
 type DocumentCrHandler struct {
-	service *docCrApp.Service
-	logger  docCrApp.Logger
+	service      *docCrApp.Service
+	logger       docCrApp.Logger
+	notification *notificationApp.Service
 }
 
 // NewDocumentCrHandler constructor
-func NewDocumentCrHandler(service *docCrApp.Service, logger docCrApp.Logger) *DocumentCrHandler {
-	return &DocumentCrHandler{service: service, logger: logger}
+func NewDocumentCrHandler(service *docCrApp.Service, logger docCrApp.Logger, notification *notificationApp.Service) *DocumentCrHandler {
+	return &DocumentCrHandler{service: service, logger: logger, notification: notification}
 }
 
 // Request DTO untuk GetAll
@@ -501,6 +504,21 @@ func (h *DocumentCrHandler) Create(c *fiber.Ctx) error {
 		h.logger.Error("Documentcr not found", err)
 		return pkg.NotFoundResponse(c, "Documentcr not found: "+err.Error())
 	}
+	if req.Review != nil {
+		_ = h.notification.Send(req.Review.ReviewNik, fmt.Sprint("New CR ", doc.FormId), "New CR needs your review, Please refresh the CR list")
+	}
+	for _, p := range req.PICFunctionals {
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("New CR ", doc.FormId), "New CR needs your review, Please refresh the CR list")
+	}
+	for _, p := range req.PICDevelopers {
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("New CR ", doc.FormId), "New CR needs your review, Please refresh the CR list")
+	}
+	for _, p := range req.PICViewers {
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("New CR ", doc.FormId), "New CR needs your review, Please refresh the CR list")
+	}
+	for _, p := range req.PICQAs {
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("New CR ", doc.FormId), "New CR needs your review, Please refresh the CR list")
+	}
 
 	h.logger.Info("[%s] %s | Status: 201 | DocumentCr created successfully", c.Method(), c.Path())
 	return pkg.SuccessResponse(c, doc.DocCrID)
@@ -626,8 +644,24 @@ func (h *DocumentCrHandler) SendReview(c *fiber.Ctx) error {
 		return pkg.BadRequestResponse(c, "Failed to send review: "+err.Error())
 	}
 
+	for _, p := range req.PICFunctionals {
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("Your CR ", req.FormId), "has been reviewed")
+	}
+	for _, p := range req.PICDevelopers {
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("Your CR ", req.FormId), "has been reviewed")
+	}
+	for _, p := range req.PICViewers {
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("Your CR ", req.FormId), "has been reviewed")
+	}
+	for _, p := range req.PICQAs {
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("Your CR ", req.FormId), "has been reviewed")
+	}
+	for _, a := range req.Approvals {
+		_ = h.notification.Send(a.ApprovalNik, fmt.Sprint("New CR ", req.FormId), "New CR needs your review, Please refresh the CR list")
+	}
+
 	h.logger.Info("[%s] %s | Status: 200 | Review submitted for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
-	return pkg.SuccessResponse(c, result.DocCrID)
+	return pkg.SuccessResponse(c, nil)
 }
 
 // --- Request DTO untuk SendReviewReject ---
@@ -664,6 +698,8 @@ func (h *DocumentCrHandler) SendReviewReject(c *fiber.Ctx) error {
 		NameLog:      req.NameLog,
 		NoteLog:      req.NoteLog,
 	}
+
+	_ = h.notification.Send(req.RequesterNIK, fmt.Sprint("New CR ", req.FormId), "New CR needs your revision, Please refresh the CR list")
 
 	// Panggil service
 	result, err := h.service.SendReviewReject(c.Context(), domainReq)
@@ -753,6 +789,8 @@ func (h *DocumentCrHandler) SendRevision(c *fiber.Ctx) error {
 		},
 	}
 
+	_ = h.notification.Send(req.Review.ReviewNik, fmt.Sprint("New CR ", req.FormId), "New CR needs your review, Please refresh the CR list")
+
 	// Panggil service
 	result, err := h.service.SendRevision(c.Context(), domainReq)
 	if err != nil {
@@ -761,9 +799,7 @@ func (h *DocumentCrHandler) SendRevision(c *fiber.Ctx) error {
 	}
 
 	h.logger.Info("[%s] %s | Status: 200 | Revision submitted for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
-	return pkg.SuccessResponse(c, fiber.Map{
-		"doc_cr_id": result.DocCrID,
-	})
+	return pkg.SuccessResponse(c, nil)
 }
 
 // --- Request DTO untuk SendApprove ---
@@ -891,9 +927,7 @@ func (h *DocumentCrHandler) SendApproveReject(c *fiber.Ctx) error {
 	}
 
 	h.logger.Info("[%s] %s | Status: 200 | Approval rejected for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
-	return pkg.SuccessResponse(c, fiber.Map{
-		"doc_cr_id": result.DocCrID,
-	})
+	return pkg.SuccessResponse(c, nil)
 }
 
 // --- Request DTO untuk UpdateStatus ---
@@ -942,7 +976,7 @@ func (h *DocumentCrHandler) UpdateStatus(c *fiber.Ctx) error {
 }
 
 type docCrDeleteRequest struct {
-	DocCrID         uint   `json:"doc_cr_id"`
+	DocCrID         uint   `json:"application_id"`
 	ApplicationName string `json:"application_name"`
 }
 
