@@ -68,3 +68,28 @@
 2026-09-16T11:33:39.5954483+07:00 | ERROR | service.go:42 | doc_cr.(*Service).GetDetail | GetDetail failed: document not found
 2026-09-16T11:33:39.5954483+07:00 | ERROR | doc_cr_handler.go:260 | handler.(*DocumentCrHandler).GetDetail | Failed to parse request body: document not found
 2026-09-16T11:35:21.9778652+07:00 | INFO | doc_cr_handler.go:239 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-16T14:05:38.2243603+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-16T14:08:58.8398675+07:00 | INFO | doc_cr_handler.go:239 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-16T14:09:21.4869525+07:00 | INFO | doc_cr_handler.go:239 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-16T14:18:53.0438854+07:00 | INFO | doc_cr_handler.go:239 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-16T14:23:52.335751+07:00 | INFO | doc_cr_handler.go:239 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-16T14:25:11.6895525+07:00 | INFO | doc_cr_handler.go:239 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-16T14:25:27.5548055+07:00 | INFO | doc_cr_handler.go:239 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-16T14:26:30.2189768+07:00 | INFO | doc_cr_handler.go:239 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-16T14:26:42.2919036+07:00 | INFO | doc_cr_handler.go:239 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-16T14:27:29.3277422+07:00 | INFO | doc_cr_handler.go:239 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-16T14:28:03.8324027+07:00 | INFO | doc_cr_handler.go:239 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-16T14:35:08.137298+07:00 | INFO | doc_cr_handler.go:239 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-16T14:36:22.2164298+07:00 | INFO | doc_cr_handler.go:239 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-16T14:36:36.2833993+07:00 | INFO | doc_cr_handler.go:239 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-16T14:37:08.8445158+07:00 | INFO | doc_cr_handler.go:239 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-16T14:55:48.1146999+07:00 | INFO | doc_cr_handler.go:239 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-16T14:56:17.4864863+07:00 | INFO | doc_cr_handler.go:239 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-16T14:56:48.9511116+07:00 | INFO | doc_cr_handler.go:239 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-16T14:57:53.8580729+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-16T14:59:10.1569456+07:00 | INFO | doc_cr_handler.go:239 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-16T15:00:20.591682+07:00 | ERROR | service.go:42 | doc_cr.(*Service).GetDetail | GetDetail failed: document not found
+2026-09-16T15:00:20.591682+07:00 | ERROR | doc_cr_handler.go:260 | handler.(*DocumentCrHandler).GetDetail | Failed to parse request body: document not found
+2026-09-16T15:00:46.9382007+07:00 | ERROR | service.go:42 | doc_cr.(*Service).GetDetail | GetDetail failed: document not found
+2026-09-16T15:00:46.9382007+07:00 | ERROR | doc_cr_handler.go:260 | handler.(*DocumentCrHandler).GetDetail | Failed to parse request body: document not found
+2026-09-16T15:01:35.2006484+07:00 | INFO | doc_cr_handler.go:369 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 | Berhasil mengambil semua data

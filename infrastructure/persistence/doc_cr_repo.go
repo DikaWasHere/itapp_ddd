@@ -261,6 +261,8 @@ func (r *DocumentCrRepositoryDB) GetAll(ctx context.Context, req domainDocCr.Get
 	}
 	// go
 	// Batch fetch semua review sekaligus
+	//iniiii
+	//inii
 	reviewMap := make(map[uint]*domainDocCr.Review)
 	if len(docIDs) > 0 {
 		var reviewModels []ReviewModel
@@ -1082,7 +1084,7 @@ func (r *DocumentCrRepositoryDB) Update(ctx context.Context, docCrID uint, req d
 		"git_merge_request":     req.GitMergeRequest,
 		"git_repository":        req.GitRepository,
 		"doc_notes":             req.DocNotes,
-		"doc_attachment":        "",
+		"doc_attachment":        strings.Join(req.DocAttachment, "|"),
 		"application_name":      req.ApplicationName,
 	}
  

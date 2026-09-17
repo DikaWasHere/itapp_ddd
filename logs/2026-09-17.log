@@ -1,0 +1,21 @@
+2026-09-17T08:00:51.1058498+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-17T08:13:03.7769526+07:00 | INFO | service.go:32 | notification.(*Service).Send | Notification sent to 20230053 | title: New CR IT.CR.2025.010
+2026-09-17T08:13:03.9534195+07:00 | INFO | service.go:144 | doc_cr.(*Service).SendRevision | Revision submitted for DocCrID: 10
+2026-09-17T08:13:03.9534195+07:00 | INFO | doc_cr_handler.go:801 | handler.(*DocumentCrHandler).SendRevision | [POST] /api/v1/doc-cr-revision | Status: 200 | Revision submitted for DocCrID: 10
+2026-09-17T08:13:24.1474906+07:00 | INFO | service.go:32 | notification.(*Service).Send | Notification sent to 20230053 | title: New CR IT.CR.2025.010
+2026-09-17T08:13:24.2319709+07:00 | INFO | service.go:144 | doc_cr.(*Service).SendRevision | Revision submitted for DocCrID: 1
+2026-09-17T08:13:24.2336303+07:00 | INFO | doc_cr_handler.go:801 | handler.(*DocumentCrHandler).SendRevision | [POST] /api/v1/doc-cr-revision | Status: 200 | Revision submitted for DocCrID: 1
+2026-09-17T11:44:25.2090053+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-17T11:46:30.4960008+07:00 | INFO | service.go:185 | doc_cr.(*Service).SendApproveReject | Approval rejected for DocCrID: 22
+2026-09-17T11:46:30.4970157+07:00 | INFO | doc_cr_handler.go:930 | handler.(*DocumentCrHandler).SendApproveReject | [POST] /api/v1/doc-cr-approve-reject | Status: 200 | Approval rejected for DocCrID: 22
+2026-09-17T11:47:11.8998678+07:00 | INFO | service.go:185 | doc_cr.(*Service).SendApproveReject | Approval rejected for DocCrID: 73
+2026-09-17T11:47:11.8998678+07:00 | INFO | doc_cr_handler.go:930 | handler.(*DocumentCrHandler).SendApproveReject | [POST] /api/v1/doc-cr-approve-reject | Status: 200 | Approval rejected for DocCrID: 73
+2026-09-17T11:47:47.6373335+07:00 | INFO | service.go:115 | doc_cr.(*Service).SendReviewReject | Review rejected for DocCrID: 1
+2026-09-17T11:47:47.9373958+07:00 | INFO | service.go:32 | notification.(*Service).Send | Notification sent to 20220086 | title: New CR IT.CR.2025.014
+2026-09-17T11:47:47.9373958+07:00 | INFO | doc_cr_handler.go:711 | handler.(*DocumentCrHandler).SendReviewReject | [POST] /api/v1/doc-cr-reject | Status: 200 | Review rejected for DocCrID: 1
+2026-09-17T11:48:43.2254223+07:00 | ERROR | doc_cr_handler.go:682 | handler.(*DocumentCrHandler).SendReviewReject | Failed to parse request body: invalid character ',' looking for beginning of value
+2026-09-17T11:49:54.3973303+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-17T11:50:03.1762325+07:00 | ERROR | doc_cr_handler.go:682 | handler.(*DocumentCrHandler).SendReviewReject | Failed to parse request body: invalid character ',' looking for beginning of value
+2026-09-17T11:50:37.5295496+07:00 | INFO | service.go:32 | notification.(*Service).Send | Notification sent to 20220086 | title: New CR IT.CR.2025.014
+2026-09-17T11:50:37.7378494+07:00 | INFO | service.go:115 | doc_cr.(*Service).SendReviewReject | Review rejected for DocCrID: 1
+2026-09-17T11:50:37.7378494+07:00 | INFO | doc_cr_handler.go:711 | handler.(*DocumentCrHandler).SendReviewReject | [POST] /api/v1/doc-cr-reject | Status: 200 | Review rejected for DocCrID: 1

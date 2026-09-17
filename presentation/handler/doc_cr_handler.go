@@ -699,14 +699,13 @@ func (h *DocumentCrHandler) SendReviewReject(c *fiber.Ctx) error {
 		NoteLog:      req.NoteLog,
 	}
 
-	_ = h.notification.Send(req.RequesterNIK, fmt.Sprint("New CR ", req.FormId), "New CR needs your revision, Please refresh the CR list")
-
 	// Panggil service
 	result, err := h.service.SendReviewReject(c.Context(), domainReq)
 	if err != nil {
 		h.logger.Error("Failed to reject review", err)
 		return pkg.BadRequestResponse(c, "Failed to reject review: "+err.Error())
 	}
+	_ = h.notification.Send(req.RequesterNIK, fmt.Sprint("New CR ", req.FormId), "New CR needs your revision, Please refresh the CR list")
 
 	h.logger.Info("[%s] %s | Status: 200 | Review rejected for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
 	return pkg.SuccessResponse(c, nil)
@@ -789,7 +788,6 @@ func (h *DocumentCrHandler) SendRevision(c *fiber.Ctx) error {
 		},
 	}
 
-	_ = h.notification.Send(req.Review.ReviewNik, fmt.Sprint("New CR ", req.FormId), "New CR needs your review, Please refresh the CR list")
 
 	// Panggil service
 	result, err := h.service.SendRevision(c.Context(), domainReq)
@@ -797,6 +795,8 @@ func (h *DocumentCrHandler) SendRevision(c *fiber.Ctx) error {
 		h.logger.Error("Failed to send revision", err)
 		return pkg.BadRequestResponse(c, "Failed to send revision: "+err.Error())
 	}
+
+		_ = h.notification.Send(req.Review.ReviewNik, fmt.Sprint("New CR ", req.FormId), "New CR needs your review, Please refresh the CR list")
 
 	h.logger.Info("[%s] %s | Status: 200 | Revision submitted for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
 	return pkg.SuccessResponse(c, nil)
