@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"fmt"
 	"time"
 
 	docCrApp "itapp_ddd/application/doc_cr"
+	notificationApp "itapp_ddd/application/notification"
 	domainDocCr "itapp_ddd/domain/doc_cr"
 	"itapp_ddd/pkg"
 
@@ -12,13 +14,14 @@ import (
 
 // DocumentCrHandler adalah handler untuk DocumentCr
 type DocumentCrHandler struct {
-	service *docCrApp.Service
-	logger  docCrApp.Logger
+	service      *docCrApp.Service
+	logger       docCrApp.Logger
+	notification *notificationApp.Service
 }
 
 // NewDocumentCrHandler constructor
-func NewDocumentCrHandler(service *docCrApp.Service, logger docCrApp.Logger) *DocumentCrHandler {
-	return &DocumentCrHandler{service: service, logger: logger}
+func NewDocumentCrHandler(service *docCrApp.Service, logger docCrApp.Logger, notification *notificationApp.Service) *DocumentCrHandler {
+	return &DocumentCrHandler{service: service, logger: logger, notification: notification}
 }
 
 // Request DTO untuk GetAll
@@ -105,13 +108,17 @@ type milestoneResponse struct {
 
 // Response DTO untuk DocumentCr Detail
 type docCrDetailResponse struct {
-	DocCrID             uint                `json:"doc_cr_id"`
+	DocCrID             uint                `json:"doc_cr_id" gorm:"primarykey"`
 	DocCrName           string              `json:"doc_cr_name"`
 	FormId              string              `json:"form_id"`
 	DocReference        string              `json:"doc_reference"`
 	RequesterNIK        string              `json:"requester_nik"`
 	RequesterName       string              `json:"requester_name"`
 	RequesterDepartment string              `json:"requester_department"`
+	PICDevelopers       []picResponse       `json:"pic_developer" gorm:"many2many:document_cr_pic_developers;"`
+	PICFunctionals      []picResponse       `json:"pic_functional" gorm:"many2many:document_cr_pic_functionals;"`
+	PICViewer           []picResponse       `json:"pic_viewer" gorm:"many2many:document_cr_pic_viewers;"`
+	PICQAs              []picResponse       `json:"pic_qa" gorm:"many2many:document_cr_pic_qas;"`
 	ReasonDetail        string              `json:"reason_detail"`
 	ProblemDetail       string              `json:"problem_detail"`
 	ServerType          string              `json:"server_type"`
@@ -125,13 +132,9 @@ type docCrDetailResponse struct {
 	ApplicationName     string              `json:"application_name"`
 	DeployedDate        *time.Time          `json:"deployed_date"`
 	CreatedAt           time.Time           `json:"created_at"`
-	PICDevelopers       []picResponse       `json:"pic_developer"`
-	PICFunctionals      []picResponse       `json:"pic_functional"`
-	PICViewer           []picResponse       `json:"pic_viewer"`
-	PICQAs              []picResponse       `json:"pic_qa"`
-	Approval            []approvalResponse  `json:"approval"`
-	Review              *reviewResponse     `json:"review"`
-	Milestones          []milestoneResponse `json:"milestones"`
+	Approval            []approvalResponse  `json:"approval" gorm:"foreignKey:DocCrID;references:DocCrID"`
+	Review              reviewResponse      `json:"review" gorm:"foreignKey:DocCrID;references:DocCrID"`
+	Milestones          []milestoneResponse `json:"milestones" gorm:"-"`
 }
 
 // GetAll menangani request untuk mengambil semua DocumentCr
@@ -290,7 +293,7 @@ func (h *DocumentCrHandler) GetDetail(c *fiber.Ctx) error {
 
 	// Map Review
 	if item.Review != nil {
-		doc.Review = &reviewResponse{
+		doc.Review = reviewResponse{
 			ReviewID:     item.Review.ReviewID,
 			ReviewNik:    item.Review.ReviewNik,
 			ReviewName:   item.Review.ReviewName,
@@ -365,4 +368,645 @@ func (h *DocumentCrHandler) GetDetail(c *fiber.Ctx) error {
 
 	h.logger.Info("[%s] %s | Status: 200 | Berhasil mengambil semua data", c.Method(), c.Path())
 	return pkg.SuccessResponse(c, doc)
+}
+
+// --- Request DTO untuk Create ---
+type docCrCreateRequest struct {
+	DocCrName              string     `json:"doc_cr_name"`
+	FormId                 string     `json:"form_id"`
+	DocReference           string     `json:"doc_reference"`
+	RequesterNIK           string     `json:"requester_nik"`
+	RequesterName          string     `json:"requester_name"`
+	RequesterDepartment    string     `json:"requester_department"`
+	ReasonDetail           string     `json:"reason_detail"`
+	ProblemDetail          string     `json:"problem_detail"`
+	ServerType             string     `json:"server_type"`
+	CrType                 string     `json:"cr_type"`
+	CrPriority             string     `json:"cr_priority"`
+	GitMergeRequest        string     `json:"git_merge_request"`
+	GitRepository          string     `json:"git_repository"`
+	DocNotes               string     `json:"doc_notes"`
+	DocAttachment          []string   `json:"doc_attachment"`
+	DocAttachmentExtension []string   `json:"doc_attachment_extension"`
+	DocStatus              string     `json:"doc_status"`
+	ApplicationName        string     `json:"application_name"`
+	DeployedDate           *time.Time `json:"deployed_date"`
+
+	DocCrID        uint              `json:"doc_cr_id"`      // Deteksi upsert
+	PICDevelopers  []picRequestDTO   `json:"pic_developer"`  // PIC Developer
+	PICFunctionals []picRequestDTO   `json:"pic_functional"` // PIC Functional
+	PICViewers     []picRequestDTO   `json:"pic_viewer"`     // PIC Viewer
+	PICQAs         []picRequestDTO   `json:"pic_qa"`         // PIC QA
+	Review         *reviewRequestDTO `json:"review"`         // Review (optional)
+	NikLog         string            `json:"nik_log"`        // Log: NIK
+	NameLog        string            `json:"name_log"`       // Log: Nama
+	NoteLog        string            `json:"note_log"`       // Log: Catatan
+}
+
+// --- Response DTO untuk Create ---
+type docCrCreateResponse struct {
+	DocCrID             uint       `json:"doc_cr_id"`
+	DocCrName           string     `json:"doc_cr_name"`
+	FormId              string     `json:"form_id"`
+	DocReference        string     `json:"doc_reference"`
+	RequesterNIK        string     `json:"requester_nik"`
+	RequesterName       string     `json:"requester_name"`
+	RequesterDepartment string     `json:"requester_department"`
+	ReasonDetail        string     `json:"reason_detail"`
+	ProblemDetail       string     `json:"problem_detail"`
+	ServerType          string     `json:"server_type"`
+	CrType              string     `json:"cr_type"`
+	CrPriority          string     `json:"cr_priority"`
+	GitMergeRequest     string     `json:"git_merge_request"`
+	GitRepository       string     `json:"git_repository"`
+	DocNotes            string     `json:"doc_notes"`
+	DocAttachment       string     `json:"doc_attachment"`
+	DocStatus           string     `json:"doc_status"`
+	ApplicationName     string     `json:"application_name"`
+	DeployedDate        *time.Time `json:"deployed_date"`
+	CreatedAt           time.Time  `json:"created_at"`
+}
+
+// go
+// go
+func (h *DocumentCrHandler) Create(c *fiber.Ctx) error {
+	req := new(docCrCreateRequest)
+
+	if err := c.BodyParser(req); err != nil {
+		h.logger.Error("Failed to parse request body", err)
+		return pkg.BadRequestResponse(c, "Failed to parse request body")
+	}
+
+	// Map PIC ke domain
+	picsDev := make([]domainDocCr.PIC, 0)
+	for _, p := range req.PICDevelopers {
+		picsDev = append(picsDev, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
+	}
+
+	picsFunc := make([]domainDocCr.PIC, 0)
+	for _, p := range req.PICFunctionals {
+		picsFunc = append(picsFunc, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
+	}
+
+	picsView := make([]domainDocCr.PIC, 0)
+	for _, p := range req.PICViewers {
+		picsView = append(picsView, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
+	}
+
+	picsQA := make([]domainDocCr.PIC, 0)
+	for _, p := range req.PICQAs {
+		picsQA = append(picsQA, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
+	}
+
+	// Map Review ke domain (pointer, optional)
+	var review *domainDocCr.ReviewCreateRequest
+	if req.Review != nil {
+		review = &domainDocCr.ReviewCreateRequest{
+			ReviewNik:  req.Review.ReviewNik,
+			ReviewName: req.Review.ReviewName,
+		}
+	}
+
+	// Map request ke domain request
+	domainReq := domainDocCr.CreateDocCrRequest{
+		DocCrID:                req.DocCrID,
+		DocCrName:              req.DocCrName,
+		FormId:                 req.FormId,
+		DocReference:           req.DocReference,
+		RequesterNIK:           req.RequesterNIK,
+		RequesterName:          req.RequesterName,
+		RequesterDepartment:    req.RequesterDepartment,
+		ReasonDetail:           req.ReasonDetail,
+		ProblemDetail:          req.ProblemDetail,
+		ServerType:             req.ServerType,
+		CrType:                 req.CrType,
+		CrPriority:             req.CrPriority,
+		GitMergeRequest:        req.GitMergeRequest,
+		GitRepository:          req.GitRepository,
+		DocNotes:               req.DocNotes,
+		DocAttachment:          req.DocAttachment,
+		DocAttachmentExtension: req.DocAttachmentExtension,
+		DocStatus:              req.DocStatus,
+		ApplicationName:        req.ApplicationName,
+		DeployedDate:           req.DeployedDate,
+		PICDevelopers:          picsDev,
+		PICFunctionals:         picsFunc,
+		PICViewers:             picsView,
+		PICQAs:                 picsQA,
+		Review:                 review,
+		NikLog:                 req.NikLog,
+		NameLog:                req.NameLog,
+		NoteLog:                req.NoteLog,
+	}
+
+	doc, err := h.service.Create(c.Context(), domainReq)
+	if err != nil {
+		h.logger.Error("Documentcr not found", err)
+		return pkg.NotFoundResponse(c, "Documentcr not found: "+err.Error())
+	}
+	if req.Review != nil {
+		_ = h.notification.Send(req.Review.ReviewNik, fmt.Sprint("New CR ", doc.FormId), "New CR needs your review, Please refresh the CR list")
+	}
+	for _, p := range req.PICFunctionals {
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("New CR ", doc.FormId), "New CR needs your review, Please refresh the CR list")
+	}
+	for _, p := range req.PICDevelopers {
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("New CR ", doc.FormId), "New CR needs your review, Please refresh the CR list")
+	}
+	for _, p := range req.PICViewers {
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("New CR ", doc.FormId), "New CR needs your review, Please refresh the CR list")
+	}
+	for _, p := range req.PICQAs {
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("New CR ", doc.FormId), "New CR needs your review, Please refresh the CR list")
+	}
+
+	h.logger.Info("[%s] %s | Status: 201 | DocumentCr created successfully", c.Method(), c.Path())
+	return pkg.SuccessResponse(c, doc.DocCrID)
+}
+
+// --- Request DTO untuk SendReview (simplified) ---
+type docCrSendReviewRequest struct {
+	DocCrID             uint                 `json:"doc_cr_id"`
+	DocCrName           string               `json:"doc_cr_name"`
+	FormId              string               `json:"form_id"`
+	DocReference        string               `json:"doc_reference"`
+	RequesterNIK        string               `json:"requester_nik"`
+	RequesterName       string               `json:"requester_name"`
+	RequesterDepartment string               `json:"requester_department"`
+	PICDevelopers       []picRequestDTO      `json:"pic_developer"`
+	PICFunctionals      []picRequestDTO      `json:"pic_functional"`
+	PICViewers          []picRequestDTO      `json:"pic_viewer"`
+	PICQAs              []picRequestDTO      `json:"pic_qa"`
+	ReasonDetail        string               `json:"reason_detail"`
+	ProblemDetail       string               `json:"problem_detail"`
+	ServerType          string               `json:"server_type"`
+	CrType              string               `json:"cr_type"`
+	CrPriority          string               `json:"cr_priority"`
+	GitMergeRequest     string               `json:"git_merge_request"`
+	GitRepository       string               `json:"git_repository"`
+	DocNotes            string               `json:"doc_notes"`
+	DocAttachment       []string             `json:"doc_attachment"`
+	DocStatus           string               `json:"doc_status"`
+	ApplicationName     string               `json:"application_name"`
+	ReviewNote          string               `json:"review_note"`
+	NikLog              string               `json:"nik_log"`
+	NameLog             string               `json:"name_log"`
+	NoteLog             string               `json:"note_log"`
+	Approvals           []approvalRequestDTO `json:"approval"`
+}
+
+type picRequestDTO struct {
+	PICNik        string `json:"pic_nik"`
+	PICName       string `json:"pic_name"`
+	PICDepartment string `json:"pic_department"`
+}
+
+type approvalRequestDTO struct {
+	ApprovalNik        string `json:"approval_nik"`
+	ApprovalName       string `json:"approval_name"`
+	ApprovalDepartment string `json:"approval_department"`
+}
+
+// SendReview menangani request untuk submit review CR
+func (h *DocumentCrHandler) SendReview(c *fiber.Ctx) error {
+	req := new(docCrSendReviewRequest)
+	if err := c.BodyParser(req); err != nil {
+		h.logger.Error("Failed to parse request body", err)
+		return pkg.BadRequestResponse(c, "Failed to parse request body")
+	}
+
+	// Map ke domain request
+	picsDev := make([]domainDocCr.PIC, 0, len(req.PICDevelopers))
+	for _, p := range req.PICDevelopers {
+		picsDev = append(picsDev, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
+	}
+
+	picsFunc := make([]domainDocCr.PIC, 0, len(req.PICFunctionals))
+	for _, p := range req.PICFunctionals {
+		picsFunc = append(picsFunc, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
+	}
+
+	picsView := make([]domainDocCr.PIC, 0, len(req.PICViewers))
+	for _, p := range req.PICViewers {
+		picsView = append(picsView, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
+	}
+
+	picsQA := make([]domainDocCr.PIC, 0, len(req.PICQAs))
+	for _, p := range req.PICQAs {
+		picsQA = append(picsQA, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
+	}
+
+	approvals := make([]*domainDocCr.Approval, 0, len(req.Approvals))
+	for _, a := range req.Approvals {
+		aid := a.ApprovalNik
+		and := a.ApprovalName
+		adept := a.ApprovalDepartment
+		approvals = append(approvals, &domainDocCr.Approval{
+			ApprovalNik:        &aid,
+			ApprovalName:       &and,
+			ApprovalDepartment: &adept,
+		})
+	}
+
+	domainReq := domainDocCr.SendReviewRequest{
+		DocCrID:             req.DocCrID,
+		DocCrName:           req.DocCrName,
+		FormId:              req.FormId,
+		DocReference:        req.DocReference,
+		RequesterNIK:        req.RequesterNIK,
+		RequesterName:       req.RequesterName,
+		RequesterDepartment: req.RequesterDepartment,
+		PICDevelopers:       picsDev,
+		PICFunctionals:      picsFunc,
+		PICViewers:          picsView,
+		PICQAs:              picsQA,
+		ReasonDetail:        req.ReasonDetail,
+		ProblemDetail:       req.ProblemDetail,
+		ServerType:          req.ServerType,
+		CrType:              req.CrType,
+		CrPriority:          req.CrPriority,
+		GitMergeRequest:     req.GitMergeRequest,
+		GitRepository:       req.GitRepository,
+		DocNotes:            req.DocNotes,
+		DocAttachment:       req.DocAttachment,
+		DocStatus:           req.DocStatus,
+		ApplicationName:     req.ApplicationName,
+		ReviewNote:          req.ReviewNote,
+		NikLog:              req.NikLog,
+		NameLog:             req.NameLog,
+		NoteLog:             req.NoteLog,
+		Approvals:           approvals,
+	}
+
+	result, err := h.service.SendReview(c.Context(), domainReq)
+	if err != nil {
+		h.logger.Error("Failed to send review", err)
+		return pkg.BadRequestResponse(c, "Failed to send review: "+err.Error())
+	}
+
+	for _, p := range req.PICFunctionals {
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("Your CR ", req.FormId), "has been reviewed")
+	}
+	for _, p := range req.PICDevelopers {
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("Your CR ", req.FormId), "has been reviewed")
+	}
+	for _, p := range req.PICViewers {
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("Your CR ", req.FormId), "has been reviewed")
+	}
+	for _, p := range req.PICQAs {
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("Your CR ", req.FormId), "has been reviewed")
+	}
+	for _, a := range req.Approvals {
+		_ = h.notification.Send(a.ApprovalNik, fmt.Sprint("New CR ", req.FormId), "New CR needs your review, Please refresh the CR list")
+	}
+
+	h.logger.Info("[%s] %s | Status: 200 | Review submitted for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
+	return pkg.SuccessResponse(c, nil)
+}
+
+// --- Request DTO untuk SendReviewReject ---
+type docCrSendReviewRejectRequest struct {
+	DocCrID      uint   `json:"doc_cr_id"`
+	RequesterNIK string `json:"requester_nik"`
+	FormId       string `json:"form_id"`
+	ReviewNote   string `json:"review_note"`
+	NikLog       string `json:"nik_log"`
+	NameLog      string `json:"name_log"`
+	NoteLog      string `json:"note_log"`
+}
+
+// SendReviewReject menangani request untuk menolak CR dari tahap review
+func (h *DocumentCrHandler) SendReviewReject(c *fiber.Ctx) error {
+	req := new(docCrSendReviewRejectRequest)
+	if err := c.BodyParser(req); err != nil {
+		h.logger.Error("Failed to parse request body", err)
+		return pkg.BadRequestResponse(c, "Failed to parse request body")
+	}
+
+	// Validasi input
+	if req.DocCrID == 0 {
+		return pkg.BadRequestResponse(c, "doc_cr_id is required")
+	}
+
+	// Map ke domain request
+	domainReq := domainDocCr.SendReviewRejectRequest{
+		DocCrID:      req.DocCrID,
+		RequesterNIK: req.RequesterNIK,
+		FormId:       req.FormId,
+		ReviewNote:   req.ReviewNote,
+		NikLog:       req.NikLog,
+		NameLog:      req.NameLog,
+		NoteLog:      req.NoteLog,
+	}
+
+	// Panggil service
+	result, err := h.service.SendReviewReject(c.Context(), domainReq)
+	if err != nil {
+		h.logger.Error("Failed to reject review", err)
+		return pkg.BadRequestResponse(c, "Failed to reject review: "+err.Error())
+	}
+	_ = h.notification.Send(req.RequesterNIK, fmt.Sprint("New CR ", req.FormId), "New CR needs your revision, Please refresh the CR list")
+
+	h.logger.Info("[%s] %s | Status: 200 | Review rejected for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
+	return pkg.SuccessResponse(c, nil)
+}
+
+// --- Request DTO untuk SendRevision ---
+type docCrSendRevisionRequest struct {
+	DocCrID             uint             `json:"doc_cr_id"`
+	DocCrName           string           `json:"doc_cr_name"`
+	FormId              string           `json:"form_id"`
+	DocReference        string           `json:"doc_reference"`
+	RequesterNIK        string           `json:"requester_nik"`
+	RequesterName       string           `json:"requester_name"`
+	RequesterDepartment string           `json:"requester_department"`
+	PICDevelopers       []picRequestDTO  `json:"pic_developer"`
+	PICFunctionals      []picRequestDTO  `json:"pic_functional"`
+	PICViewers          []picRequestDTO  `json:"pic_viewer"`
+	PICQAs              []picRequestDTO  `json:"pic_qa"`
+	ReasonDetail        string           `json:"reason_detail"`
+	ProblemDetail       string           `json:"problem_detail"`
+	ServerType          string           `json:"server_type"`
+	CrType              string           `json:"cr_type"`
+	CrPriority          string           `json:"cr_priority"`
+	GitMergeRequest     string           `json:"git_merge_request"`
+	GitRepository       string           `json:"git_repository"`
+	DocNotes            string           `json:"doc_notes"`
+	DocAttachment       string           `json:"doc_attachment"`
+	ApplicationName     string           `json:"application_name"`
+	ReviewNote          string           `json:"review_note"`
+	NikLog              string           `json:"nik_log"`
+	NameLog             string           `json:"name_log"`
+	NoteLog             string           `json:"note_log"`
+	Review              reviewRequestDTO `json:"review"`
+}
+
+type reviewRequestDTO struct {
+	ReviewNik  string `json:"review_nik"`
+	ReviewName string `json:"review_name"`
+}
+
+// SendRevision menangani request untuk merevisi CR
+func (h *DocumentCrHandler) SendRevision(c *fiber.Ctx) error {
+	req := new(docCrSendRevisionRequest)
+	if err := c.BodyParser(req); err != nil {
+		h.logger.Error("Failed to parse request body", err)
+		return pkg.BadRequestResponse(c, "Failed to parse request body")
+	}
+
+	// Validasi input
+	if req.DocCrID == 0 {
+		return pkg.BadRequestResponse(c, "doc_cr_id is required")
+	}
+
+	// Map ke domain request
+	domainReq := domainDocCr.SendRevisionRequest{
+		DocCrID:             req.DocCrID,
+		DocCrName:           req.DocCrName,
+		FormId:              req.FormId,
+		DocReference:        req.DocReference,
+		RequesterNIK:        req.RequesterNIK,
+		RequesterName:       req.RequesterName,
+		RequesterDepartment: req.RequesterDepartment,
+		ReasonDetail:        req.ReasonDetail,
+		ProblemDetail:       req.ProblemDetail,
+		ServerType:          req.ServerType,
+		CrType:              req.CrType,
+		CrPriority:          req.CrPriority,
+		GitMergeRequest:     req.GitMergeRequest,
+		GitRepository:       req.GitRepository,
+		DocNotes:            req.DocNotes,
+		DocAttachment:       req.DocAttachment,
+		ApplicationName:     req.ApplicationName,
+		ReviewNote:          req.ReviewNote,
+		NikLog:              req.NikLog,
+		NameLog:             req.NameLog,
+		NoteLog:             req.NoteLog,
+		Review: domainDocCr.ReviewCreateRequest{
+			ReviewNik:  req.Review.ReviewNik,
+			ReviewName: req.Review.ReviewName,
+		},
+	}
+
+
+	// Panggil service
+	result, err := h.service.SendRevision(c.Context(), domainReq)
+	if err != nil {
+		h.logger.Error("Failed to send revision", err)
+		return pkg.BadRequestResponse(c, "Failed to send revision: "+err.Error())
+	}
+
+		_ = h.notification.Send(req.Review.ReviewNik, fmt.Sprint("New CR ", req.FormId), "New CR needs your review, Please refresh the CR list")
+
+	h.logger.Info("[%s] %s | Status: 200 | Revision submitted for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
+	return pkg.SuccessResponse(c, nil)
+}
+
+// --- Request DTO untuk SendApprove ---
+type docCrSendApproveRequest struct {
+	ApprovalID          uint   `json:"approval_id"`
+	ApprovalStatus      string `json:"approval_status"`
+	ApprovalNote        string `json:"approval_note"`
+	NikLog              string `json:"nik_log"`
+	NameLog             string `json:"name_log"`
+	NoteLog             string `json:"note_log"`
+	DocCrID             uint   `json:"doc_cr_id"`
+	CrPriority          string `json:"cr_priority"`
+	RequesterDepartment string `json:"requester_department"`
+}
+
+// --- Response DTO untuk SendApprove (termasuk ApprovalNote) ---
+type approvalApproveResponse struct {
+	ApprovalID         *uint      `json:"approval_id"`
+	ApprovalNik        *string    `json:"approval_nik"`
+	ApprovalName       *string    `json:"approval_name"`
+	ApprovalDate       *string    `json:"approval_date"`
+	ApprovalStatus     *string    `json:"approval_status"`
+	ApprovalNote       *string    `json:"approval_note"`
+	DocCrID            *uint      `json:"doc_cr_id"`
+	ApprovalDepartment *string    `json:"approval_department"`
+	CreatedAt          *time.Time `json:"created_at"`
+	UpdatedAt          *time.Time `json:"updated_at"`
+}
+
+// SendApprove menangani request untuk approve CR
+func (h *DocumentCrHandler) SendApprove(c *fiber.Ctx) error {
+	// 1. Parse JSON
+	req := new(docCrSendApproveRequest)
+	if err := c.BodyParser(req); err != nil {
+		h.logger.Error("Failed to parse request body", err)
+		return pkg.BadRequestResponse(c, "Failed to parse request body")
+	}
+
+	// 2. Validasi input
+	if req.ApprovalID == 0 {
+		return pkg.BadRequestResponse(c, "approval_id is required")
+	}
+	if req.DocCrID == 0 {
+		return pkg.BadRequestResponse(c, "doc_cr_id is required")
+	}
+
+	// 3. Map ke domain request
+	domainReq := domainDocCr.SendApproveRequest{
+		ApprovalID:          req.ApprovalID,
+		ApprovalStatus:      req.ApprovalStatus,
+		ApprovalNote:        req.ApprovalNote,
+		NikLog:              req.NikLog,
+		NameLog:             req.NameLog,
+		NoteLog:             req.NoteLog,
+		DocCrID:             req.DocCrID,
+		CrPriority:          req.CrPriority,
+		RequesterDepartment: req.RequesterDepartment,
+	}
+
+	// 4. Panggil service
+	result, err := h.service.SendApprove(c.Context(), domainReq)
+	if err != nil {
+		h.logger.Error("Failed to send approve", err)
+		return pkg.BadRequestResponse(c, "Failed to send approve: "+err.Error())
+	}
+
+	// 5. Map result ke response DTO
+	var approvals []approvalApproveResponse
+	for _, a := range result.Approvals {
+		approvals = append(approvals, approvalApproveResponse{
+			ApprovalID:         a.ApprovalID,
+			ApprovalNik:        a.ApprovalNik,
+			ApprovalName:       a.ApprovalName,
+			ApprovalDate:       a.ApprovalDate,
+			ApprovalStatus:     a.ApprovalStatus,
+			ApprovalDepartment: a.ApprovalDepartment,
+			ApprovalNote:       a.ApprovalNote,
+			DocCrID:            a.DocCrID,
+			CreatedAt:          a.CreatedAt,
+			UpdatedAt:          a.UpdatedAt,
+		})
+	}
+
+	// 6. Return response
+	h.logger.Info("[%s] %s | Status: 200 | Approval submitted for DocCrID: %d", c.Method(), c.Path(), req.DocCrID)
+	return pkg.SuccessResponse(c, approvals)
+}
+
+// --- Request DTO untuk SendApproveReject ---
+type docCrSendApproveRejectRequest struct {
+	DocCrID       uint   `json:"doc_cr_id"`
+	RequesterName string `json:"requester_name"`
+	NikLog        string `json:"nik_log"`
+	NameLog       string `json:"name_log"`
+	NoteLog       string `json:"note_log"`
+}
+
+// SendApproveReject menangani request untuk menolak hasil approval CR
+func (h *DocumentCrHandler) SendApproveReject(c *fiber.Ctx) error {
+	req := new(docCrSendApproveRejectRequest)
+	if err := c.BodyParser(req); err != nil {
+		h.logger.Error("Failed to parse request body", err)
+		return pkg.BadRequestResponse(c, "Failed to parse request body")
+	}
+
+	// Validasi input
+	if req.DocCrID == 0 {
+		return pkg.BadRequestResponse(c, "doc_cr_id is required")
+	}
+
+	// Map ke domain request
+	domainReq := domainDocCr.SendApproveRejectRequest{
+		DocCrID:       req.DocCrID,
+		RequesterName: req.RequesterName,
+		NikLog:        req.NikLog,
+		NameLog:       req.NameLog,
+		NoteLog:       req.NoteLog,
+	}
+
+	// Panggil service
+	result, err := h.service.SendApproveReject(c.Context(), domainReq)
+	if err != nil {
+		h.logger.Error("Failed to reject approval", err)
+		return pkg.BadRequestResponse(c, "Failed to reject approval: "+err.Error())
+	}
+
+	h.logger.Info("[%s] %s | Status: 200 | Approval rejected for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
+	return pkg.SuccessResponse(c, nil)
+}
+
+// --- Request DTO untuk UpdateStatus ---
+type docCrUpdateStatusRequest struct {
+	DocCrID   uint   `json:"doc_cr_id"`
+	DocStatus string `json:"doc_status"`
+	NikLog    string `json:"nik_log"`
+	NameLog   string `json:"name_log"`
+	NoteLog   string `json:"note_log"`
+}
+
+// UpdateStatus menangani request untuk update status dokumen CR
+func (h *DocumentCrHandler) UpdateStatus(c *fiber.Ctx) error {
+	req := new(docCrUpdateStatusRequest)
+	if err := c.BodyParser(req); err != nil {
+		h.logger.Error("Failed to parse request body", err)
+		return pkg.BadRequestResponse(c, "Failed to parse request body")
+	}
+
+	// Validasi input
+	if req.DocCrID == 0 {
+		return pkg.BadRequestResponse(c, "doc_cr_id is required")
+	}
+	if req.DocStatus == "" {
+		return pkg.BadRequestResponse(c, "doc_status is required")
+	}
+
+	// Map ke domain request
+	domainReq := domainDocCr.UpdateStatusRequest{
+		DocCrID:   req.DocCrID,
+		DocStatus: req.DocStatus,
+		NikLog:    req.NikLog,
+		NameLog:   req.NameLog,
+		NoteLog:   req.NoteLog,
+	}
+
+	// Panggil service
+	result, err := h.service.UpdateStatus(c.Context(), domainReq)
+	if err != nil {
+		h.logger.Error("Failed to update status", err)
+		return pkg.BadRequestResponse(c, "Failed to update status: "+err.Error())
+	}
+
+	h.logger.Info("[%s] %s | Status: 200 | Document status updated to '%s' for DocCrID: %d", c.Method(), c.Path(), result.DocStatus, result.DocCrID)
+	return pkg.SuccessResponse(c, result.DocCrID)
+}
+
+type docCrDeleteRequest struct {
+	DocCrID         uint   `json:"application_id"`
+	ApplicationName string `json:"application_name"`
+}
+
+func (h *DocumentCrHandler) Delete(c *fiber.Ctx) error {
+	req := new(docCrDeleteRequest)
+	if err := c.BodyParser(req); err != nil {
+		h.logger.Error("Failed to parse request body", err)
+		return pkg.BadRequestResponse(c, "Failed to parse request body")
+	}
+
+	if req.DocCrID == 0 {
+		return pkg.BadRequestResponse(c, "doc_cr_id is required")
+	}
+
+	domainReq := domainDocCr.DeleteRequest{
+		DocCrID:         req.DocCrID,
+		ApplicationName: req.ApplicationName,
+	}
+
+	result, err := h.service.Delete(c.Context(), domainReq)
+	if err != nil {
+		h.logger.Error("Failed to delete DocumentCr", err)
+		return pkg.BadRequestResponse(c, "Failed to delete DocumentCr: "+err.Error())
+	}
+
+	h.logger.Info("[%s] %s | Status: 200 | DocumentCr deleted successfully for DocCrID: %d", c.Method(), c.Path(), req.DocCrID)
+	return pkg.SuccessResponse(c, fiber.Map{
+		"application_id":   result.DocCrID,
+		"application_name": result.ApplicationName,
+		"created_at":       result.CreatedAt,
+		"updated_at":       result.UpdatedAt,
+	})
 }

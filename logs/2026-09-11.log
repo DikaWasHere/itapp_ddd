@@ -1,0 +1,13 @@
+2026-09-11T09:30:49.1945962+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-11T09:32:22.4789633+07:00 | INFO | doc_cr_handler.go:366 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 | Berhasil mengambil semua data
+2026-09-11T10:16:48.6200087+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-11T10:16:59.0853023+07:00 | INFO | doc_cr_handler.go:367 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 | Berhasil mengambil semua data
+2026-09-11T10:23:54.8792599+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-11T10:24:11.8633824+07:00 | INFO | service.go:103 | doc_cr.(*Service).Create | DocumentCr created successfully with ID: 50
+2026-09-11T10:24:11.865167+07:00 | INFO | doc_cr_handler.go:482 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 201 | DocumentCr created successfully
+2026-09-11T16:02:10.1322343+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-11T16:02:28.1431212+07:00 | ERROR | doc_cr_handler.go:503 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: record not found
+2026-09-11T17:06:09.2253242+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-11T17:06:58.8048795+07:00 | ERROR | doc_cr_handler.go:503 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: record not found
+2026-09-11T17:07:09.8213752+07:00 | ERROR | doc_cr_handler.go:503 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: record not found
+2026-09-11T17:07:47.1641609+07:00 | ERROR | doc_cr_handler.go:503 | handler.(*DocumentCrHandler).Create | Failed to create DocumentCr: record not found

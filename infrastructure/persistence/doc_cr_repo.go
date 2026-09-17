@@ -3,6 +3,7 @@ package persistence
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -116,8 +117,8 @@ type ApprovalModel struct {
 	ApprovalNote       string    `gorm:"column:approval_note"`
 	DocCrID            uint      `gorm:"column:doc_cr_id"`
 	ApprovalDepartment string    `gorm:"column:approval_department"`
-	CreatedAt          time.Time `gorm:"column:created_at"`
-	UpdatedAt          time.Time `gorm:"column:updated_at"`
+	CreatedAt          *time.Time `gorm:"column:created_at"`
+	UpdatedAt          *time.Time `gorm:"column:updated_at"`
 }
 
 func (ApprovalModel) TableName() string {
@@ -260,6 +261,8 @@ func (r *DocumentCrRepositoryDB) GetAll(ctx context.Context, req domainDocCr.Get
 	}
 	// go
 	// Batch fetch semua review sekaligus
+	//iniiii
+	//inii
 	reviewMap := make(map[uint]*domainDocCr.Review)
 	if len(docIDs) > 0 {
 		var reviewModels []ReviewModel
@@ -276,8 +279,8 @@ func (r *DocumentCrRepositoryDB) GetAll(ctx context.Context, req domainDocCr.Get
 		r.db.Where("doc_cr_id IN ? AND approval_status != ?", docIDs, "Cancel").Find(&approvalModels)
 		for i := range approvalModels {
 			appr := approvalModels[i].toEntity()
-			if appr.DocCrID != nil { // ✅ Tambah check ini
-				approvalMap[*appr.DocCrID] = append(approvalMap[*appr.DocCrID], appr) // ✅ Dereference
+			if appr.DocCrID != nil { 
+				approvalMap[*appr.DocCrID] = append(approvalMap[*appr.DocCrID], appr) 
 			}
 		}
 	}
@@ -392,37 +395,6 @@ func (r *DocumentCrRepositoryDB) fetchApprovals(ctx context.Context, docCrID uin
 	}
 	return nil
 }
-
-// fetchPICs mengambil data PIC dan mengkategorikan berdasarkan department
-// func (r *DocumentCrRepositoryDB) fetchPICs(ctx context.Context, docCrID uint, item *domainDocCr.DocumentCrDetailItem) error {
-// 	rows, err := r.db.WithContext(ctx).Raw(`
-// 		SELECT *
-// 		FROM trs.trs_pic
-// 		WHERE doc_cr_id = ?;
-// 	`, docCrID).Rows()
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer rows.Close()
-
-// 	for rows.Next() {
-// 		var picModel PICModel
-// 		r.db.ScanRows(rows, &picModel)
-// 		pic := picModel.toEntity()
-
-// 		switch pic.PICDepartment {
-// 		case "IT FUNCTIONAL":
-// 			item.PICFunctionals = append(item.PICFunctionals, pic)
-// 		case "IT DEVELOPMENT":
-// 			item.PICDevelopers = append(item.PICDevelopers, pic)
-// 		case "IT SERVICES & IMPLEMENTATION":
-// 			item.PICViewers = append(item.PICViewers, pic)
-// 		case "QA":
-// 			item.PICQAs = append(item.PICQAs, pic)
-// 		}
-// 	}
-// 	return nil
-// }
 
 // fetchReview mengambil data review (optional)
 func (r *DocumentCrRepositoryDB) fetchReview(ctx context.Context, docCrID uint, item *domainDocCr.DocumentCrDetailItem) {
@@ -604,41 +576,770 @@ func toDocumentCrDetailItem(rows []DocumentCrDetailJoinModel) (*domainDocCr.Docu
 	return item, nil
 }
 
-// ini N+1 karena melakukan 3 query yaitu review, approval, dan pic. Namun, ini dilakukan untuk menghindari query yang terlalu kompleks dan tetap menjaga performa. Jika diperlukan, bisa dioptimalkan dengan join query, tetapi harus dipastikan hasilnya tetap sesuai dengan kebutuhan.
-// func (r *DocumentCrRepositoryDB) fetchRelatedData(ctx context.Context, docCrID uint, item *domainDocCr.DocumentCrListItem) {
-// 	// Review
-// 	var reviewModel ReviewModel
-// 	err := r.db.Raw(`SELECT * FROM trs.trs_review WHERE doc_cr_id = ?;`, docCrID).Scan(&reviewModel).Error
-// 	if err == nil {
-// 		item.Review = reviewModel.toEntity()
-// 	}
+// Create membuat DocumentCr baru
+func (r *DocumentCrRepositoryDB) Create(ctx context.Context, req domainDocCr.CreateDocCrRequest) (*domainDocCr.DocumentCr, error) {
+    // Konversi DocAttachment ([]string) ke string dengan join "|"
+    var docAttachmentStr string
+    if len(req.DocAttachment) > 0 {
+        docAttachmentStr = strings.Join(req.DocAttachment, "|")
+    }
+ 
+    docModel := DocumentCrModel{
+        DocCrName:           req.DocCrName,
+        FormId:              req.FormId,
+        DocReference:        req.DocReference,
+        RequesterNIK:        req.RequesterNIK,
+        RequesterName:       req.RequesterName,
+        RequesterDepartment: req.RequesterDepartment,
+        ReasonDetail:        req.ReasonDetail,
+        ProblemDetail:       req.ProblemDetail,
+        ServerType:          req.ServerType,
+        CrType:              req.CrType,
+        CrPriority:          req.CrPriority,
+        GitMergeRequest:     req.GitMergeRequest,
+        GitRepository:       req.GitRepository,
+        DocNotes:            req.DocNotes,
+        DocAttachment:       docAttachmentStr,  
+        DocStatus:           req.DocStatus,
+        ApplicationName:     req.ApplicationName,
+        DeployedDate:        req.DeployedDate,
+        CreatedAt:           time.Now(),
+        UpdatedAt:           time.Now(),
+    }
+ 
+    if err := r.db.WithContext(ctx).Create(&docModel).Error; err != nil {
+        return nil, fmt.Errorf("failed to create DocumentCr: %w", err)
+    }
+ 
+    return docModel.toEntity(), nil
+}
 
-// 	// Approvals
-// 	approvalRows, err := r.db.Raw(`SELECT * FROM trs.trs_approval WHERE doc_cr_id = ? AND approval_status != 'Cancel';`, docCrID).Rows()
-// 	if err == nil {
-// 		defer approvalRows.Close()
-// 		for approvalRows.Next() {
-// 			var approvalModel ApprovalModel
-// 			r.db.ScanRows(approvalRows, &approvalModel)
-// 			item.Approvals = append(item.Approvals, approvalModel.toEntity())
-// 		}
-// 	}
+// CountByYear menghitung jumlah DocumentCr berdasarkan tahun (range query berbasis indeks)
+func (r *DocumentCrRepositoryDB) CountByYear(ctx context.Context, year string) (int64, error) {
+	var count int64
 
-// 	// PICs
-// 	picRows, err := r.db.Raw(`SELECT * FROM trs.trs_pic WHERE doc_cr_id = ?;`, docCrID).Rows()
-// 	if err == nil {
-// 		defer picRows.Close()
-// 		for picRows.Next() {
-// 			var picModel PICModel
-// 			r.db.ScanRows(picRows, &picModel)
-// 			pic := picModel.toEntity()
+	// Pembatas rentang waktu: awal tahun sampai awal tahun berikutnya
+	startOfYear := fmt.Sprintf("%s-01-01 00:00:00", year)
 
-// 			if pic.PICDepartment == "IT FUNCTIONAL" {
-// 				item.PICFunctionals = append(item.PICFunctionals, pic)
-// 			}
-// 			if pic.PICDepartment == "IT DEVELOPMENT" {
-// 				item.PICDevelopers = append(item.PICDevelopers, pic)
-// 			}
-// 		}
-// 	}
-// }
+	yearInt, err := strconv.Atoi(year)
+	if err != nil {
+		return 0, fmt.Errorf("invalid year format: %w", err)
+	}
+	endOfYear := fmt.Sprintf("%d-01-01 00:00:00", yearInt+1)
+
+	err = r.db.WithContext(ctx).
+		Model(&DocumentCrModel{}).
+		Where("created_at >= ? AND created_at < ?", startOfYear, endOfYear).
+		Count(&count).Error
+	if err != nil {
+		return 0, fmt.Errorf("failed to count DocumentCr by year: %w", err)
+	}
+	return count, nil
+}
+
+type SendReviewUpdateModel struct {
+	DocCrName       string
+	FormId          string
+	DocReference    string
+	ReasonDetail    string
+	ProblemDetail   string
+	ServerType      string
+	CrType          string
+	CrPriority      string
+	GitMergeRequest string
+	GitRepository   string
+	DocNotes        string
+	DocAttachment   string
+	DocStatus       string
+	ApplicationName string
+}
+
+// SendReview implementasi persistensi untuk review CR
+func (r *DocumentCrRepositoryDB) SendReview(ctx context.Context, req domainDocCr.SendReviewRequest) (*domainDocCr.SendReviewResult, error) {
+	// 1. Update document CR (partial update)
+	updateDoc := SendReviewUpdateModel{
+		DocCrName:       req.DocCrName,
+		FormId:          req.FormId,
+		DocReference:    req.DocReference,
+		ReasonDetail:    req.ReasonDetail,
+		ProblemDetail:   req.ProblemDetail,
+		ServerType:      req.ServerType,
+		CrType:          req.CrType,
+		CrPriority:      req.CrPriority,
+		GitMergeRequest: req.GitMergeRequest,
+		GitRepository:   req.GitRepository,
+		DocNotes:        req.DocNotes,
+		DocAttachment:   strings.Join(req.DocAttachment, "|"),
+		DocStatus:       req.DocStatus,
+		ApplicationName: req.ApplicationName,
+	}
+
+	// guaranteed baris ini dijalankan walau nanti ada error di steps berikutnya
+	if err := r.db.WithContext(ctx).Model(&DocumentCrModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(updateDoc).Error; err != nil {
+		return nil, fmt.Errorf("failed to update document cr: %w", err)
+	}
+
+	// 2. Log aktivitas
+	logModel := DocumentCrLogModel{
+		DocCrID:     req.DocCrID,
+		LogActivity: "Reviewed",
+		NikLog:      req.NikLog,
+		NameLog:     req.NameLog,
+		NoteLog:     req.NoteLog,
+	}
+	if err := r.db.WithContext(ctx).Create(&logModel).Error; err != nil {
+		return nil, fmt.Errorf("failed to create log: %w", err)
+	}
+
+	// 3. Reset PIC (hapus lama, insert baru)
+	if err := r.db.WithContext(ctx).Delete(&PICModel{}, "doc_cr_id = ?", req.DocCrID).Error; err != nil {
+		return nil, fmt.Errorf("failed to delete old pics: %w", err)
+	}
+
+	pics := make([]PICModel, 0, len(req.PICDevelopers)+len(req.PICFunctionals)+len(req.PICViewers)+len(req.PICQAs))
+	for i := range req.PICDevelopers {
+		pics = append(pics, PICModel{DocCrID: req.DocCrID, PICNik: req.PICDevelopers[i].PICNik, PICName: req.PICDevelopers[i].PICName, PICDepartment: req.PICDevelopers[i].PICDepartment})
+	}
+	for i := range req.PICFunctionals {
+		pics = append(pics, PICModel{DocCrID: req.DocCrID, PICNik: req.PICFunctionals[i].PICNik, PICName: req.PICFunctionals[i].PICName, PICDepartment: req.PICFunctionals[i].PICDepartment})
+	}
+	for i := range req.PICViewers {
+		pics = append(pics, PICModel{DocCrID: req.DocCrID, PICNik: req.PICViewers[i].PICNik, PICName: req.PICViewers[i].PICName, PICDepartment: req.PICViewers[i].PICDepartment})
+	}
+	for i := range req.PICQAs {
+		pics = append(pics, PICModel{DocCrID: req.DocCrID, PICNik: req.PICQAs[i].PICNik, PICName: req.PICQAs[i].PICName, PICDepartment: "QA"})
+	}
+
+	if len(pics) > 0 {
+		if err := r.db.WithContext(ctx).Create(&pics).Error; err != nil {
+			return nil, fmt.Errorf("failed to create new pics: %w", err)
+		}
+	}
+
+	// 4. Insert approvals
+	approvals := make([]ApprovalModel, 0, len(req.Approvals))
+	for _, a := range req.Approvals {
+		if a == nil || a.ApprovalNik == nil || a.ApprovalName == nil || a.ApprovalDepartment == nil {
+			continue
+		}
+		approvals = append(approvals, ApprovalModel{
+			ApprovalNik:        *a.ApprovalNik,
+			ApprovalName:       *a.ApprovalName,
+			ApprovalDepartment: *a.ApprovalDepartment,
+			ApprovalStatus:     "Waiting",
+			DocCrID:            req.DocCrID,
+		})
+	}
+
+	if len(approvals) > 0 {
+		if err := r.db.WithContext(ctx).Create(&approvals).Error; err != nil {
+			return nil, fmt.Errorf("failed to create approvals: %w", err)
+		}
+	}
+
+	// 5. Update review
+	now := time.Now()
+	reviewUpdate := ReviewModel{
+		ReviewDate:   func() *string { s := now.Format(time.RFC3339); return &s }(),
+		ReviewStatus: "Reviewed",
+		ReviewNote:   req.ReviewNote,
+	}
+	if err := r.db.WithContext(ctx).Model(&ReviewModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(reviewUpdate).Error; err != nil {
+		return nil, fmt.Errorf("failed to update review: %w", err)
+	}
+
+	return &domainDocCr.SendReviewResult{DocCrID: req.DocCrID}, nil
+}
+
+// SendReviewReject implementasi persistensi untuk reject review CR
+func (r *DocumentCrRepositoryDB) SendReviewReject(ctx context.Context, req domainDocCr.SendReviewRejectRequest) (*domainDocCr.SendReviewRejectResult, error) {
+	// 1. Update status dokumen ke "Waiting Revision"
+	newDocStatus := struct {
+		DocStatus string
+	}{
+		DocStatus: "Waiting Revision",
+	}
+ 
+	if err := r.db.WithContext(ctx).Model(&DocumentCrModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(newDocStatus).Error; err != nil {
+		return nil, fmt.Errorf("failed to update document status: %w", err)
+	}
+ 
+	// 2. Insert log aktivitas "Rejected"
+	logModel := DocumentCrLogModel{
+		DocCrID:     req.DocCrID,
+		LogActivity: "Rejected",
+		NikLog:      req.NikLog,
+		NameLog:     req.NameLog,
+		NoteLog:     req.NoteLog,
+	}
+	if err := r.db.WithContext(ctx).Create(&logModel).Error; err != nil {
+		return nil, fmt.Errorf("failed to create log: %w", err)
+	}
+ 
+	// 3. Update data review
+	now := time.Now()
+	reviewUpdate := ReviewModel{
+		ReviewDate:   func() *string { s := now.Format(time.RFC3339); return &s }(),
+		ReviewStatus: "Waiting Revision",
+		ReviewNote:   req.ReviewNote,
+	}
+	if err := r.db.WithContext(ctx).Model(&ReviewModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(reviewUpdate).Error; err != nil {
+		return nil, fmt.Errorf("failed to update review: %w", err)
+	}
+ 
+	return &domainDocCr.SendReviewRejectResult{DocCrID: req.DocCrID}, nil
+}
+
+// SendRevisionUpdateModel adalah model untuk partial update document CR saat revision
+type SendRevisionUpdateModel struct {
+	DocCrName       string
+	DocReference    string
+	ReasonDetail    string
+	ProblemDetail   string
+	ServerType      string
+	CrType          string
+	CrPriority      string
+	GitMergeRequest string
+	GitRepository   string
+	DocNotes        string
+	DocAttachment   string
+	DocStatus       string
+	ApplicationName string
+}
+ 
+// SendRevision implementasi persistensi untuk merevisi CR
+func (r *DocumentCrRepositoryDB) SendRevision(ctx context.Context, req domainDocCr.SendRevisionRequest) (*domainDocCr.SendRevisionResult, error) {
+	// 1. Update document CR
+	updateDoc := SendRevisionUpdateModel{
+		DocCrName:       req.DocCrName,
+		DocReference:    req.DocReference,
+		ReasonDetail:    req.ReasonDetail,
+		ProblemDetail:   req.ProblemDetail,
+		ServerType:      req.ServerType,
+		CrType:          req.CrType,
+		CrPriority:      req.CrPriority,
+		GitMergeRequest: req.GitMergeRequest,
+		GitRepository:   req.GitRepository,
+		DocNotes:        req.DocNotes,
+		DocAttachment:   req.DocAttachment,
+		DocStatus:       "Waiting Review",
+		ApplicationName: req.ApplicationName,
+	}
+ 
+	if err := r.db.WithContext(ctx).Model(&DocumentCrModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(updateDoc).Error; err != nil {
+		return nil, fmt.Errorf("failed to update document cr: %w", err)
+	}
+ 
+	// 2. Log aktivitas "Revised"
+	logModel := DocumentCrLogModel{
+		DocCrID:     req.DocCrID,
+		LogActivity: "Revised",
+		NikLog:      req.NikLog,
+		NameLog:     req.NameLog,
+		NoteLog:     req.NoteLog,
+	}
+	if err := r.db.WithContext(ctx).Create(&logModel).Error; err != nil {
+		return nil, fmt.Errorf("failed to create log: %w", err)
+	}
+ 
+	return &domainDocCr.SendRevisionResult{DocCrID: req.DocCrID}, nil
+}
+
+// SendApprove implementasi persistensi untuk approve CR
+func (r *DocumentCrRepositoryDB) SendApprove(ctx context.Context, req domainDocCr.SendApproveRequest) (*domainDocCr.SendApproveResult, error) {
+ 
+	now := time.Now()
+	nowStr := now.Format(time.RFC3339)
+	approvalUpdate := struct {
+		ApprovalDate   *string
+		ApprovalStatus string
+		ApprovalNote   string
+	}{
+		ApprovalDate:   &nowStr,
+		ApprovalStatus: req.ApprovalStatus,
+		ApprovalNote:   req.ApprovalNote,
+	}
+ 
+	if err := r.db.WithContext(ctx).Model(&ApprovalModel{}).Where("approval_id = ?", req.ApprovalID).Updates(approvalUpdate).Error; err != nil {
+		return nil, fmt.Errorf("failed to update approval: %w", err)
+	}
+ 
+	var approvedApprovals []ApprovalModel
+	if err := r.db.WithContext(ctx).
+		Where("doc_cr_id = ? AND approval_status = ?", req.DocCrID, "Approve").
+		Find(&approvedApprovals).Error; err != nil {
+		return nil, fmt.Errorf("failed to fetch approvals: %w", err)
+	}
+ 
+	hasSameDepartment := false
+	hasITServices := false
+ 
+	for _, approval := range approvedApprovals {
+		if approval.ApprovalDepartment == req.RequesterDepartment {
+			hasSameDepartment = true
+		}
+		if approval.ApprovalDepartment == "IT SERVICES & IMPLEMENTATION" {
+			hasITServices = true
+		}
+	}
+ 
+	if hasSameDepartment {
+		shouldDeploy := false
+ 
+		if req.CrPriority == "Not Urgent" {
+			if hasITServices {
+				shouldDeploy = true
+			}
+		} else {
+			shouldDeploy = true
+		}
+ 
+		if shouldDeploy {
+			docUpdate := struct {
+				DocStatus string
+			}{
+				DocStatus: "Waiting Deploy",
+			}
+ 
+			if err := r.db.WithContext(ctx).Model(&DocumentCrModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(docUpdate).Error; err != nil {
+				return nil, fmt.Errorf("failed to update document status: %w", err)
+			}
+ 
+			logModel := DocumentCrLogModel{
+				DocCrID:     req.DocCrID,
+				LogActivity: "Approved",
+				NikLog:      req.NikLog,
+				NameLog:     req.NameLog,
+				NoteLog:     req.NoteLog,
+			}
+			if err := r.db.WithContext(ctx).Create(&logModel).Error; err != nil {
+				return nil, fmt.Errorf("failed to create log: %w", err)
+			}
+		}
+	}
+ 
+	var approveItems []*domainDocCr.ApproveItem
+	for i := range approvedApprovals {
+		item := &domainDocCr.ApproveItem{
+			ApprovalID:         &approvedApprovals[i].ApprovalID,
+			ApprovalNik:        &approvedApprovals[i].ApprovalNik,
+			ApprovalName:       &approvedApprovals[i].ApprovalName,
+			ApprovalDate:       approvedApprovals[i].ApprovalDate,
+			ApprovalStatus:     &approvedApprovals[i].ApprovalStatus,
+			ApprovalDepartment: &approvedApprovals[i].ApprovalDepartment,
+			ApprovalNote:       &approvedApprovals[i].ApprovalNote,
+			DocCrID:            &approvedApprovals[i].DocCrID,
+			CreatedAt:          approvedApprovals[i].CreatedAt,
+			UpdatedAt:          approvedApprovals[i].UpdatedAt,
+		}
+		approveItems = append(approveItems, item)
+	}
+ 
+	return &domainDocCr.SendApproveResult{Approvals: approveItems}, nil
+}
+
+// SendApproveReject menolak hasil approval CR
+func (r *DocumentCrRepositoryDB) SendApproveReject(ctx context.Context, req domainDocCr.SendApproveRejectRequest) (*domainDocCr.SendApproveRejectResult, error) {
+	docUpdate := struct {
+		DocStatus string
+	}{
+		DocStatus: "Waiting Review",
+	}
+ 
+	if err := r.db.WithContext(ctx).Model(&DocumentCrModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(docUpdate).Error; err != nil {
+		return nil, fmt.Errorf("failed to update document status: %w", err)
+	}
+ 
+	// 2. Cancel semua approval_status pada CR tersebut
+	if err := r.db.WithContext(ctx).Model(&ApprovalModel{}).Where("doc_cr_id = ?", req.DocCrID).Update("approval_status", "Cancel").Error; err != nil {
+		return nil, fmt.Errorf("failed to cancel approvals: %w", err)
+	}
+ 
+	// 3. Update data review
+	now := time.Now()
+	reviewUpdate := ReviewModel{
+		ReviewDate:   func() *string { s := now.Format(time.RFC3339); return &s }(),
+		ReviewStatus: "Waiting Review",
+		ReviewNote:   "Reject Approve",
+	}
+	if err := r.db.WithContext(ctx).Model(&ReviewModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(reviewUpdate).Error; err != nil {
+		return nil, fmt.Errorf("failed to update review: %w", err)
+	}
+ 
+	// 4. Buat log aktivitas "Rejected"
+	logModel := DocumentCrLogModel{
+		DocCrID:     req.DocCrID,
+		LogActivity: "Rejected",
+		NikLog:      req.NikLog,
+		NameLog:     req.NameLog,
+		NoteLog:     req.NoteLog,
+	}
+	if err := r.db.WithContext(ctx).Create(&logModel).Error; err != nil {
+		return nil, fmt.Errorf("failed to create log: %w", err)
+	}
+ 
+	return &domainDocCr.SendApproveRejectResult{DocCrID: req.DocCrID}, nil
+}
+
+// UpdateStatus mengubah status dokumen CR
+func (r *DocumentCrRepositoryDB) UpdateStatus(ctx context.Context, req domainDocCr.UpdateStatusRequest) (*domainDocCr.UpdateStatusResult, error) {
+	// 1. Update status dokumen
+	docUpdate := struct {
+		DocStatus    string
+		DeployedDate *time.Time
+	}{
+		DocStatus: req.DocStatus,
+	}
+ 
+	// 2. Jika status "Deployed", set deployed_date dan cancel approval yang masih "Waiting"
+	if req.DocStatus == "Deployed" {
+		now := time.Now()
+		docUpdate.DeployedDate = &now
+ 
+		// Cari semua approval yang masih "Waiting"
+		var waitingApprovals []ApprovalModel
+		if err := r.db.WithContext(ctx).
+			Where("doc_cr_id = ? AND approval_status = ?", req.DocCrID, "Waiting").
+			Find(&waitingApprovals).Error; err != nil {
+			return nil, fmt.Errorf("failed to fetch waiting approvals: %w", err)
+		}
+ 
+		// Update approval yang masih "Waiting" → "No Action"
+		for _, approval := range waitingApprovals {
+			approvalUpdate := struct {
+				ApprovalDate   *string
+				ApprovalStatus string
+				ApprovalNote   string
+			}{
+				ApprovalStatus: "No Action",
+				ApprovalNote:   "",
+			}
+			nowStr := time.Now().Format(time.RFC3339)
+			approvalUpdate.ApprovalDate = &nowStr
+ 
+			if err := r.db.WithContext(ctx).Model(&ApprovalModel{}).Where("approval_id = ?", approval.ApprovalID).Updates(approvalUpdate).Error; err != nil {
+				return nil, fmt.Errorf("failed to update approval status: %w", err)
+			}
+		}
+	}
+ 
+	// 3. Simpan perubahan status dokumen
+	if err := r.db.WithContext(ctx).Model(&DocumentCrModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(docUpdate).Error; err != nil {
+		return nil, fmt.Errorf("failed to update document status: %w", err)
+	}
+ 
+	// 4. Buat log aktivitas
+	logModel := DocumentCrLogModel{
+		DocCrID:     req.DocCrID,
+		LogActivity: req.DocStatus,
+		NikLog:      req.NikLog,
+		NameLog:     req.NameLog,
+		NoteLog:     req.NoteLog,
+	}
+	if err := r.db.WithContext(ctx).Create(&logModel).Error; err != nil {
+		return nil, fmt.Errorf("failed to create log: %w", err)
+	}
+ 
+	return &domainDocCr.UpdateStatusResult{
+		DocCrID:   req.DocCrID,
+		DocStatus: req.DocStatus,
+	}, nil
+}
+
+
+func (r *DocumentCrRepositoryDB) Delete (ctx context.Context,req domainDocCr.DeleteRequest) (*domainDocCr.DeleteResult,error){
+	if err := r.db.WithContext(ctx).Delete(&DocumentCrModel{}, "doc_cr_id = ?", req.DocCrID).Error; err != nil {
+		return nil, fmt.Errorf("failed to delete document: %w", err)
+	}
+	return &domainDocCr.DeleteResult{
+		DocCrID: req.DocCrID,
+		ApplicationName: req.ApplicationName,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now()}, nil
+}
+ 
+// GetByID mengambil satu document berdasarkan ID
+func (r *DocumentCrRepositoryDB) GetByID(ctx context.Context, docCrID uint) (*domainDocCr.DocumentCr, error) {
+	var model DocumentCrModel
+	err := r.db.WithContext(ctx).Where("doc_cr_id = ?", docCrID).First(&model).Error
+	if err != nil {
+		return nil, err
+	}
+	return model.toEntity(), nil
+}
+ 
+func (r *DocumentCrRepositoryDB) Update(ctx context.Context, docCrID uint, req domainDocCr.CreateDocCrRequest) (*domainDocCr.DocumentCr, error) {
+	updates := map[string]interface{}{
+		"doc_cr_name":           req.DocCrName,
+		"form_id":               req.FormId,
+		"doc_reference":         req.DocReference,
+		"requester_nik":         req.RequesterNIK,
+		"requester_name":        req.RequesterName,
+		"requester_department":  req.RequesterDepartment,
+		"reason_detail":         req.ReasonDetail,
+		"problem_detail":        req.ProblemDetail,
+		"server_type":           req.ServerType,
+		"cr_type":               req.CrType,
+		"cr_priority":           req.CrPriority,
+		"git_merge_request":     req.GitMergeRequest,
+		"git_repository":        req.GitRepository,
+		"doc_notes":             req.DocNotes,
+		"doc_attachment":        strings.Join(req.DocAttachment, "|"),
+		"application_name":      req.ApplicationName,
+	}
+ 
+	err := r.db.WithContext(ctx).
+		Model(&DocumentCrModel{}).
+		Where("doc_cr_id = ?", docCrID).
+		Updates(updates).Error
+ 
+	if err != nil {
+		return nil, err
+	}
+ 
+	return r.GetByID(ctx, docCrID)
+}
+ 
+// DeletePICsByDocCrID menghapus semua PIC milik document (hard delete)
+func (r  *DocumentCrRepositoryDB) DeletePICsByDocCrID(ctx context.Context, docCrID uint) error {
+	return r.db.WithContext(ctx).Unscoped().Delete(&PICModel{}, "doc_cr_id = ?", docCrID).Error
+}
+ 
+// DeleteReviewsByDocCrID menghapus semua Review milik document
+func (r  *DocumentCrRepositoryDB) DeleteReviewsByDocCrID(ctx context.Context, docCrID uint) error {
+	return r.db.WithContext(ctx).Unscoped().Delete(&ReviewModel{}, "doc_cr_id = ?", docCrID).Error
+}
+ 
+// CreatePICs bulk insert PIC baru
+func (r *DocumentCrRepositoryDB) CreatePICs(ctx context.Context, docCrID uint, pics []domainDocCr.PIC) error {
+	if len(pics) == 0 {
+		return nil
+	}
+ 
+	models := make([]PICModel, len(pics))
+	for i, p := range pics {
+		models[i] = PICModel{
+			DocCrID:       docCrID,
+			PICNik:        p.PICNik,
+			PICName:       p.PICName,
+			PICDepartment: p.PICDepartment,
+		}
+	}
+	return r.db.WithContext(ctx).Create(&models).Error
+}
+ 
+// CreateReview insert review baru dengan status "Waiting"
+func (r *DocumentCrRepositoryDB) CreateReview(ctx context.Context, docCrID uint, review domainDocCr.ReviewCreateRequest) error {
+	model := ReviewModel{
+		DocCrID:      docCrID,
+		ReviewNik:    review.ReviewNik,
+		ReviewName:   review.ReviewName,
+		ReviewStatus: "Waiting",
+	}
+	return r.db.WithContext(ctx).Create(&model).Error
+}
+ 
+// CreateLog insert log aktivitas ke trs_document_cr_log
+func (r *DocumentCrRepositoryDB) CreateLog(ctx context.Context, log domainDocCr.Milestone) error {
+	model := DocumentCrLogModel{
+		DocCrID:     log.DocCrID,
+		LogActivity: log.LogActivity,
+		NikLog:      log.NikLog,
+		NameLog:     log.NameLog,
+		NoteLog:     log.NoteLog,
+		CreatedAt:   time.Now(),
+	}
+	return r.db.WithContext(ctx).Create(&model).Error
+}
+
+func (r *DocumentCrRepositoryDB) Upsert(ctx context.Context, req domainDocCr.CreateDocCrRequest) (*domainDocCr.DocumentCr, error) {
+	var result *domainDocCr.DocumentCr
+ 
+	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var doc *domainDocCr.DocumentCr
+		var docCrID uint
+ 
+		if req.DocCrID > 0 {
+			// ===== MODE UPDATE =====
+			updated, err := r.updateInTx(tx, req)
+			if err != nil {
+				return err
+			}
+			doc = updated
+			docCrID = req.DocCrID
+ 
+			// Hapus PIC & Review lama (hard delete, sama seperti perilaku lama)
+			if err := tx.Unscoped().Delete(&PICModel{}, "doc_cr_id = ?", docCrID).Error; err != nil {
+				return fmt.Errorf("failed to delete old pics: %w", err)
+			}
+			if err := tx.Unscoped().Delete(&ReviewModel{}, "doc_cr_id = ?", docCrID).Error; err != nil {
+				return fmt.Errorf("failed to delete old reviews: %w", err)
+			}
+		} else {
+			created, err := r.createInTx(tx, req)
+			if err != nil {
+				return err
+			}
+			doc = created
+			docCrID = doc.DocCrID
+		}
+ 
+		// Buat PIC baru (berlaku untuk kedua mode)
+		allPICs := make([]domainDocCr.PIC, 0,
+			len(req.PICDevelopers)+len(req.PICFunctionals)+len(req.PICViewers)+len(req.PICQAs))
+		allPICs = append(allPICs, req.PICDevelopers...)
+		allPICs = append(allPICs, req.PICFunctionals...)
+		allPICs = append(allPICs, req.PICViewers...)
+		allPICs = append(allPICs, req.PICQAs...)
+		if len(allPICs) > 0 {
+			if err := createPICsInTx(tx, docCrID, allPICs); err != nil {
+				return fmt.Errorf("failed to create pics: %w", err)
+			}
+		}
+ 
+		// Buat Review baru (jika ada)
+		if req.Review != nil {
+			if err := createReviewInTx(tx, docCrID, *req.Review); err != nil {
+				return fmt.Errorf("failed to create review: %w", err)
+			}
+		}
+ 
+		// Buat log aktivitas
+		activity := "Created"
+		if req.DocCrID > 0 {
+			activity = "Updated"
+		}
+		if err := createLogInTx(tx, domainDocCr.Milestone{
+			DocCrID:     docCrID,
+			LogActivity: activity,
+			NikLog:      req.NikLog,
+			NameLog:     req.NameLog,
+			NoteLog:     req.NoteLog,
+		}); err != nil {
+			return fmt.Errorf("failed to create log: %w", err)
+		}
+ 
+		result = doc
+		return nil // commit
+	})
+ 
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+ 
+// createInTx versi Create() yang berjalan di dalam transaksi
+func (r *DocumentCrRepositoryDB) createInTx(tx *gorm.DB, req domainDocCr.CreateDocCrRequest) (*domainDocCr.DocumentCr, error) {
+	var docAttachmentStr string
+	if len(req.DocAttachment) > 0 {
+		docAttachmentStr = strings.Join(req.DocAttachment, "|")
+	}
+ 
+	docModel := DocumentCrModel{
+		DocCrName:           req.DocCrName,
+		FormId:              req.FormId,
+		DocReference:        req.DocReference,
+		RequesterNIK:        req.RequesterNIK,
+		RequesterName:       req.RequesterName,
+		RequesterDepartment: req.RequesterDepartment,
+		ReasonDetail:        req.ReasonDetail,
+		ProblemDetail:       req.ProblemDetail,
+		ServerType:          req.ServerType,
+		CrType:              req.CrType,
+		CrPriority:          req.CrPriority,
+		GitMergeRequest:     req.GitMergeRequest,
+		GitRepository:       req.GitRepository,
+		DocNotes:            req.DocNotes,
+		DocAttachment:       docAttachmentStr,
+		DocStatus:           req.DocStatus,
+		ApplicationName:     req.ApplicationName,
+		DeployedDate:        req.DeployedDate,
+		CreatedAt:           time.Now(),
+		UpdatedAt:           time.Now(),
+	}
+ 
+	if err := tx.Create(&docModel).Error; err != nil {
+		return nil, fmt.Errorf("failed to create DocumentCr: %w", err)
+	}
+	return docModel.toEntity(), nil
+}
+ 
+// updateInTx versi Update() yang berjalan di dalam transaksi,
+// plus validasi bahwa document benar-benar ada (dan tidak soft-deleted)
+func (r *DocumentCrRepositoryDB) updateInTx(tx *gorm.DB, req domainDocCr.CreateDocCrRequest) (*domainDocCr.DocumentCr, error) {
+	var existing DocumentCrModel
+	if err := tx.Where("doc_cr_id = ?", req.DocCrID).First(&existing).Error; err != nil {
+		return nil, fmt.Errorf("document with doc_cr_id %d not found: %w", req.DocCrID, err)
+	}
+ 
+	// CATATAN: lihat Step 4b jika ingin mempertahankan attachment lama
+	updates := map[string]interface{}{
+		"doc_cr_name":          req.DocCrName,
+		"form_id":              req.FormId,
+		"doc_reference":        req.DocReference,
+		"requester_nik":        req.RequesterNIK,
+		"requester_name":       req.RequesterName,
+		"requester_department": req.RequesterDepartment,
+		"reason_detail":        req.ReasonDetail,
+		"problem_detail":       req.ProblemDetail,
+		"server_type":          req.ServerType,
+		"cr_type":              req.CrType,
+		"cr_priority":          req.CrPriority,
+		"git_merge_request":    req.GitMergeRequest,
+		"git_repository":       req.GitRepository,
+		"doc_notes":            req.DocNotes,
+		"doc_attachment":       "",
+		"application_name":     req.ApplicationName,
+	}
+ 
+	if err := tx.Model(&DocumentCrModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(updates).Error; err != nil {
+		return nil, err
+	}
+ 
+	var updated DocumentCrModel
+	if err := tx.Where("doc_cr_id = ?", req.DocCrID).First(&updated).Error; err != nil {
+		return nil, err
+	}
+	return updated.toEntity(), nil
+}
+ 
+// Helper transaksional (varian dari CreatePICs / CreateReview / CreateLog
+// yang menerima tx, bukan r.db)
+func createPICsInTx(tx *gorm.DB, docCrID uint, pics []domainDocCr.PIC) error {
+	if len(pics) == 0 {
+		return nil
+	}
+	models := make([]PICModel, len(pics))
+	for i, p := range pics {
+		models[i] = PICModel{
+			DocCrID:       docCrID,
+			PICNik:        p.PICNik,
+			PICName:       p.PICName,
+			PICDepartment: p.PICDepartment,
+		}
+	}
+	return tx.Create(&models).Error
+}
+ 
+func createReviewInTx(tx *gorm.DB, docCrID uint, review domainDocCr.ReviewCreateRequest) error {
+	model := ReviewModel{
+		DocCrID:      docCrID,
+		ReviewNik:    review.ReviewNik,
+		ReviewName:   review.ReviewName,
+		ReviewStatus: "Waiting",
+	}
+	return tx.Create(&model).Error
+}
+ 
+func createLogInTx(tx *gorm.DB, log domainDocCr.Milestone) error {
+	model := DocumentCrLogModel{
+		DocCrID:     log.DocCrID,
+		LogActivity: log.LogActivity,
+		NikLog:      log.NikLog,
+		NameLog:     log.NameLog,
+		NoteLog:     log.NoteLog,
+		CreatedAt:   time.Now(),
+	}
+	return tx.Create(&model).Error
+}
