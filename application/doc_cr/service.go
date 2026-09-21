@@ -9,7 +9,6 @@ import (
 	
 )
 
-// Service adalah application service untuk DocumentCr
 type Service struct {
 	repo      domainDocCr.DocumentCrRepository
 	logger    Logger
@@ -20,7 +19,6 @@ func NewService(repo domainDocCr.DocumentCrRepository, logger Logger, fileStore 
 	return &Service{repo: repo, logger: logger, fileStore: fileStore}
 }
 
-// FileStorer adalah interface untuk menyimpan file ke disk
 type FileStorer interface {
 	Save(base64Data string, filePath string) error
 }
@@ -46,8 +44,7 @@ func (s *Service) GetDetail(ctx context.Context, req domainDocCr.GetDetailReques
 	return item, nil
 }
 
-// Create membuat atau memperbarui DocumentCr (upsert)
-// Create membuat atau memperbarui DocumentCr (upsert, atomik dalam 1 transaksi)
+
 func (s *Service) Create(ctx context.Context, req domainDocCr.CreateDocCrRequest) (*domainDocCr.DocumentCr, error) {
 	// ===== MODE UPDATE: langsung serahkan ke repo =====
 	if req.DocCrID > 0 {
@@ -147,7 +144,6 @@ func (s *Service) SendRevision(ctx context.Context, req domainDocCr.SendRevision
 
 // SendApprove mengirim approve CR
 func (s *Service) SendApprove(ctx context.Context, req domainDocCr.SendApproveRequest) (*domainDocCr.SendApproveResult, error) {
-	// 1. Validasi input
 	if req.ApprovalID == 0 {
 		s.logger.Warn("SendApprove failed: ApprovalID is required")
 		return nil, fmt.Errorf("ApprovalID is required")
@@ -158,7 +154,6 @@ func (s *Service) SendApprove(ctx context.Context, req domainDocCr.SendApproveRe
 		return nil, fmt.Errorf("DocCrID is required")
 	}
  
-	// 2. Panggil repository (service tidak tahu detail DB)
 	result, err := s.repo.SendApprove(ctx, req)
 	if err != nil {
 		s.logger.Error("SendApprove failed", err)
