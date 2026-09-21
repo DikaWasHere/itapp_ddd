@@ -18,13 +18,20 @@ container/
 berisi depedency injection yang menyusun semua repository,service,storage,handler dan notifier
 
 # alur 
-1.request dimulai dari presentation handler yang mengubah request http menjadi request domain ke service
+1. request dimulai dari presentation handler yang mengubah request http menjadi request domain ke service
 
-2.file application doc_cr.service menjalankan usecase 
+2. file application doc_cr.service menjalankan usecase 
 
-3.service memanggil repository melalui interface domain 
+3. service memanggil repository melalui interface domain 
 
-4.service menyimpan data menggunakan gorm ke postgre
+4. service menyimpan data menggunakan gorm ke postgre
 
 
 # pengembangan
+1. aaturan bisnis di letakan di domain
+2. handler hanya berisi request dan response
+3. application tidak boleh langsung menyentuh gorm
+4. database hanya boleh berada di infrastructure/persistance
+5. depedency baru harus di tulis melalui container.go
+
+

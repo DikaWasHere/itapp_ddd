@@ -362,13 +362,11 @@ func (r *DocumentCrRepositoryDB) GetDetail(ctx context.Context, req domainDocCr.
 		return nil, fmt.Errorf("failed to retrieve DocumentCr detail: %w", err)
 	}
 
-	// Step 1: Convert JOIN rows to detail item (without milestones)
 	item, err := toDocumentCrDetailItem(joinRows)
 	if err != nil {
 		return nil, err
 	}
 
-	// Step 2: Fetch milestones separately (already exists!)
 	r.fetchMilestones(ctx, item.DocCr.DocCrID, item)
 
 	return item, nil
