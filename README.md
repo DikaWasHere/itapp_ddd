@@ -33,7 +33,25 @@ berisi depedency injection yang menyusun semua repository,service,storage,handle
 
 
 # instalasi
-cloning
+1. cloning
 ```bash
 git clone
+```
+cd itapp
+2. download depedency
+```bash
+go mod download
+```
+3. sesuaikan env.example
+4. jalankan 
+```bash
+go run main.go
+```
+5. server berjalan pada 
+```bash
+http://localhost:8280
+```
+6. dokumentasi API berjlana pada
+```bash
+http://localhost:8280/swagger/index.html
 ```
