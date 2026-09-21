@@ -19,8 +19,11 @@ berisi depedency injection yang menyusun semua repository,service,storage,handle
 
 # alur 
 1.request dimulai dari presentation handler yang mengubah request http menjadi request domain ke service
+
 2.file application doc_cr.service menjalankan usecase 
+
 3.service memanggil repository melalui interface domain 
+
 4.service menyimpan data menggunakan gorm ke postgre
 
 
