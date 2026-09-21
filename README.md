@@ -36,8 +36,8 @@ berisi depedency injection yang menyusun semua repository,service,storage,handle
 1. cloning
 ```bash
 git clone
-```
 cd itapp
+```
 2. download depedency
 ```bash
 go mod download

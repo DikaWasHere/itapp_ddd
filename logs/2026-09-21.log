@@ -148,3 +148,4 @@
 2026-09-21T13:37:19.2963591+07:00 | INFO | service.go:144 | doc_cr.(*Service).SendRevision | Revision submitted for DocCrID: 1
 2026-09-21T13:37:21.2484661+07:00 | INFO | service.go:32 | notification.(*Service).Send | Notification sent to 20230053 | title: New CR IT.CR.2025.010
 2026-09-21T13:37:21.2484661+07:00 | INFO | doc_cr_handler.go:854 | handler.(*DocumentCrHandler).SendRevision | [POST] /api/v1/doc-cr-revision | Status: 200 | Revision submitted for DocCrID: 1
+2026-09-21T15:23:24.762425+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
