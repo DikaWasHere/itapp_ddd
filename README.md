@@ -42,7 +42,7 @@ cd itapp
 ```bash
 go mod download
 ```
-3. sesuaikan env.example
+3. sesuaikan .env.example
 4. jalankan 
 ```bash
 go run main.go

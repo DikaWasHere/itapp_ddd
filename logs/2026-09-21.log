@@ -149,3 +149,12 @@
 2026-09-21T13:37:21.2484661+07:00 | INFO | service.go:32 | notification.(*Service).Send | Notification sent to 20230053 | title: New CR IT.CR.2025.010
 2026-09-21T13:37:21.2484661+07:00 | INFO | doc_cr_handler.go:854 | handler.(*DocumentCrHandler).SendRevision | [POST] /api/v1/doc-cr-revision | Status: 200 | Revision submitted for DocCrID: 1
 2026-09-21T15:23:24.762425+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-21T16:23:45.8168173+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-21T16:23:56.2252984+07:00 | ERROR | service.go:198 | doc_cr.(*Service).UpdateStatus | UpdateStatus failed: record not found
+2026-09-21T16:23:56.2252984+07:00 | ERROR | doc_cr_handler.go:1050 | handler.(*DocumentCrHandler).UpdateStatus | Failed to update status: record not found
+2026-09-21T16:24:12.802747+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-21T16:24:19.0319848+07:00 | INFO | service.go:202 | doc_cr.(*Service).UpdateStatus | Document status updated to 'Waiting Review' for DocCrID: 135
+2026-09-21T16:24:19.0335154+07:00 | INFO | doc_cr_handler.go:1054 | handler.(*DocumentCrHandler).UpdateStatus | [POST] /api/v1/doc-cr-update-status | Status: 200 | Document status updated to 'Waiting Review' for DocCrID: 135
+2026-09-21T17:01:17.7518182+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-21T17:01:25.1083945+07:00 | INFO | service.go:202 | doc_cr.(*Service).UpdateStatus | Document status updated to 'Waiting Review' for DocCrID: 135
+2026-09-21T17:01:25.1083945+07:00 | INFO | doc_cr_handler.go:1054 | handler.(*DocumentCrHandler).UpdateStatus | [POST] /api/v1/doc-cr-update-status | Status: 200 | Document status updated to 'Waiting Review' for DocCrID: 135

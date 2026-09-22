@@ -1,0 +1,4 @@
+2026-09-22T11:13:31.9523852+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-22T11:13:50.8291173+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-22T11:14:58.2765194+07:00 | INFO | service.go:202 | doc_cr.(*Service).UpdateStatus | Document status updated to 'Waiting Review' for DocCrID: 135
+2026-09-22T11:14:58.2765194+07:00 | INFO | doc_cr_handler.go:1054 | handler.(*DocumentCrHandler).UpdateStatus | [POST] /api/v1/doc-cr-update-status | Status: 200 | Document status updated to 'Waiting Review' for DocCrID: 135
