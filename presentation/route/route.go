@@ -4,13 +4,14 @@ import (
 	"itapp_ddd/presentation/handler"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/swaggo/fiber-swagger" // fiber-swagger middleware
 )
 
 func RouteInit(app *fiber.App, attachmentHandler *handler.AttachmentHandler, docCrHandler *handler.DocumentCrHandler) {
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
 
-	// Static file serving (sama seperti proyek asli)
+	app.Get("/swagger/*", fiberSwagger.WrapHandler)
 	app.Static("/attachment", "./public/attachment")
 
 	// Document CR

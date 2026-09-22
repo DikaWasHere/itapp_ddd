@@ -137,7 +137,16 @@ type docCrDetailResponse struct {
 	Milestones          []milestoneResponse `json:"milestones" gorm:"-"`
 }
 
-// GetAll menangani request untuk mengambil semua DocumentCr
+// ShowAll DocumentCr
+// @Summary      Show all DocumentCr
+// @Description  Show all DocumentCr
+// @Tags         DocumentCr
+// @Accept       json
+// @Produce      json
+// @Param        request body  docCrGetListRequest true "Request body containing the filter parameters"
+// @Success      200  {object}  docCrListResponse
+// Failure        400  {object}  pkg.ErrorResponse
+// @Router       /doc-cr [post]
 func (h *DocumentCrHandler) GetAll(c *fiber.Ctx) error {
 	req := new(docCrGetListRequest)
 
@@ -240,6 +249,16 @@ func (h *DocumentCrHandler) GetAll(c *fiber.Ctx) error {
 	return pkg.SuccessResponse(c, data)
 }
 
+// Show Detail DocumentCr
+// @Summary      Show Detail DocumentCr
+// @Description  Show Detail DocumentCr
+// @Tags         DocumentCr
+// @Accept       json
+// @Produce      json
+// @Param        request body  docCrGetDetailRequest true "Request body containing the filter parameters"
+// @Success      200  {object}  []docCrDetailResponse
+// Failure        400  {object}  pkg.ErrorResponse
+// @Router       /doc-cr-detail [post]
 // GetDetail menangani request untuk mengambil detail DocumentCr
 func (h *DocumentCrHandler) GetDetail(c *fiber.Ctx) error {
 	req := new(docCrGetDetailRequest)
@@ -427,8 +446,16 @@ type docCrCreateResponse struct {
 	CreatedAt           time.Time  `json:"created_at"`
 }
 
-// go
-// go
+// Show Add DocumentCr
+// @Summary      ADD DocumentCr
+// @Description  Add DocumentCr
+// @Tags         DocumentCr
+// @Accept       json
+// @Produce      json
+// @Param        request body  docCrCreateRequest true "Request body containing the filter parameters"
+// @Success      200  {object}  ApiResponse
+// Failure        400  {object}  pkg.ErrorResponse
+// @Router       /doc-cr-add [post]
 func (h *DocumentCrHandler) Create(c *fiber.Ctx) error {
 	req := new(docCrCreateRequest)
 
@@ -520,7 +547,7 @@ func (h *DocumentCrHandler) Create(c *fiber.Ctx) error {
 		_ = h.notification.Send(p.PICNik, fmt.Sprint("New CR ", doc.FormId), "New CR needs your review, Please refresh the CR list")
 	}
 
-	h.logger.Info("[%s] %s | Status: 201 | DocumentCr created successfully", c.Method(), c.Path())
+	h.logger.Info("[%s] %s | Status: 200 | DocumentCr created successfully", c.Method(), c.Path())
 	return pkg.SuccessResponse(c, doc.DocCrID)
 }
 
@@ -567,7 +594,16 @@ type approvalRequestDTO struct {
 	ApprovalDepartment string `json:"approval_department"`
 }
 
-// SendReview menangani request untuk submit review CR
+// Show Send Review DocumentCr
+// @Summary      Send Review DocumentCr
+// @Description  Send Review DocumentCr
+// @Tags         DocumentCr
+// @Accept       json
+// @Produce      json
+// @Param        request body  docCrSendReviewRequest true "Request body containing the filter parameters"
+// @Success      200  {object}  docCrCreateResponse "Review sent successfully"
+// Failure       400  {object}  pkg.ErrorResponse
+// @Router       /doc-cr-review [post]
 func (h *DocumentCrHandler) SendReview(c *fiber.Ctx) error {
 	req := new(docCrSendReviewRequest)
 	if err := c.BodyParser(req); err != nil {
@@ -675,7 +711,16 @@ type docCrSendReviewRejectRequest struct {
 	NoteLog      string `json:"note_log"`
 }
 
-// SendReviewReject menangani request untuk menolak CR dari tahap review
+// Show Send Review Reject DocumentCr
+// @Summary      Send Review Reject DocumentCr
+// @Description  Send Review Reject DocumentCr
+// @Tags         DocumentCr
+// @Accept       json
+// @Produce      json
+// @Param        request body  docCrSendReviewRejectRequest true "Request body containing the filter parameters"
+// @Success      200  {object}  docCrCreateResponse "Review reject sent successfully"
+// Failure        400  {object}  pkg.ErrorResponse
+// @Router       /doc-cr-reject [post]
 func (h *DocumentCrHandler) SendReviewReject(c *fiber.Ctx) error {
 	req := new(docCrSendReviewRejectRequest)
 	if err := c.BodyParser(req); err != nil {
@@ -746,7 +791,16 @@ type reviewRequestDTO struct {
 	ReviewName string `json:"review_name"`
 }
 
-// SendRevision menangani request untuk merevisi CR
+// Show revision DocumentCr
+// @Summary      revision DocumentCr
+// @Description  revision DocumentCr
+// @Tags         DocumentCr
+// @Accept       json
+// @Produce      json
+// @Param        request body  docCrSendRevisionRequest true "Request body containing the filter parameters"
+// @Success      200  {object}  docCrCreateResponse "Revision submitted"
+// Failure        400  {object}  pkg.ErrorResponse
+// @Router       /doc-cr-revision [post]
 func (h *DocumentCrHandler) SendRevision(c *fiber.Ctx) error {
 	req := new(docCrSendRevisionRequest)
 	if err := c.BodyParser(req); err != nil {
@@ -788,7 +842,6 @@ func (h *DocumentCrHandler) SendRevision(c *fiber.Ctx) error {
 		},
 	}
 
-
 	// Panggil service
 	result, err := h.service.SendRevision(c.Context(), domainReq)
 	if err != nil {
@@ -796,7 +849,7 @@ func (h *DocumentCrHandler) SendRevision(c *fiber.Ctx) error {
 		return pkg.BadRequestResponse(c, "Failed to send revision: "+err.Error())
 	}
 
-		_ = h.notification.Send(req.Review.ReviewNik, fmt.Sprint("New CR ", req.FormId), "New CR needs your review, Please refresh the CR list")
+	_ = h.notification.Send(req.Review.ReviewNik, fmt.Sprint("New CR ", req.FormId), "New CR needs your review, Please refresh the CR list")
 
 	h.logger.Info("[%s] %s | Status: 200 | Revision submitted for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
 	return pkg.SuccessResponse(c, nil)
@@ -829,7 +882,16 @@ type approvalApproveResponse struct {
 	UpdatedAt          *time.Time `json:"updated_at"`
 }
 
-// SendApprove menangani request untuk approve CR
+// Show Approve DocumentCr
+// @Summary      Approve DocumentCr
+// @Description  Approve DocumentCr
+// @Tags         DocumentCr
+// @Accept       json
+// @Produce      json
+// @Param        request body  docCrSendApproveRequest true "Request body containing the filter parameters"
+// @Success      200  {object}  approvalApproveResponse "Revision submitted"
+// Failure       400  {object}  pkg.ErrorResponse
+// @Router    	/doc-cr-approve [post]
 func (h *DocumentCrHandler) SendApprove(c *fiber.Ctx) error {
 	// 1. Parse JSON
 	req := new(docCrSendApproveRequest)
@@ -897,7 +959,16 @@ type docCrSendApproveRejectRequest struct {
 	NoteLog       string `json:"note_log"`
 }
 
-// SendApproveReject menangani request untuk menolak hasil approval CR
+// Show approve Reject DocumentCr
+// @Summary      approve Reject DocumentCr
+// @Description  approve Reject DocumentCr
+// @Tags         DocumentCr
+// @Accept       json
+// @Produce      json
+// @Param        request body  docCrSendApproveRejectRequest true "Request body containing the filter parameters"
+// @Success      200  {object}  docCrCreateResponse "Approval rejected submitted"
+// Failure        400  {object}  pkg.ErrorResponse
+// @Router       /doc-cr-approve-reject [post]
 func (h *DocumentCrHandler) SendApproveReject(c *fiber.Ctx) error {
 	req := new(docCrSendApproveRejectRequest)
 	if err := c.BodyParser(req); err != nil {
@@ -939,7 +1010,16 @@ type docCrUpdateStatusRequest struct {
 	NoteLog   string `json:"note_log"`
 }
 
-// UpdateStatus menangani request untuk update status dokumen CR
+// UpdateStatus mengupdate status dokumen CR
+// @Summary      Update Document CR Status
+// @Description  Update the status of a Document CR
+// @Tags         DocumentCr
+// @Accept       json
+// @Produce      json
+// @Param        request body  docCrUpdateStatusRequest true "Request body containing the filter parameters"
+// @Success      200  {object}  docCrCreateResponse "update status"
+// Failure        400  {object}  pkg.ErrorResponse
+// @Router       /doc-cr-update-status [post]
 func (h *DocumentCrHandler) UpdateStatus(c *fiber.Ctx) error {
 	req := new(docCrUpdateStatusRequest)
 	if err := c.BodyParser(req); err != nil {
@@ -980,6 +1060,23 @@ type docCrDeleteRequest struct {
 	ApplicationName string `json:"application_name"`
 }
 
+type DeleteResponse struct {
+	ApplicationID   uint      `json:"application_id"`
+	ApplicationName string    `json:"application_name"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
+}
+
+// Show delete DocumentCr
+// @Summary      Delete DocumentCr
+// @Description  Delete DocumentCr
+// @Tags         DocumentCr
+// @Accept       json
+// @Produce      json
+// @Param        request body  domainDocCr.DeleteRequest true "Request body containing the filter parameters"
+// @Success      200  {object}  DeleteResponse  "DocumentCr deleted successfully"
+// @Failure      400  {object}  domainDocCr.ApiResponse "Failed to delete DocumentCr"
+// @Router       /doc-cr-delete [post]
 func (h *DocumentCrHandler) Delete(c *fiber.Ctx) error {
 	req := new(docCrDeleteRequest)
 	if err := c.BodyParser(req); err != nil {
@@ -1003,10 +1100,10 @@ func (h *DocumentCrHandler) Delete(c *fiber.Ctx) error {
 	}
 
 	h.logger.Info("[%s] %s | Status: 200 | DocumentCr deleted successfully for DocCrID: %d", c.Method(), c.Path(), req.DocCrID)
-	return pkg.SuccessResponse(c, fiber.Map{
-		"application_id":   result.DocCrID,
-		"application_name": result.ApplicationName,
-		"created_at":       result.CreatedAt,
-		"updated_at":       result.UpdatedAt,
+	return pkg.SuccessResponse(c, DeleteResponse{
+		ApplicationID:   result.DocCrID,
+		ApplicationName: result.ApplicationName,
+		CreatedAt:       result.CreatedAt,
+		UpdatedAt:       result.UpdatedAt,
 	})
 }

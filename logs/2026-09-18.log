@@ -1,0 +1,46 @@
+2026-09-18T09:05:56.8712743+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T09:09:46.8977884+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T09:17:28.6143959+07:00 | ERROR | service.go:32 | doc_cr.(*Service).GetAll | GetAll failed: failed to retrieve DocumentCr data: ERROR: invalid input syntax for type timestamp with time zone: "string" (SQLSTATE 22007)
+2026-09-18T09:17:50.6917386+07:00 | INFO | doc_cr_handler.go:251 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-18T09:18:06.6823522+07:00 | INFO | doc_cr_handler.go:251 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
+2026-09-18T09:36:10.8452874+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T09:38:44.0464616+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T09:45:51.1482719+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T09:49:42.5252211+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T10:10:17.7831959+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T10:17:51.3875975+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T10:19:27.4751713+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T10:19:36.7286601+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T10:20:02.1710997+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T10:22:21.2130764+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T10:23:51.330656+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T10:24:33.8592907+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T10:25:10.5695097+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T10:30:25.8688597+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T10:44:08.1716085+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T10:49:13.2212715+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T10:54:42.3749369+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T11:21:39.0767307+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T11:26:53.9975136+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T11:27:46.5584679+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T11:31:12.4556743+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T11:38:26.676115+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T14:11:44.9390127+07:00 | INFO | service.go:168 | doc_cr.(*Service).SendApprove | Approval submitted for DocCrID: 1
+2026-09-18T14:11:44.9390127+07:00 | INFO | doc_cr_handler.go:941 | handler.(*DocumentCrHandler).SendApprove | [POST] /api/v1/doc-cr-approve | Status: 200 | Approval submitted for DocCrID: 1
+2026-09-18T14:12:02.2393445+07:00 | INFO | service.go:168 | doc_cr.(*Service).SendApprove | Approval submitted for DocCrID: 1
+2026-09-18T14:12:02.2393445+07:00 | INFO | doc_cr_handler.go:941 | handler.(*DocumentCrHandler).SendApprove | [POST] /api/v1/doc-cr-approve | Status: 200 | Approval submitted for DocCrID: 1
+2026-09-18T14:32:28.6479376+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T14:34:41.8624977+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T14:35:38.9991199+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T14:38:51.9061377+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T14:40:55.9351065+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T14:54:17.7389145+07:00 | INFO | service.go:168 | doc_cr.(*Service).SendApprove | Approval submitted for DocCrID: 1
+2026-09-18T14:54:17.7389145+07:00 | INFO | doc_cr_handler.go:950 | handler.(*DocumentCrHandler).SendApprove | [POST] /api/v1/doc-cr-approve | Status: 200 | Approval submitted for DocCrID: 1
+2026-09-18T15:00:56.9315977+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T15:06:59.8144716+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T15:09:49.3123782+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T16:06:39.9992733+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T16:07:50.6567773+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T17:10:16.2957481+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T17:11:00.2218469+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-18T17:15:40.2699848+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized

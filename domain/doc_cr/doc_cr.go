@@ -127,3 +127,9 @@ func NewDocumentCr(
 		CreatedAt:           createdAt,
 	}
 }
+
+type ApiResponse struct {
+	Status  string      `json:"status"`
+	Message string      `json:"message"`
+	Data    string 		`json:"data"`
+}

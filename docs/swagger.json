@@ -1,0 +1,1276 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "ITAPP",
+        "contact": {}
+    },
+    "host": "localhost:8280",
+    "basePath": "/api/v1",
+    "paths": {
+        "/doc-cr": {
+            "post": {
+                "description": "Show all DocumentCr",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DocumentCr"
+                ],
+                "summary": "Show all DocumentCr",
+                "parameters": [
+                    {
+                        "description": "Request body containing the filter parameters",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.docCrGetListRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.docCrListResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/doc-cr-add": {
+            "post": {
+                "description": "Add DocumentCr",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DocumentCr"
+                ],
+                "summary": "ADD DocumentCr",
+                "parameters": [
+                    {
+                        "description": "Request body containing the filter parameters",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.docCrCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Document created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/handler.docCrCreateResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/doc-cr-approve": {
+            "post": {
+                "description": "Approve DocumentCr",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DocumentCr"
+                ],
+                "summary": "Approve DocumentCr",
+                "parameters": [
+                    {
+                        "description": "Request body containing the filter parameters",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.docCrSendApproveRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Revision submitted",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/handler.approvalApproveResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/doc-cr-approve-reject": {
+            "post": {
+                "description": "approve Reject DocumentCr",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DocumentCr"
+                ],
+                "summary": "approve Reject DocumentCr",
+                "parameters": [
+                    {
+                        "description": "Request body containing the filter parameters",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.docCrSendApproveRejectRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Approval rejected submitted",
+                        "schema": {
+                            "$ref": "#/definitions/handler.docCrCreateResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/doc-cr-delete": {
+            "post": {
+                "description": "Delete DocumentCr",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DocumentCr"
+                ],
+                "summary": "Delete DocumentCr",
+                "parameters": [
+                    {
+                        "description": "Request body containing the filter parameters",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/doc_cr.DeleteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "DocumentCr deleted successfully",
+                        "schema": {
+                            "$ref": "#/definitions/handler.DeleteResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Failed to delete DocumentCr",
+                        "schema": {
+                            "$ref": "#/definitions/doc_cr.ApiResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/doc-cr-detail": {
+            "post": {
+                "description": "Show Detail DocumentCr",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DocumentCr"
+                ],
+                "summary": "Show Detail DocumentCr",
+                "parameters": [
+                    {
+                        "description": "Request body containing the filter parameters",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.docCrGetDetailRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/handler.docCrDetailResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/doc-cr-reject": {
+            "post": {
+                "description": "Send Review Reject DocumentCr",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DocumentCr"
+                ],
+                "summary": "Send Review Reject DocumentCr",
+                "parameters": [
+                    {
+                        "description": "Request body containing the filter parameters",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.docCrSendReviewRejectRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Review reject sent successfully",
+                        "schema": {
+                            "$ref": "#/definitions/handler.docCrCreateResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/doc-cr-review": {
+            "post": {
+                "description": "Send Review DocumentCr",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DocumentCr"
+                ],
+                "summary": "Send Review DocumentCr",
+                "parameters": [
+                    {
+                        "description": "Request body containing the filter parameters",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.docCrSendReviewRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Review sent successfully",
+                        "schema": {
+                            "$ref": "#/definitions/handler.docCrCreateResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/doc-cr-revision": {
+            "post": {
+                "description": "revision DocumentCr",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DocumentCr"
+                ],
+                "summary": "revision DocumentCr",
+                "parameters": [
+                    {
+                        "description": "Request body containing the filter parameters",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.docCrSendRevisionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Revision submitted",
+                        "schema": {
+                            "$ref": "#/definitions/handler.docCrCreateResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/doc-cr-update-status": {
+            "post": {
+                "description": "Update the status of a Document CR",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DocumentCr"
+                ],
+                "summary": "Update Document CR Status",
+                "parameters": [
+                    {
+                        "description": "Request body containing the filter parameters",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.docCrUpdateStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "update status",
+                        "schema": {
+                            "$ref": "#/definitions/handler.docCrCreateResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "doc_cr.ApiResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "doc_cr.DeleteRequest": {
+            "type": "object",
+            "properties": {
+                "applicationName": {
+                    "type": "string"
+                },
+                "docCrID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.DeleteResponse": {
+            "type": "object",
+            "properties": {
+                "application_id": {
+                    "type": "integer"
+                },
+                "application_name": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.approvalApproveResponse": {
+            "type": "object",
+            "properties": {
+                "approval_date": {
+                    "type": "string"
+                },
+                "approval_department": {
+                    "type": "string"
+                },
+                "approval_id": {
+                    "type": "integer"
+                },
+                "approval_name": {
+                    "type": "string"
+                },
+                "approval_nik": {
+                    "type": "string"
+                },
+                "approval_note": {
+                    "type": "string"
+                },
+                "approval_status": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "doc_cr_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.approvalRequestDTO": {
+            "type": "object",
+            "properties": {
+                "approval_department": {
+                    "type": "string"
+                },
+                "approval_name": {
+                    "type": "string"
+                },
+                "approval_nik": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.approvalResponse": {
+            "type": "object",
+            "properties": {
+                "approval_date": {
+                    "type": "string"
+                },
+                "approval_department": {
+                    "type": "string"
+                },
+                "approval_id": {
+                    "type": "integer"
+                },
+                "approval_name": {
+                    "type": "string"
+                },
+                "approval_nik": {
+                    "type": "string"
+                },
+                "approval_status": {
+                    "type": "string"
+                },
+                "doc_cr_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.docCrCreateRequest": {
+            "type": "object",
+            "properties": {
+                "application_name": {
+                    "type": "string"
+                },
+                "cr_priority": {
+                    "type": "string"
+                },
+                "cr_type": {
+                    "type": "string"
+                },
+                "deployed_date": {
+                    "type": "string"
+                },
+                "doc_attachment": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "doc_attachment_extension": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "doc_cr_id": {
+                    "description": "Deteksi upsert",
+                    "type": "integer"
+                },
+                "doc_cr_name": {
+                    "type": "string"
+                },
+                "doc_notes": {
+                    "type": "string"
+                },
+                "doc_reference": {
+                    "type": "string"
+                },
+                "doc_status": {
+                    "type": "string"
+                },
+                "form_id": {
+                    "type": "string"
+                },
+                "git_merge_request": {
+                    "type": "string"
+                },
+                "git_repository": {
+                    "type": "string"
+                },
+                "name_log": {
+                    "description": "Log: Nama",
+                    "type": "string"
+                },
+                "nik_log": {
+                    "description": "Log: NIK",
+                    "type": "string"
+                },
+                "note_log": {
+                    "description": "Log: Catatan",
+                    "type": "string"
+                },
+                "pic_developer": {
+                    "description": "PIC Developer",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.picRequestDTO"
+                    }
+                },
+                "pic_functional": {
+                    "description": "PIC Functional",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.picRequestDTO"
+                    }
+                },
+                "pic_qa": {
+                    "description": "PIC QA",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.picRequestDTO"
+                    }
+                },
+                "pic_viewer": {
+                    "description": "PIC Viewer",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.picRequestDTO"
+                    }
+                },
+                "problem_detail": {
+                    "type": "string"
+                },
+                "reason_detail": {
+                    "type": "string"
+                },
+                "requester_department": {
+                    "type": "string"
+                },
+                "requester_name": {
+                    "type": "string"
+                },
+                "requester_nik": {
+                    "type": "string"
+                },
+                "review": {
+                    "description": "Review (optional)",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/handler.reviewRequestDTO"
+                        }
+                    ]
+                },
+                "server_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.docCrCreateResponse": {
+            "type": "object",
+            "properties": {
+                "application_name": {
+                    "type": "string"
+                },
+                "cr_priority": {
+                    "type": "string"
+                },
+                "cr_type": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "deployed_date": {
+                    "type": "string"
+                },
+                "doc_attachment": {
+                    "type": "string"
+                },
+                "doc_cr_id": {
+                    "type": "integer"
+                },
+                "doc_cr_name": {
+                    "type": "string"
+                },
+                "doc_notes": {
+                    "type": "string"
+                },
+                "doc_reference": {
+                    "type": "string"
+                },
+                "doc_status": {
+                    "type": "string"
+                },
+                "form_id": {
+                    "type": "string"
+                },
+                "git_merge_request": {
+                    "type": "string"
+                },
+                "git_repository": {
+                    "type": "string"
+                },
+                "problem_detail": {
+                    "type": "string"
+                },
+                "reason_detail": {
+                    "type": "string"
+                },
+                "requester_department": {
+                    "type": "string"
+                },
+                "requester_name": {
+                    "type": "string"
+                },
+                "requester_nik": {
+                    "type": "string"
+                },
+                "server_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.docCrDetailResponse": {
+            "type": "object",
+            "properties": {
+                "application_name": {
+                    "type": "string"
+                },
+                "approval": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.approvalResponse"
+                    }
+                },
+                "cr_priority": {
+                    "type": "string"
+                },
+                "cr_type": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "deployed_date": {
+                    "type": "string"
+                },
+                "doc_attachment": {
+                    "type": "string"
+                },
+                "doc_cr_id": {
+                    "type": "integer"
+                },
+                "doc_cr_name": {
+                    "type": "string"
+                },
+                "doc_notes": {
+                    "type": "string"
+                },
+                "doc_reference": {
+                    "type": "string"
+                },
+                "doc_status": {
+                    "type": "string"
+                },
+                "form_id": {
+                    "type": "string"
+                },
+                "git_merge_request": {
+                    "type": "string"
+                },
+                "git_repository": {
+                    "type": "string"
+                },
+                "milestones": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.milestoneResponse"
+                    }
+                },
+                "pic_developer": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.picResponse"
+                    }
+                },
+                "pic_functional": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.picResponse"
+                    }
+                },
+                "pic_qa": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.picResponse"
+                    }
+                },
+                "pic_viewer": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.picResponse"
+                    }
+                },
+                "problem_detail": {
+                    "type": "string"
+                },
+                "reason_detail": {
+                    "type": "string"
+                },
+                "requester_department": {
+                    "type": "string"
+                },
+                "requester_name": {
+                    "type": "string"
+                },
+                "requester_nik": {
+                    "type": "string"
+                },
+                "review": {
+                    "$ref": "#/definitions/handler.reviewResponse"
+                },
+                "server_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.docCrGetDetailRequest": {
+            "type": "object",
+            "properties": {
+                "doc_cr_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.docCrGetListRequest": {
+            "type": "object",
+            "properties": {
+                "approval_nik": {
+                    "type": "string"
+                },
+                "doc_status": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "requester_nik": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.docCrListResponse": {
+            "type": "object",
+            "properties": {
+                "application_name": {
+                    "type": "string"
+                },
+                "approval": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.approvalResponse"
+                    }
+                },
+                "cr_priority": {
+                    "type": "string"
+                },
+                "cr_type": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "deployed_date": {
+                    "type": "string"
+                },
+                "doc_attachment": {
+                    "type": "string"
+                },
+                "doc_cr_id": {
+                    "type": "integer"
+                },
+                "doc_cr_name": {
+                    "type": "string"
+                },
+                "doc_notes": {
+                    "type": "string"
+                },
+                "doc_reference": {
+                    "type": "string"
+                },
+                "doc_status": {
+                    "type": "string"
+                },
+                "form_id": {
+                    "type": "string"
+                },
+                "git_merge_request": {
+                    "type": "string"
+                },
+                "git_repository": {
+                    "type": "string"
+                },
+                "pic_developer": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.picResponse"
+                    }
+                },
+                "pic_functional": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.picResponse"
+                    }
+                },
+                "problem_detail": {
+                    "type": "string"
+                },
+                "reason_detail": {
+                    "type": "string"
+                },
+                "requester_department": {
+                    "type": "string"
+                },
+                "requester_name": {
+                    "type": "string"
+                },
+                "requester_nik": {
+                    "type": "string"
+                },
+                "review": {
+                    "$ref": "#/definitions/handler.reviewResponse"
+                },
+                "server_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.docCrSendApproveRejectRequest": {
+            "type": "object",
+            "properties": {
+                "doc_cr_id": {
+                    "type": "integer"
+                },
+                "name_log": {
+                    "type": "string"
+                },
+                "nik_log": {
+                    "type": "string"
+                },
+                "note_log": {
+                    "type": "string"
+                },
+                "requester_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.docCrSendApproveRequest": {
+            "type": "object",
+            "properties": {
+                "approval_id": {
+                    "type": "integer"
+                },
+                "approval_note": {
+                    "type": "string"
+                },
+                "approval_status": {
+                    "type": "string"
+                },
+                "cr_priority": {
+                    "type": "string"
+                },
+                "doc_cr_id": {
+                    "type": "integer"
+                },
+                "name_log": {
+                    "type": "string"
+                },
+                "nik_log": {
+                    "type": "string"
+                },
+                "note_log": {
+                    "type": "string"
+                },
+                "requester_department": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.docCrSendReviewRejectRequest": {
+            "type": "object",
+            "properties": {
+                "doc_cr_id": {
+                    "type": "integer"
+                },
+                "form_id": {
+                    "type": "string"
+                },
+                "name_log": {
+                    "type": "string"
+                },
+                "nik_log": {
+                    "type": "string"
+                },
+                "note_log": {
+                    "type": "string"
+                },
+                "requester_nik": {
+                    "type": "string"
+                },
+                "review_note": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.docCrSendReviewRequest": {
+            "type": "object",
+            "properties": {
+                "application_name": {
+                    "type": "string"
+                },
+                "approval": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.approvalRequestDTO"
+                    }
+                },
+                "cr_priority": {
+                    "type": "string"
+                },
+                "cr_type": {
+                    "type": "string"
+                },
+                "doc_attachment": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "doc_cr_id": {
+                    "type": "integer"
+                },
+                "doc_cr_name": {
+                    "type": "string"
+                },
+                "doc_notes": {
+                    "type": "string"
+                },
+                "doc_reference": {
+                    "type": "string"
+                },
+                "doc_status": {
+                    "type": "string"
+                },
+                "form_id": {
+                    "type": "string"
+                },
+                "git_merge_request": {
+                    "type": "string"
+                },
+                "git_repository": {
+                    "type": "string"
+                },
+                "name_log": {
+                    "type": "string"
+                },
+                "nik_log": {
+                    "type": "string"
+                },
+                "note_log": {
+                    "type": "string"
+                },
+                "pic_developer": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.picRequestDTO"
+                    }
+                },
+                "pic_functional": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.picRequestDTO"
+                    }
+                },
+                "pic_qa": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.picRequestDTO"
+                    }
+                },
+                "pic_viewer": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.picRequestDTO"
+                    }
+                },
+                "problem_detail": {
+                    "type": "string"
+                },
+                "reason_detail": {
+                    "type": "string"
+                },
+                "requester_department": {
+                    "type": "string"
+                },
+                "requester_name": {
+                    "type": "string"
+                },
+                "requester_nik": {
+                    "type": "string"
+                },
+                "review_note": {
+                    "type": "string"
+                },
+                "server_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.docCrSendRevisionRequest": {
+            "type": "object",
+            "properties": {
+                "application_name": {
+                    "type": "string"
+                },
+                "cr_priority": {
+                    "type": "string"
+                },
+                "cr_type": {
+                    "type": "string"
+                },
+                "doc_attachment": {
+                    "type": "string"
+                },
+                "doc_cr_id": {
+                    "type": "integer"
+                },
+                "doc_cr_name": {
+                    "type": "string"
+                },
+                "doc_notes": {
+                    "type": "string"
+                },
+                "doc_reference": {
+                    "type": "string"
+                },
+                "form_id": {
+                    "type": "string"
+                },
+                "git_merge_request": {
+                    "type": "string"
+                },
+                "git_repository": {
+                    "type": "string"
+                },
+                "name_log": {
+                    "type": "string"
+                },
+                "nik_log": {
+                    "type": "string"
+                },
+                "note_log": {
+                    "type": "string"
+                },
+                "pic_developer": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.picRequestDTO"
+                    }
+                },
+                "pic_functional": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.picRequestDTO"
+                    }
+                },
+                "pic_qa": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.picRequestDTO"
+                    }
+                },
+                "pic_viewer": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.picRequestDTO"
+                    }
+                },
+                "problem_detail": {
+                    "type": "string"
+                },
+                "reason_detail": {
+                    "type": "string"
+                },
+                "requester_department": {
+                    "type": "string"
+                },
+                "requester_name": {
+                    "type": "string"
+                },
+                "requester_nik": {
+                    "type": "string"
+                },
+                "review": {
+                    "$ref": "#/definitions/handler.reviewRequestDTO"
+                },
+                "review_note": {
+                    "type": "string"
+                },
+                "server_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.docCrUpdateStatusRequest": {
+            "type": "object",
+            "properties": {
+                "doc_cr_id": {
+                    "type": "integer"
+                },
+                "doc_status": {
+                    "type": "string"
+                },
+                "name_log": {
+                    "type": "string"
+                },
+                "nik_log": {
+                    "type": "string"
+                },
+                "note_log": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.milestoneResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "doc_cr_id": {
+                    "type": "integer"
+                },
+                "log_activity": {
+                    "type": "string"
+                },
+                "log_id": {
+                    "type": "integer"
+                },
+                "name_log": {
+                    "type": "string"
+                },
+                "nik_log": {
+                    "type": "string"
+                },
+                "note_log": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.picRequestDTO": {
+            "type": "object",
+            "properties": {
+                "pic_department": {
+                    "type": "string"
+                },
+                "pic_name": {
+                    "type": "string"
+                },
+                "pic_nik": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.picResponse": {
+            "type": "object",
+            "properties": {
+                "pic_department": {
+                    "type": "string"
+                },
+                "pic_name": {
+                    "type": "string"
+                },
+                "pic_nik": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.reviewRequestDTO": {
+            "type": "object",
+            "properties": {
+                "review_name": {
+                    "type": "string"
+                },
+                "review_nik": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.reviewResponse": {
+            "type": "object",
+            "properties": {
+                "doc_cr_id": {
+                    "type": "integer"
+                },
+                "review_date": {
+                    "type": "string"
+                },
+                "review_id": {
+                    "type": "integer"
+                },
+                "review_name": {
+                    "type": "string"
+                },
+                "review_nik": {
+                    "type": "string"
+                },
+                "review_note": {
+                    "type": "string"
+                },
+                "review_status": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

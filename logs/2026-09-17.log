@@ -19,3 +19,7 @@
 2026-09-17T11:50:37.5295496+07:00 | INFO | service.go:32 | notification.(*Service).Send | Notification sent to 20220086 | title: New CR IT.CR.2025.014
 2026-09-17T11:50:37.7378494+07:00 | INFO | service.go:115 | doc_cr.(*Service).SendReviewReject | Review rejected for DocCrID: 1
 2026-09-17T11:50:37.7378494+07:00 | INFO | doc_cr_handler.go:711 | handler.(*DocumentCrHandler).SendReviewReject | [POST] /api/v1/doc-cr-reject | Status: 200 | Review rejected for DocCrID: 1
+2026-09-17T15:05:21.8891019+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-17T15:05:46.4541949+07:00 | INFO | service.go:115 | doc_cr.(*Service).SendReviewReject | Review rejected for DocCrID: 1
+2026-09-17T15:05:46.7260773+07:00 | INFO | service.go:32 | notification.(*Service).Send | Notification sent to 20220086 | title: New CR IT.CR.2025.014
+2026-09-17T15:05:46.7266027+07:00 | INFO | doc_cr_handler.go:710 | handler.(*DocumentCrHandler).SendReviewReject | [POST] /api/v1/doc-cr-reject | Status: 200 | Review rejected for DocCrID: 1

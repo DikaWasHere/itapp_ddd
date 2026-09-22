@@ -11,8 +11,12 @@ import (
  
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+
+	_ "itapp_ddd/docs" 
 )
- 
+ // @title ITAPP 
+// @host localhost:8280
+// @BasePath /api/v1
 func main() {
 	logger.SetupLogger()
 	logger.Info("Logger initialized")

@@ -12,7 +12,7 @@ import (
 var DB *gorm.DB
 
 func DatabaseInit() {
-	_ = godotenv.Load() // Mengabaikan error jika file .env absen (env sudah disuntikkan di OS pada produksi)
+	_ = godotenv.Load() 
 
 	host := os.Getenv("DB_HOST_TS")
 	port := os.Getenv("DB_PORT_TS")
