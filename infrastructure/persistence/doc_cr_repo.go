@@ -1283,7 +1283,7 @@ func (r *DocumentCrRepositoryDB) updateInTx(tx *gorm.DB, req domainDocCr.CreateD
 		"git_merge_request":    req.GitMergeRequest,
 		"git_repository":       req.GitRepository,
 		"doc_notes":            req.DocNotes,
-		"doc_attachment":       "",
+		"doc_attachment":       strings.Join(req.DocAttachment, "|"),
 		"application_name":     req.ApplicationName,
 	}
 
@@ -1298,8 +1298,7 @@ func (r *DocumentCrRepositoryDB) updateInTx(tx *gorm.DB, req domainDocCr.CreateD
 	return updated.toEntity(), nil
 }
 
-// Helper transaksional (varian dari CreatePICs / CreateReview / CreateLog
-// yang menerima tx, bukan r.db)
+
 func createPICsInTx(tx *gorm.DB, docCrID uint, pics []domainDocCr.PIC) error {
 	if len(pics) == 0 {
 		return nil

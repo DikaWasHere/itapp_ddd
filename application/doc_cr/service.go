@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+	"strings"
+	"encoding/base64"
 	domainDocCr "itapp_ddd/domain/doc_cr"
 	
 )
@@ -13,14 +15,19 @@ type Service struct {
 	repo      domainDocCr.DocumentCrRepository
 	logger    Logger
 	fileStore FileStorer
+	attachment AttachmentProcessor
 }
 
-func NewService(repo domainDocCr.DocumentCrRepository, logger Logger, fileStore FileStorer) *Service {
-	return &Service{repo: repo, logger: logger, fileStore: fileStore}
+func NewService(repo domainDocCr.DocumentCrRepository, logger Logger, fileStore FileStorer,attachment AttachmentProcessor) *Service {
+	return &Service{repo: repo, logger: logger, fileStore: fileStore,attachment: attachment}
 }
 
 type FileStorer interface {
 	Save(base64Data string, filePath string) error
+}
+
+type AttachmentProcessor interface {
+	ProcessAttachments(ctx context.Context, formID string, base64DataList []string, extensions []string,startNumber int) (string, error)
 }
 
 // GetAll mengambil semua DocumentCr berdasarkan filter
@@ -46,27 +53,61 @@ func (s *Service) GetDetail(ctx context.Context, req domainDocCr.GetDetailReques
 
 
 func (s *Service) Create(ctx context.Context, req domainDocCr.CreateDocCrRequest) (*domainDocCr.DocumentCr, error) {
-	// ===== MODE UPDATE: langsung serahkan ke repo =====
-	if req.DocCrID > 0 {
-		return s.repo.Upsert(ctx, req)
+	formId := req.FormId
+	existing := make([]string, 0) // filename/link lama yang dipertahankan
+ 
+	if req.DocCrID == 0 {
+		// ===== MODE CREATE (kode existing Anda, tidak berubah) =====
+		nowYear := time.Now().Format("2006")
+		nowYearId := time.Now().Format("06")
+ 
+		count, err := s.repo.CountByYear(ctx, nowYear)
+		if err != nil {
+			return nil, err
+		}
+ 
+		formId = "IT.CR." + nowYearId + "." + padLeft(strconv.Itoa(int(count+1)), 4)
+		if req.FormId != "" {
+			formId = req.FormId
+		}
+ 
+		req.FormId = formId
+		req.DocStatus = "Waiting Submit"
+	} else {
+		// ===== MODE UPDATE: pisahkan filename lama vs base64 baru =====
+		for _, att := range req.DocAttachment {
+			if !isBase64(att) {
+				existing = append(existing, att)
+			}
+		}
 	}
  
-	// ===== MODE CREATE: generate form_id & status dulu =====
-	nowYear := time.Now().Format("2006")
-	nowYearId := time.Now().Format("06")
+	// ===== Proses attachment (berlaku untuk kedua mode) =====
+	if len(req.DocAttachment) > 0 {
+		newB64 := make([]string, 0)
+		newExt := make([]string, 0)
+		for i, att := range req.DocAttachment {
+			if isBase64(att) {
+				ext := ""
+				if i < len(req.DocAttachmentExtension) {
+					ext = req.DocAttachmentExtension[i]
+				}
+				newB64 = append(newB64, att)
+				newExt = append(newExt, ext)
+			}
+		}
  
-	count, err := s.repo.CountByYear(ctx, nowYear)
-	if err != nil {
-		return nil, err
+		if len(newB64) > 0 {
+			joined, err := s.attachment.ProcessAttachments(ctx, formId, newB64, newExt, len(existing))
+			if err != nil {
+				s.logger.Error("Failed to process attachments", err)
+				return nil, err
+			}
+			existing = append(existing, strings.Split(joined, "|")...)
+		}
+ 
+		req.DocAttachment = existing
 	}
- 
-	formId := "IT.CR." + nowYearId + "." + padLeft(strconv.Itoa(int(count+1)), 4)
-	if req.FormId != "" {
-		formId = req.FormId
-	}
- 
-	req.FormId = formId
-	req.DocStatus = "Waiting Submit"
  
 	return s.repo.Upsert(ctx, req)
 }
@@ -218,4 +259,12 @@ func (s *Service) Delete(ctx context.Context, req domainDocCr.DeleteRequest) (*d
 
 	s.logger.Info("document telah berhasil dihapus dengan ID: %d", result.DocCrID)
 	return result,nil
+}
+
+func isBase64(s string) bool {
+	if len(s) < 100 { // filename pendek; base64 file asli selalu panjang
+		return false
+	}
+	_, err := base64.StdEncoding.DecodeString(s)
+	return err == nil
 }

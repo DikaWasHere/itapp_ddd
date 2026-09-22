@@ -24,7 +24,7 @@ func NewService(repo domainAttachment.AttachmentRepository, fileStore FileStorer
 }
 
 // ProcessAttachments memproses array base64 + extension, mengembalikan string filename (digabung "|")
-func (s *Service) ProcessAttachments(ctx context.Context, formID string, base64DataList []string, extensions []string) (string, error) {
+func (s *Service) ProcessAttachments(ctx context.Context, formID string, base64DataList []string, extensions []string,startNumber int) (string, error) {
 	if len(base64DataList) == 0 {
 		return "", nil
 	}
@@ -42,7 +42,7 @@ func (s *Service) ProcessAttachments(ctx context.Context, formID string, base64D
 		if i < len(extensions) {
 			ext = extensions[i]
 		}
-		fileName := fmt.Sprintf("%s_%d%s", formID, i+1, ext)
+		fileName := fmt.Sprintf("%s_%d%s", formID, startNumber+i+1, ext)
 		filePath := fmt.Sprintf("public/attachment/%s", fileName)
 
 		// Simpan file ke disk

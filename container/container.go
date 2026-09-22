@@ -9,6 +9,7 @@ import (
 	"itapp_ddd/infrastructure/persistence"
 	"itapp_ddd/infrastructure/storage"
 	"itapp_ddd/presentation/handler"
+	"itapp_ddd/migrations"
 )
 
 type Container struct {
@@ -25,6 +26,7 @@ type Container struct {
 func NewContainer() *Container {
 	// 1. Init Database
 	persistence.DatabaseInit()
+	migration.RunMigration()
 
 	// 2. Init Infrastructure
 	attachmentRepo := persistence.NewAttachmentRepositoryDB(persistence.DB)
@@ -33,7 +35,7 @@ func NewContainer() *Container {
 
 	// 3. Init Application Service
 	attachmentService := attachmentApp.NewService(attachmentRepo, fileStorage)
-	docCrService := docCrApp.NewService(docCrRepo, &infraLogger.LoggerImpl{}, fileStorage)
+	docCrService := docCrApp.NewService(docCrRepo, &infraLogger.LoggerImpl{}, fileStorage, attachmentService)
 	notificationService := notificationApp.NewService(infraNotification.NewHTTPNotifier(), &infraLogger.LoggerImpl{})
 
 	// 4. Init Handler
