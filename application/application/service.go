@@ -7,8 +7,6 @@ import (
 	domainApp "itapp_ddd/domain/application"
 )
  
-// Logger adalah interface untuk logging di application layer
-// (sama persis dengan pola application/doc_cr)
 type Logger interface {
 	Info(msg string, args ...interface{})
 	Error(msg string, err error, args ...interface{})
@@ -26,8 +24,7 @@ func NewService(sso domainApp.SSOClient, logger Logger) *Service {
 	return &Service{sso: sso, logger: logger}
 }
  
-// GetAll mengambil daftar aplikasi dari API SSO eksternal
-// (endpoint ini tidak membaca database, sama seperti kode lama)
+
 func (s *Service) GetAll(ctx context.Context, req domainApp.GetListApplicationRequest) ([]*domainApp.Application, error) {
 	if strings.TrimSpace(req.Username) == "" || strings.TrimSpace(req.SessionToken) == "" {
 		return nil, errors.New("username and session_token are required")

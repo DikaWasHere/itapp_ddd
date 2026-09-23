@@ -15,13 +15,11 @@ import (
 	"github.com/joho/godotenv"
 )
  
-// Client adalah implementasi domainApp.SSOClient
 type Client struct {
 	httpClient *http.Client
 	url        string
 }
  
-// NewClient constructor (membaca URL_SSO dari .env)
 func NewClient() *Client {
 	_ = godotenv.Load()
 	return &Client{
