@@ -1,0 +1,4 @@
+2026-09-23T08:57:18.3976932+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-23T08:58:21.6158663+07:00 | ERROR | doc_cr_handler.go:531 | handler.(*DocumentCrHandler).Create | Documentcr not found: document with doc_cr_id 7 not found: record not found
+2026-09-23T08:58:33.1133091+07:00 | INFO | service.go:32 | notification.(*Service).Send | Notification sent to 20230053 | title: New CR IT.CR.26.021
+2026-09-23T08:58:33.1133091+07:00 | INFO | doc_cr_handler.go:550 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 200 | DocumentCr created successfully
