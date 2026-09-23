@@ -47,7 +47,6 @@ func (c *Client) FetchApplications(ctx context.Context, req domainApp.GetListApp
 	}
  
 	payload, err := json.Marshal(map[string]interface{}{
-		"username":      req.Username,
 		"session_token": req.SessionToken,
 	})
 	if err != nil {

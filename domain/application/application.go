@@ -14,6 +14,5 @@ type SSOApplication struct {
 }
  
 type GetListApplicationRequest struct {
-	Username     string
 	SessionToken string
 }

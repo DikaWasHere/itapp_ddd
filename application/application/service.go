@@ -26,8 +26,8 @@ func NewService(sso domainApp.SSOClient, logger Logger) *Service {
  
 
 func (s *Service) GetAll(ctx context.Context, req domainApp.GetListApplicationRequest) ([]*domainApp.Application, error) {
-	if strings.TrimSpace(req.Username) == "" || strings.TrimSpace(req.SessionToken) == "" {
-		return nil, errors.New("username and session_token are required")
+	if strings.TrimSpace(req.SessionToken) == "" {
+		return nil, errors.New("session_token are required")
 	}
  
 	items, err := s.sso.FetchApplications(ctx, req)

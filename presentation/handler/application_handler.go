@@ -42,7 +42,6 @@ func (h *ApplicationHandler) GetAll(c *fiber.Ctx) error {
 	}
  
 	domainReq := domainApp.GetListApplicationRequest{
-		Username:     req.Username,
 		SessionToken: req.SessionToken,
 	}
  
