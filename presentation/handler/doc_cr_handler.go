@@ -26,8 +26,8 @@ func NewDocumentCrHandler(service *docCrApp.Service, logger docCrApp.Logger, not
 
 // Request DTO untuk GetAll
 type docCrGetListRequest struct {
-	StartDate    string   `json:"start_date"`
-	EndDate      string   `json:"end_date"`
+	StartDate    time.Time   `json:"start_date"`
+	EndDate      time.Time   `json:"end_date"`
 	RequesterNik string   `json:"requester_nik"`
 	ApprovalNik  string   `json:"approval_nik"`
 	DocStatus    []string `json:"doc_status"`
@@ -43,7 +43,7 @@ type reviewResponse struct {
 	ReviewID     *uint   `json:"review_id"`
 	ReviewNik    *string `json:"review_nik"`
 	ReviewName   *string `json:"review_name"`
-	ReviewDate   *string `json:"review_date"`
+	ReviewDate   *time.Time `json:"review_date"`
 	ReviewStatus *string `json:"review_status"`
 	ReviewNote   *string `json:"review_note"`
 	DocCrID      *uint   `json:"doc_cr_id"`
@@ -54,7 +54,7 @@ type approvalResponse struct {
 	ApprovalID         *uint   `json:"approval_id"`
 	ApprovalNik        *string `json:"approval_nik"`
 	ApprovalName       *string `json:"approval_name"`
-	ApprovalDate       *string `json:"approval_date"`
+	ApprovalDate       *time.Time `json:"approval_date"`
 	ApprovalStatus     *string `json:"approval_status"`
 	ApprovalDepartment *string `json:"approval_department"`
 	DocCrID            *uint   `json:"doc_cr_id"`
@@ -873,7 +873,7 @@ type approvalApproveResponse struct {
 	ApprovalID         *uint      `json:"approval_id"`
 	ApprovalNik        *string    `json:"approval_nik"`
 	ApprovalName       *string    `json:"approval_name"`
-	ApprovalDate       *string    `json:"approval_date"`
+	ApprovalDate       *time.Time    `json:"approval_date"`
 	ApprovalStatus     *string    `json:"approval_status"`
 	ApprovalNote       *string    `json:"approval_note"`
 	DocCrID            *uint      `json:"doc_cr_id"`

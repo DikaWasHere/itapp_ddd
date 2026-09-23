@@ -2,3 +2,26 @@
 2026-09-23T08:58:21.6158663+07:00 | ERROR | doc_cr_handler.go:531 | handler.(*DocumentCrHandler).Create | Documentcr not found: document with doc_cr_id 7 not found: record not found
 2026-09-23T08:58:33.1133091+07:00 | INFO | service.go:32 | notification.(*Service).Send | Notification sent to 20230053 | title: New CR IT.CR.26.021
 2026-09-23T08:58:33.1133091+07:00 | INFO | doc_cr_handler.go:550 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 200 | DocumentCr created successfully
+2026-09-23T10:42:21.3534013+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-23T13:26:24.2621754+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-23T13:27:28.6958992+07:00 | INFO | doc_cr_handler.go:388 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 | Berhasil mengambil semua data
+2026-09-23T13:28:17.7658895+07:00 | INFO | service.go:32 | notification.(*Service).Send | Notification sent to 20230053 | title: New CR IT.CR.26.021
+2026-09-23T13:28:17.7663926+07:00 | INFO | doc_cr_handler.go:550 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 200 | DocumentCr created successfully
+2026-09-23T13:30:01.9199285+07:00 | INFO | service.go:202 | doc_cr.(*Service).SendApprove | Approval submitted for DocCrID: 1
+2026-09-23T13:30:01.9199285+07:00 | INFO | doc_cr_handler.go:949 | handler.(*DocumentCrHandler).SendApprove | [POST] /api/v1/doc-cr-approve | Status: 200 | Approval submitted for DocCrID: 1
+2026-09-23T13:31:30.0038017+07:00 | INFO | service.go:202 | doc_cr.(*Service).SendApprove | Approval submitted for DocCrID: 145
+2026-09-23T13:31:30.0038017+07:00 | INFO | doc_cr_handler.go:949 | handler.(*DocumentCrHandler).SendApprove | [POST] /api/v1/doc-cr-approve | Status: 200 | Approval submitted for DocCrID: 145
+2026-09-23T13:32:45.6748041+07:00 | INFO | service.go:202 | doc_cr.(*Service).SendApprove | Approval submitted for DocCrID: 49
+2026-09-23T13:32:45.6748041+07:00 | INFO | doc_cr_handler.go:949 | handler.(*DocumentCrHandler).SendApprove | [POST] /api/v1/doc-cr-approve | Status: 200 | Approval submitted for DocCrID: 49
+2026-09-23T15:05:10.252726+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-23T15:06:34.8444468+07:00 | INFO | application_handler.go:63 | handler.(*ApplicationHandler).GetAll | [POST] /api/v1/application | Status: 200 | Fetched 0 applications
+2026-09-23T15:11:33.1080322+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-23T15:11:44.2331203+07:00 | INFO | application_handler.go:67 | handler.(*ApplicationHandler).GetAll | [POST] /api/v1/application | Status: 200 | Fetched 0 applications
+2026-09-23T15:12:33.5544889+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-23T15:12:47.1857006+07:00 | INFO | application_handler.go:70 | handler.(*ApplicationHandler).GetAll | [POST] /api/v1/application | Status: 200 | Fetched 0 applications
+2026-09-23T15:25:54.4050135+07:00 | INFO | application_handler.go:70 | handler.(*ApplicationHandler).GetAll | [POST] /api/v1/application | Status: 200 | Fetched 0 applications
+2026-09-23T15:32:57.0847003+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-23T15:33:10.2864407+07:00 | INFO | application_handler.go:70 | handler.(*ApplicationHandler).GetAll | [POST] /api/v1/application | Status: 200 | Fetched 0 applications
+2026-09-23T16:05:15.3738156+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-23T16:05:41.781281+07:00 | INFO | application_handler.go:66 | handler.(*ApplicationHandler).GetAll | [POST] /api/v1/application | Status: 200 | Fetched 0 applications
+2026-09-23T16:08:14.5904051+07:00 | INFO | application_handler.go:66 | handler.(*ApplicationHandler).GetAll | [POST] /api/v1/application | Status: 200 | Fetched 60 applications

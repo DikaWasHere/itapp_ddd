@@ -23,7 +23,7 @@ type Review struct {
 	ReviewID     *uint
 	ReviewNik    *string
 	ReviewName   *string
-	ReviewDate   *string
+	ReviewDate   *time.Time
 	ReviewStatus *string
 	ReviewNote   *string
 	DocCrID      *uint
@@ -34,7 +34,7 @@ type Approval struct {
 	ApprovalID         *uint
 	ApprovalNik        *string
 	ApprovalName       *string
-	ApprovalDate       *string
+	ApprovalDate       *time.Time
 	ApprovalStatus     *string
 	ApprovalDepartment *string
 	DocCrID            *uint

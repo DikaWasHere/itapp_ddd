@@ -7,12 +7,13 @@ import (
 	"github.com/swaggo/fiber-swagger" // fiber-swagger middleware
 )
 
-func RouteInit(app *fiber.App, attachmentHandler *handler.AttachmentHandler, docCrHandler *handler.DocumentCrHandler) {
+func RouteInit(app *fiber.App, attachmentHandler *handler.AttachmentHandler, docCrHandler *handler.DocumentCrHandler, applicationHandler *handler.ApplicationHandler) {
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
 
 	app.Get("/swagger/*", fiberSwagger.WrapHandler)
 	app.Static("/attachment", "./public/attachment")
+	v1.Post("/application", applicationHandler.GetAll)
 
 	// Document CR
 	v1.Post("/doc-cr", docCrHandler.GetAll)

@@ -21,7 +21,6 @@ func NewDocumentCrRepositoryDB(db *gorm.DB) *DocumentCrRepositoryDB {
 	return &DocumentCrRepositoryDB{db: db}
 }
 
-// --- GORM Models ---
 
 // DocumentCrModel adalah model GORM untuk tabel trs_document_cr
 type DocumentCrModel struct {
@@ -83,7 +82,7 @@ type ReviewModel struct {
 	ReviewID     uint      `gorm:"primarykey;column:review_id"`
 	ReviewNik    string    `gorm:"column:review_nik"`
 	ReviewName   string    `gorm:"column:review_name"`
-	ReviewDate   *string   `gorm:"column:review_date"`
+	ReviewDate   *time.Time   `gorm:"column:review_date"`
 	ReviewStatus string    `gorm:"column:review_status"`
 	ReviewNote   string    `gorm:"column:review_note"`
 	DocCrID      uint      `gorm:"column:doc_cr_id"`
@@ -112,7 +111,7 @@ type ApprovalModel struct {
 	ApprovalID         uint       `gorm:"primarykey;column:approval_id"`
 	ApprovalNik        string     `gorm:"column:approval_nik"`
 	ApprovalName       string     `gorm:"column:approval_name"`
-	ApprovalDate       *string    `gorm:"column:approval_date"`
+	ApprovalDate       *time.Time    `gorm:"column:approval_date"`
 	ApprovalStatus     string     `gorm:"column:approval_status"`
 	ApprovalNote       string     `gorm:"column:approval_note"`
 	DocCrID            uint       `gorm:"column:doc_cr_id"`
@@ -211,7 +210,7 @@ func (r *DocumentCrRepositoryDB) GetAll(ctx context.Context, req domainDocCr.Get
 		queryParams = append(queryParams, req.RequesterNik, req.RequesterNik)
 	}
 
-	if req.StartDate != "" && req.EndDate != "" {
+	if !req.StartDate .IsZero() && req.EndDate .IsZero() {
 		query += " AND date_trunc('day', tdc.created_at) BETWEEN ? AND ?"
 		queryParams = append(queryParams, req.StartDate, req.EndDate)
 	}
@@ -458,7 +457,7 @@ type DocumentCrDetailJoinModel struct {
 	ApprovalID         *uint   `gorm:"column:approval_id"`
 	ApprovalNik        *string `gorm:"column:approval_nik"`
 	ApprovalName       *string `gorm:"column:approval_name"`
-	ApprovalDate       *string `gorm:"column:approval_date"`
+	ApprovalDate       *time.Time `gorm:"column:approval_date"`
 	ApprovalStatus     *string `gorm:"column:approval_status"`
 	ApprovalNote       *string `gorm:"column:approval_note"`
 	ApprovalDepartment *string `gorm:"column:approval_department"`
@@ -473,7 +472,7 @@ type DocumentCrDetailJoinModel struct {
 	ReviewID     *uint   `gorm:"column:review_id"`
 	ReviewNik    *string `gorm:"column:review_nik"`
 	ReviewName   *string `gorm:"column:review_name"`
-	ReviewDate   *string `gorm:"column:review_date"`
+	ReviewDate   *time.Time `gorm:"column:review_date"`
 	ReviewStatus *string `gorm:"column:review_status"`
 	ReviewNote   *string `gorm:"column:review_note"`
 }
@@ -741,7 +740,7 @@ func (r *DocumentCrRepositoryDB) SendReview(ctx context.Context, req domainDocCr
 	// 5. Update review
 	now := time.Now()
 	reviewUpdate := ReviewModel{
-		ReviewDate:   func() *string { s := now.Format(time.RFC3339); return &s }(),
+		ReviewDate:   func() *time.Time { s := now; return &s }(),
 		ReviewStatus: "Reviewed",
 		ReviewNote:   req.ReviewNote,
 	}
@@ -780,7 +779,7 @@ func (r *DocumentCrRepositoryDB) SendReviewReject(ctx context.Context, req domai
 	// 3. Update data review
 	now := time.Now()
 	reviewUpdate := ReviewModel{
-		ReviewDate:   func() *string { s := now.Format(time.RFC3339); return &s }(),
+		ReviewDate:   func() *time.Time {  return &now }(),
 		ReviewStatus: "Waiting Revision",
 		ReviewNote:   req.ReviewNote,
 	}
@@ -959,7 +958,7 @@ func (r *DocumentCrRepositoryDB) SendApproveReject(ctx context.Context, req doma
 	// 3. Update data review
 	now := time.Now()
 	reviewUpdate := ReviewModel{
-		ReviewDate:   func() *string { s := now.Format(time.RFC3339); return &s }(),
+		ReviewDate:   func() *time.Time { return &now }(),
 		ReviewStatus: "Waiting Review",
 		ReviewNote:   "Reject Approve",
 	}

@@ -29,7 +29,7 @@ func main() {
 	app.Use(cors.New())
  
 	// 3. Init Routes
-	route.RouteInit(app, c.AttachmentHandler, c.DocCrHandler)
+	route.RouteInit(app, c.AttachmentHandler, c.DocCrHandler,c.ApplicationHandler)
  
 	// 4. Start Server
 	port := os.Getenv("PORT")

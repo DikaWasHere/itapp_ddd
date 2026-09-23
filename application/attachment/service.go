@@ -23,7 +23,6 @@ func NewService(repo domainAttachment.AttachmentRepository, fileStore FileStorer
 	return &Service{repo: repo, fileStore: fileStore}
 }
 
-// ProcessAttachments memproses array base64 + extension, mengembalikan string filename (digabung "|")
 func (s *Service) ProcessAttachments(ctx context.Context, formID string, base64DataList []string, extensions []string,startNumber int) (string, error) {
 	if len(base64DataList) == 0 {
 		return "", nil
@@ -37,7 +36,6 @@ func (s *Service) ProcessAttachments(ctx context.Context, formID string, base64D
 			return "", fmt.Errorf("invalid base64 data for attachment %d", i+1)
 		}
 
-		// Generate nama file: {FormId}_{index}{extension}
 		ext := ""
 		if i < len(extensions) {
 			ext = extensions[i]
@@ -63,7 +61,6 @@ func (s *Service) ProcessAttachments(ctx context.Context, formID string, base64D
 		fileNames = append(fileNames, fileName)
 	}
 
-	// Gabung dengan "|"
 	result := ""
 	for i, name := range fileNames {
 		if i > 0 {

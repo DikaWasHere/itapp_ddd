@@ -7,8 +7,8 @@ import (
 
 // GetListRequest adalah parameter untuk filter data
 type GetListRequest struct {
-	StartDate    string
-	EndDate      string
+	StartDate    time.Time
+	EndDate      time.Time
 	RequesterNik string
 	ApprovalNik  string
 	DocStatus    []string
@@ -84,14 +84,14 @@ type CreateDocCrRequest struct {
 	ApplicationName        string
 	DeployedDate           *time.Time
 
-	PICDevelopers  []PIC           // PIC Developer
-	PICFunctionals []PIC           // PIC Functional
-	PICViewers     []PIC           // PIC Viewer
-	PICQAs         []PIC           // PIC QA
-	Review         *ReviewCreateRequest            // Review (optional)
-	NikLog         string             // Log: NIK yang melakukan aksi
-	NameLog        string             // Log: Nama yang melakukan aksi
-	NoteLog        string             // Log: Catatan
+	PICDevelopers  []PIC           
+	PICFunctionals []PIC           
+	PICViewers     []PIC           
+	PICQAs         []PIC           
+	Review         *ReviewCreateRequest            
+	NikLog         string             
+	NameLog        string             
+	NoteLog        string             
 }
 
 // SendReviewRequest adalah request untuk me-review CR (DDD-simplified)
@@ -193,7 +193,7 @@ type ApproveItem struct {
 	ApprovalID         *uint
 	ApprovalNik        *string
 	ApprovalName       *string
-	ApprovalDate       *string
+	ApprovalDate       *time.Time
 	ApprovalStatus     *string
 	ApprovalDepartment *string
 	ApprovalNote       *string
