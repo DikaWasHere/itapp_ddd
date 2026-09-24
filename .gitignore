@@ -5,3 +5,5 @@ bin/
 build/
 dist/
 *.exe
+docs/
+*.docs
