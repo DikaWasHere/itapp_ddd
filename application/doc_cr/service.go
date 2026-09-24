@@ -66,7 +66,7 @@ func (s *Service) Create(ctx context.Context, req domainDocCr.CreateDocCrRequest
 			return nil, err
 		}
  
-		formId = "IT.CR." + nowYearId + "." + padLeft(strconv.Itoa(int(count+1)), 4)
+		formId = "IT.CR." + nowYearId + "." + padLeft(strconv.Itoa(int(count+1)), 3)
 		if req.FormId != "" {
 			formId = req.FormId
 		}
