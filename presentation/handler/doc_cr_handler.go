@@ -26,8 +26,8 @@ func NewDocumentCrHandler(service *docCrApp.Service, logger docCrApp.Logger, not
 
 // Request DTO untuk GetAll
 type docCrGetListRequest struct {
-	StartDate    time.Time   `json:"start_date"`
-	EndDate      time.Time   `json:"end_date"`
+	StartDate    string   `json:"start_date"`
+	EndDate      string   `json:"end_date"`
 	RequesterNik string   `json:"requester_nik"`
 	ApprovalNik  string   `json:"approval_nik"`
 	DocStatus    []string `json:"doc_status"`
@@ -453,7 +453,7 @@ type docCrCreateResponse struct {
 // @Accept       json
 // @Produce      json
 // @Param        request body  docCrCreateRequest true "Request body containing the filter parameters"
-// @Success      200  {object}  ApiResponse
+// @Success      200  {object}  domainDocCr.ApiResponse
 // Failure        400  {object}  pkg.ErrorResponse
 // @Router       /doc-cr-add [post]
 func (h *DocumentCrHandler) Create(c *fiber.Ctx) error {

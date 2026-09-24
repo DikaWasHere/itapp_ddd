@@ -15,6 +15,40 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/application": {
+            "post": {
+                "description": "Returns a list of all applications",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Application"
+                ],
+                "summary": "Get all applications",
+                "parameters": [
+                    {
+                        "description": "Request body containing the filter parameters",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.applicationGetListRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.applicationItem"
+                        }
+                    }
+                }
+            }
+        },
         "/doc-cr": {
             "post": {
                 "description": "Show all DocumentCr",
@@ -74,10 +108,10 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Document created successfully",
+                    "200": {
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.docCrCreateResponse"
+                            "$ref": "#/definitions/doc_cr.ApiResponse"
                         }
                     }
                 }
@@ -111,10 +145,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Revision submitted",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/handler.approvalApproveResponse"
-                            }
+                            "$ref": "#/definitions/handler.approvalApproveResponse"
                         }
                     }
                 }
@@ -395,6 +426,31 @@ const docTemplate = `{
             }
         },
         "handler.DeleteResponse": {
+            "type": "object",
+            "properties": {
+                "application_id": {
+                    "type": "integer"
+                },
+                "application_name": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.applicationGetListRequest": {
+            "type": "object",
+            "properties": {
+                "session_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.applicationItem": {
             "type": "object",
             "properties": {
                 "application_id": {

@@ -27,6 +27,22 @@ definitions:
       updated_at:
         type: string
     type: object
+  handler.applicationGetListRequest:
+    properties:
+      session_token:
+        type: string
+    type: object
+  handler.applicationItem:
+    properties:
+      application_id:
+        type: integer
+      application_name:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+    type: object
   handler.approvalApproveResponse:
     properties:
       approval_date:
@@ -606,6 +622,28 @@ info:
   contact: {}
   title: ITAPP
 paths:
+  /application:
+    post:
+      consumes:
+      - application/json
+      description: Returns a list of all applications
+      parameters:
+      - description: Request body containing the filter parameters
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.applicationGetListRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.applicationItem'
+      summary: Get all applications
+      tags:
+      - Application
   /doc-cr:
     post:
       consumes:
@@ -643,10 +681,10 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
-          description: Document created successfully
+        "200":
+          description: OK
           schema:
-            $ref: '#/definitions/handler.docCrCreateResponse'
+            $ref: '#/definitions/doc_cr.ApiResponse'
       summary: ADD DocumentCr
       tags:
       - DocumentCr
@@ -668,9 +706,7 @@ paths:
         "200":
           description: Revision submitted
           schema:
-            items:
-              $ref: '#/definitions/handler.approvalApproveResponse'
-            type: array
+            $ref: '#/definitions/handler.approvalApproveResponse'
       summary: Approve DocumentCr
       tags:
       - DocumentCr

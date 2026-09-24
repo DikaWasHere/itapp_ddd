@@ -7,8 +7,8 @@ import (
 
 // GetListRequest adalah parameter untuk filter data
 type GetListRequest struct {
-	StartDate    time.Time
-	EndDate      time.Time
+	StartDate    string
+	EndDate      string
 	RequesterNik string
 	ApprovalNik  string
 	DocStatus    []string
@@ -83,15 +83,14 @@ type CreateDocCrRequest struct {
 	DocStatus              string
 	ApplicationName        string
 	DeployedDate           *time.Time
-
-	PICDevelopers  []PIC           
-	PICFunctionals []PIC           
-	PICViewers     []PIC           
-	PICQAs         []PIC           
-	Review         *ReviewCreateRequest            
-	NikLog         string             
-	NameLog        string             
-	NoteLog        string             
+	PICDevelopers 		   []PIC           
+	PICFunctionals 			[]PIC           
+	PICViewers     			[]PIC           
+	PICQAs         			[]PIC           
+	Review         			*ReviewCreateRequest            
+	NikLog         			string             
+	NameLog        			string             
+	NoteLog       			string             
 }
 
 // SendReviewRequest adalah request untuk me-review CR (DDD-simplified)

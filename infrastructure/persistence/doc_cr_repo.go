@@ -210,7 +210,7 @@ func (r *DocumentCrRepositoryDB) GetAll(ctx context.Context, req domainDocCr.Get
 		queryParams = append(queryParams, req.RequesterNik, req.RequesterNik)
 	}
 
-	if !req.StartDate .IsZero() && req.EndDate .IsZero() {
+	if req.StartDate != "" && req.EndDate != "" {
 		query += " AND date_trunc('day', tdc.created_at) BETWEEN ? AND ?"
 		queryParams = append(queryParams, req.StartDate, req.EndDate)
 	}
@@ -1213,7 +1213,7 @@ func (r *DocumentCrRepositoryDB) Upsert(ctx context.Context, req domainDocCr.Cre
 		}
 
 		result = doc
-		return nil // commit
+		return nil 
 	})
 
 	if err != nil {

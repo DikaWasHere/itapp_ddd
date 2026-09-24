@@ -20,7 +20,6 @@ func NewApplicationHandler(service *applicationApp.Service, logger applicationAp
  
 // Request DTO untuk GetAll
 type applicationGetListRequest struct {
-	Username     string `json:"username"`
 	SessionToken string `json:"session_token"`
 }
  
@@ -33,7 +32,16 @@ type applicationItem struct {
     DeletedAt       *time.Time     `json:"-" gorm:"index"`
 }
  
-// GetAll mengambil daftar aplikasi dari API SSO eksternal
+// Show all applications
+// @Summary      Get all applications
+// @Description  Returns a list of all applications
+// @Tags         Application
+// @Accept       json
+// @Produce      json
+// @Param        request body  applicationGetListRequest true "Request body containing the filter parameters"
+// @Success      200  {object}  applicationItem
+// Failure        400  {object}  pkg.ErrorResponse
+// @Router       /application [post]
 func (h *ApplicationHandler) GetAll(c *fiber.Ctx) error {
 	req := new(applicationGetListRequest)
 	if err := c.BodyParser(req); err != nil {
