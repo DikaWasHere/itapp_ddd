@@ -368,7 +368,7 @@ func (h *DocumentCrHandler) GetDetail(c *fiber.Ctx) error {
 		doc.PICQAs = append(doc.PICQAs, picResponse{
 			PICNik:        p.PICNik,
 			PICName:       p.PICName,
-			PICDepartment: p.PICDepartment,
+			PICDepartment: "QA",
 		})
 	}
 
@@ -482,7 +482,7 @@ func (h *DocumentCrHandler) Create(c *fiber.Ctx) error {
 
 	picsQA := make([]domainDocCr.PIC, 0)
 	for _, p := range req.PICQAs {
-		picsQA = append(picsQA, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
+		picsQA = append(picsQA, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: "QA"})
 	}
 
 	// Map Review ke domain (pointer, optional)
@@ -629,7 +629,7 @@ func (h *DocumentCrHandler) SendReview(c *fiber.Ctx) error {
 
 	picsQA := make([]domainDocCr.PIC, 0, len(req.PICQAs))
 	for _, p := range req.PICQAs {
-		picsQA = append(picsQA, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: p.PICDepartment})
+		picsQA = append(picsQA, domainDocCr.PIC{PICNik: p.PICNik, PICName: p.PICName, PICDepartment: "QA"})
 	}
 
 	approvals := make([]*domainDocCr.Approval, 0, len(req.Approvals))
