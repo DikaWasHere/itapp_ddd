@@ -1,5 +1,0 @@
-2026-09-01T11:49:49.9055962+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
-2026-09-01T11:50:32.9844843+07:00 | INFO | doc_cr_handler.go:366 | handler.(*DocumentCrHandler).GetDetail | [POST] /api/v1/doc-cr-detail | Status: 200 | Berhasil mengambil semua data
-2026-09-01T11:50:42.6686776+07:00 | INFO | doc_cr_handler.go:236 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data
-2026-09-01T15:05:15.311101+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
-2026-09-01T15:05:25.3604928+07:00 | INFO | doc_cr_handler.go:236 | handler.(*DocumentCrHandler).GetAll | [POST] /api/v1/doc-cr | Status: 200 | Berhasil mengambil semua data

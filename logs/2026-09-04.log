@@ -1,2 +1,0 @@
-2026-09-04T10:08:43.556572+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
-2026-09-04T10:09:15.352799+07:00 | INFO | doc_cr_handler.go:458 | handler.(*DocumentCrHandler).Create | [POST] /api/v1/doc-cr-add | Status: 200 | DocumentCr created successfully
