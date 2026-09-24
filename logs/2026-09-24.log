@@ -3,3 +3,5 @@
 2026-09-24T09:05:58.1860212+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
 2026-09-24T09:06:06.6206111+07:00 | INFO | application_handler.go:65 | handler.(*ApplicationHandler).GetAll | [POST] /api/v1/application | Status: 200 | Fetched 60 applications
 2026-09-24T09:06:38.8300216+07:00 | INFO | application_handler.go:65 | handler.(*ApplicationHandler).GetAll | [POST] /api/v1/application | Status: 200 | Fetched 60 applications
+2026-09-24T09:11:07.1661922+07:00 | INFO | proc.go:290 | runtime.main | Logger initialized
+2026-09-24T09:11:55.8811622+07:00 | INFO | application_handler.go:65 | handler.(*ApplicationHandler).GetAll | [POST] /api/v1/application | Status: 200 | Fetched 60 applications

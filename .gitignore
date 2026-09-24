@@ -1,4 +1,4 @@
 .env
-log/
+logs/
 build/
 bin/
