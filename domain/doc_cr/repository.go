@@ -115,6 +115,7 @@ type SendReviewRequest struct {
 	GitRepository       string
 	DocNotes            string
 	DocAttachment       []string
+	DocAttachmentExtension []string
 	DocStatus           string
 	ApplicationName     string
 	ReviewNote          string

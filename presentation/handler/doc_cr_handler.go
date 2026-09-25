@@ -573,6 +573,7 @@ type docCrSendReviewRequest struct {
 	GitRepository       string               `json:"git_repository"`
 	DocNotes            string               `json:"doc_notes"`
 	DocAttachment       []string             `json:"doc_attachment"`
+	DocAttachmentExtension []string            `json:"doc_attachment_extension"`
 	DocStatus           string               `json:"doc_status"`
 	ApplicationName     string               `json:"application_name"`
 	ReviewNote          string               `json:"review_note"`
@@ -665,6 +666,7 @@ func (h *DocumentCrHandler) SendReview(c *fiber.Ctx) error {
 		GitRepository:       req.GitRepository,
 		DocNotes:            req.DocNotes,
 		DocAttachment:       req.DocAttachment,
+		DocAttachmentExtension: req.DocAttachmentExtension,
 		DocStatus:           req.DocStatus,
 		ApplicationName:     req.ApplicationName,
 		ReviewNote:          req.ReviewNote,

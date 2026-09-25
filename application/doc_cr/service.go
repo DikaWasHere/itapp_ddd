@@ -124,6 +124,32 @@ func (s *Service) SendReview(ctx context.Context, req domainDocCr.SendReviewRequ
 		s.logger.Warn("SendReview failed: DocCrID is required")
 		return nil, fmt.Errorf("DocCrID is required")
 	}
+
+	filenames := make([]string, 0, len(req.DocAttachment))
+	newB64 := make([]string, 0)
+	newExt := make([]string, 0)
+	for i, att := range req.DocAttachment {
+		if isBase64(att) {
+			ext := ""
+			if i < len(req.DocAttachmentExtension) {
+				ext = req.DocAttachmentExtension[i]
+			}
+			newB64 = append(newB64, att)
+			newExt = append(newExt, ext)
+			continue
+		}
+		filenames = append(filenames, att) 
+	}
+ 
+	if len(newB64) > 0 {
+		joined, err := s.attachment.ProcessAttachments(ctx, req.FormId, newB64, newExt, len(filenames))
+		if err != nil {
+			s.logger.Error("Failed to process attachments", err)
+			return nil, err
+		}
+		filenames = append(filenames, strings.Split(joined, "|")...)
+	}
+	req.DocAttachment = filenames
  
 	result, err := s.repo.SendReview(ctx, req)
 	if err != nil {
