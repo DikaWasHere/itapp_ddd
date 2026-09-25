@@ -40,7 +40,7 @@ func (s *Service) ProcessAttachments(ctx context.Context, formID string, base64D
 		if i < len(extensions) {
 			ext = extensions[i]
 		}
-		fileName := fmt.Sprintf("%s_%d%s", formID, startNumber+i+1, ext)
+		fileName := fmt.Sprintf("%s%d%s", formID, startNumber+i+1, ext)
 		filePath := fmt.Sprintf("public/attachment/%s", fileName)
 
 		// Simpan file ke disk

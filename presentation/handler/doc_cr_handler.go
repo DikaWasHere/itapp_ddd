@@ -667,7 +667,7 @@ func (h *DocumentCrHandler) SendReview(c *fiber.Ctx) error {
 		DocNotes:            req.DocNotes,
 		DocAttachment:       req.DocAttachment,
 		DocAttachmentExtension: req.DocAttachmentExtension,
-		DocStatus:           req.DocStatus,
+		DocStatus:           "Waiting Approve",
 		ApplicationName:     req.ApplicationName,
 		ReviewNote:          req.ReviewNote,
 		NikLog:              req.NikLog,
@@ -839,8 +839,8 @@ func (h *DocumentCrHandler) SendRevision(c *fiber.Ctx) error {
 		NameLog:             req.NameLog,
 		NoteLog:             req.NoteLog,
 		Review: domainDocCr.ReviewCreateRequest{
-			ReviewNik:  req.Review.ReviewNik,
-			ReviewName: req.Review.ReviewName,
+		ReviewNik:  req.Review.ReviewNik,
+		ReviewName: req.Review.ReviewName,
 		},
 	}
 
@@ -875,7 +875,7 @@ type approvalApproveResponse struct {
 	ApprovalID         *uint      `json:"approval_id"`
 	ApprovalNik        *string    `json:"approval_nik"`
 	ApprovalName       *string    `json:"approval_name"`
-	ApprovalDate       *time.Time    `json:"approval_date"`
+	ApprovalDate       *time.Time `json:"approval_date"`
 	ApprovalStatus     *string    `json:"approval_status"`
 	ApprovalNote       *string    `json:"approval_note"`
 	DocCrID            *uint      `json:"doc_cr_id"`
