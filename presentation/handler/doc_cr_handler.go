@@ -532,19 +532,19 @@ func (h *DocumentCrHandler) Create(c *fiber.Ctx) error {
 		return pkg.NotFoundResponse(c, "Documentcr not found: "+err.Error())
 	}
 	if req.Review != nil {
-		_ = h.notification.Send(req.Review.ReviewNik, fmt.Sprint("New CR ", doc.FormId), "New CR needs your review, Please refresh the CR list")
+		_ = h.notification.Send(req.Review.ReviewNik, fmt.Sprint("New CR ", doc.FormId, " - ", doc.DocCrName), "New CR needs your review, Please refresh the CR list")
 	}
 	for _, p := range req.PICFunctionals {
-		_ = h.notification.Send(p.PICNik, fmt.Sprint("New CR ", doc.FormId), "New CR needs your review, Please refresh the CR list")
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("New CR ", doc.FormId, " - ", doc.DocCrName), "New CR needs your review, Please refresh the CR list")
 	}
 	for _, p := range req.PICDevelopers {
-		_ = h.notification.Send(p.PICNik, fmt.Sprint("New CR ", doc.FormId), "New CR needs your review, Please refresh the CR list")
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("New CR ", doc.FormId, " - ", doc.DocCrName), "New CR needs your review, Please refresh the CR list")
 	}
 	for _, p := range req.PICViewers {
-		_ = h.notification.Send(p.PICNik, fmt.Sprint("New CR ", doc.FormId), "New CR needs your review, Please refresh the CR list")
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("New CR ", doc.FormId, " - ", doc.DocCrName), "New CR needs your review, Please refresh the CR list")
 	}
 	for _, p := range req.PICQAs {
-		_ = h.notification.Send(p.PICNik, fmt.Sprint("New CR ", doc.FormId), "New CR needs your review, Please refresh the CR list")
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("New CR ", doc.FormId, " - ", doc.DocCrName), "New CR needs your review, Please refresh the CR list")
 	}
 
 	h.logger.Info("[%s] %s | Status: 200 | DocumentCr created successfully", c.Method(), c.Path())
@@ -683,19 +683,19 @@ func (h *DocumentCrHandler) SendReview(c *fiber.Ctx) error {
 	}
 
 	for _, p := range req.PICFunctionals {
-		_ = h.notification.Send(p.PICNik, fmt.Sprint("Your CR ", req.FormId), "has been reviewed")
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("Your CR ", req.FormId, "-", req.DocCrName), "has been reviewed")
 	}
 	for _, p := range req.PICDevelopers {
-		_ = h.notification.Send(p.PICNik, fmt.Sprint("Your CR ", req.FormId), "has been reviewed")
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("Your CR ", req.FormId, "-", req.DocCrName), "has been reviewed")
 	}
 	for _, p := range req.PICViewers {
-		_ = h.notification.Send(p.PICNik, fmt.Sprint("Your CR ", req.FormId), "has been reviewed")
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("Your CR ", req.FormId, "-", req.DocCrName), "has been reviewed")
 	}
 	for _, p := range req.PICQAs {
-		_ = h.notification.Send(p.PICNik, fmt.Sprint("Your CR ", req.FormId), "has been reviewed")
+		_ = h.notification.Send(p.PICNik, fmt.Sprint("Your CR ", req.FormId, "-", req.DocCrName), "has been reviewed")
 	}
 	for _, a := range req.Approvals {
-		_ = h.notification.Send(a.ApprovalNik, fmt.Sprint("New CR ", req.FormId), "New CR needs your review, Please refresh the CR list")
+		_ = h.notification.Send(a.ApprovalNik, fmt.Sprint("New CR ", req.FormId, "-", req.DocCrName), "New CR needs your review, Please refresh the CR list")
 	}
 
 	h.logger.Info("[%s] %s | Status: 200 | Review submitted for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
@@ -724,7 +724,7 @@ type docCrSendReviewRejectRequest struct {
 // Failure        400  {object}  pkg.ErrorResponse
 // @Router       /doc-cr-reject [post]
 func (h *DocumentCrHandler) SendReviewReject(c *fiber.Ctx) error {
-	req := new(docCrSendReviewRejectRequest)
+	req := new(docCrSendReviewRequest)
 	if err := c.BodyParser(req); err != nil {
 		h.logger.Error("Failed to parse request body", err)
 		return pkg.BadRequestResponse(c, "Failed to parse request body")
@@ -752,7 +752,7 @@ func (h *DocumentCrHandler) SendReviewReject(c *fiber.Ctx) error {
 		h.logger.Error("Failed to reject review", err)
 		return pkg.BadRequestResponse(c, "Failed to reject review: "+err.Error())
 	}
-	_ = h.notification.Send(req.RequesterNIK, fmt.Sprint("New CR ", req.FormId), "New CR needs your revision, Please refresh the CR list")
+	_ = h.notification.Send(req.RequesterNIK, fmt.Sprint("New CR ", req.FormId, " - ", req.DocCrName), "New CR needs your revision, Please refresh the CR list")
 
 	h.logger.Info("[%s] %s | Status: 200 | Review rejected for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
 	return pkg.SuccessResponse(c, nil)
@@ -851,7 +851,7 @@ func (h *DocumentCrHandler) SendRevision(c *fiber.Ctx) error {
 		return pkg.BadRequestResponse(c, "Failed to send revision: "+err.Error())
 	}
 
-	_ = h.notification.Send(req.Review.ReviewNik, fmt.Sprint("New CR ", req.FormId), "New CR needs your review, Please refresh the CR list")
+	_ = h.notification.Send(req.Review.ReviewNik, fmt.Sprint("New CR ", req.FormId, "-",req.DocCrName), "New CR needs your review, Please refresh the CR list")
 
 	h.logger.Info("[%s] %s | Status: 200 | Revision submitted for DocCrID: %d", c.Method(), c.Path(), result.DocCrID)
 	return pkg.SuccessResponse(c, nil)

@@ -111,7 +111,7 @@ type ApprovalModel struct {
 	ApprovalID         uint       `gorm:"primarykey;column:approval_id"`
 	ApprovalNik        string     `gorm:"column:approval_nik"`
 	ApprovalName       string     `gorm:"column:approval_name"`
-	ApprovalDate       *time.Time    `gorm:"column:approval_date"`
+	ApprovalDate       *time.Time `gorm:"column:approval_date"`
 	ApprovalStatus     string     `gorm:"column:approval_status"`
 	ApprovalNote       string     `gorm:"column:approval_note"`
 	DocCrID            uint       `gorm:"column:doc_cr_id"`
@@ -847,34 +847,37 @@ func (r *DocumentCrRepositoryDB) SendRevision(ctx context.Context, req domainDoc
 
 // SendApprove implementasi persistensi untuk approve CR
 func (r *DocumentCrRepositoryDB) SendApprove(ctx context.Context, req domainDocCr.SendApproveRequest) (*domainDocCr.SendApproveResult, error) {
-
 	now := time.Now()
-	nowStr := now.Format(time.RFC3339)
 	approvalUpdate := struct {
-		ApprovalDate   *string
+		ApprovalDate   *time.Time
 		ApprovalStatus string
 		ApprovalNote   string
 	}{
-		ApprovalDate:   &nowStr,
+		ApprovalDate:   &now,
 		ApprovalStatus: req.ApprovalStatus,
 		ApprovalNote:   req.ApprovalNote,
 	}
 
-	if err := r.db.WithContext(ctx).Model(&ApprovalModel{}).Where("approval_id = ?", req.ApprovalID).Updates(approvalUpdate).Error; err != nil {
+	if err := r.db.WithContext(ctx).
+		Model(&ApprovalModel{}).
+		Where("approval_id = ?", req.ApprovalID).
+		Updates(approvalUpdate).Error; err != nil {
 		return nil, fmt.Errorf("failed to update approval: %w", err)
 	}
 
-	var approvedApprovals []ApprovalModel
+	var approvals []ApprovalModel
 	if err := r.db.WithContext(ctx).
-		Where("doc_cr_id = ? AND approval_status = ?", req.DocCrID, "Approve").
-		Find(&approvedApprovals).Error; err != nil {
+		Model(&ApprovalModel{}).
+		Where("doc_cr_id = ?", req.DocCrID).
+		Where("approval_status = ?", "Approve").
+		Find(&approvals).Error; err != nil {
 		return nil, fmt.Errorf("failed to fetch approvals: %w", err)
 	}
 
 	hasSameDepartment := false
 	hasITServices := false
 
-	for _, approval := range approvedApprovals {
+	for _, approval := range approvals {
 		if approval.ApprovalDepartment == req.RequesterDepartment {
 			hasSameDepartment = true
 		}
@@ -882,57 +885,84 @@ func (r *DocumentCrRepositoryDB) SendApprove(ctx context.Context, req domainDocC
 			hasITServices = true
 		}
 	}
+		var docCr DocumentCrModel
+	if err := r.db.WithContext(ctx).
+		Model(&DocumentCrModel{}).
+		Select("cr_priority").
+		Where("doc_cr_id = ?", req.DocCrID).
+		First(&docCr).Error; err != nil {
+		return nil, fmt.Errorf("failed to fetch document cr priority: %w", err)
+	}
 
-	if hasSameDepartment {
-		shouldDeploy := false
 
-		if req.CrPriority == "Not Urgent" {
+if hasSameDepartment {
+		if docCr.CrPriority == "Not Urgent" {
+			fmt.Println("masuk Not Urgent || Not Urgent")
 			if hasITServices {
-				shouldDeploy = true
+				newDocumentCr := DocumentCrModel{
+					DocStatus: "Waiting Deploy",
+				}
+ 
+				if err := r.db.WithContext(ctx).
+					Model(&DocumentCrModel{}).
+					Where("doc_cr_id = ?", req.DocCrID).
+					Updates(&newDocumentCr).Error; err != nil {
+					return nil, fmt.Errorf("failed to update document status: %w", err)
+				}
+
+				newApproval := DocumentCrLogModel{
+					DocCrID:     req.DocCrID,
+					LogActivity: "Approved",
+					NikLog:      req.NikLog,
+					NameLog:     req.NameLog,
+					NoteLog:     req.NoteLog,
+				}
+
+				if err := r.db.WithContext(ctx).Create(&newApproval).Error; err != nil {
+					return nil, fmt.Errorf("failed to create log: %w", err)
+				}
 			}
 		} else {
-			shouldDeploy = true
-		}
-
-		if shouldDeploy {
-			docUpdate := struct {
-				DocStatus string
-			}{
+			fmt.Println("masuk Urgent || Urgent")
+			newDocumentCr := DocumentCrModel{
 				DocStatus: "Waiting Deploy",
 			}
 
-			if err := r.db.WithContext(ctx).Model(&DocumentCrModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(docUpdate).Error; err != nil {
+			if err := r.db.WithContext(ctx).
+				Model(&DocumentCrModel{}).
+				Where("doc_cr_id = ?", req.DocCrID).
+				Updates(&newDocumentCr).Error; err != nil {
 				return nil, fmt.Errorf("failed to update document status: %w", err)
 			}
 
-			logModel := DocumentCrLogModel{
+			newApproval := DocumentCrLogModel{
 				DocCrID:     req.DocCrID,
 				LogActivity: "Approved",
 				NikLog:      req.NikLog,
 				NameLog:     req.NameLog,
 				NoteLog:     req.NoteLog,
 			}
-			if err := r.db.WithContext(ctx).Create(&logModel).Error; err != nil {
+
+			if err := r.db.WithContext(ctx).Create(&newApproval).Error; err != nil {
 				return nil, fmt.Errorf("failed to create log: %w", err)
 			}
 		}
 	}
 
-	var approveItems []*domainDocCr.ApproveItem
-	for i := range approvedApprovals {
-		item := &domainDocCr.ApproveItem{
-			ApprovalID:         &approvedApprovals[i].ApprovalID,
-			ApprovalNik:        &approvedApprovals[i].ApprovalNik,
-			ApprovalName:       &approvedApprovals[i].ApprovalName,
-			ApprovalDate:       approvedApprovals[i].ApprovalDate,
-			ApprovalStatus:     &approvedApprovals[i].ApprovalStatus,
-			ApprovalDepartment: &approvedApprovals[i].ApprovalDepartment,
-			ApprovalNote:       &approvedApprovals[i].ApprovalNote,
-			DocCrID:            &approvedApprovals[i].DocCrID,
-			CreatedAt:          approvedApprovals[i].CreatedAt,
-			UpdatedAt:          approvedApprovals[i].UpdatedAt,
-		}
-		approveItems = append(approveItems, item)
+	approveItems := make([]*domainDocCr.ApproveItem, 0, len(approvals))
+	for i := range approvals {
+		approveItems = append(approveItems, &domainDocCr.ApproveItem{
+			ApprovalID:         &approvals[i].ApprovalID,
+			ApprovalNik:        &approvals[i].ApprovalNik,
+			ApprovalName:       &approvals[i].ApprovalName,
+			ApprovalDate:       approvals[i].ApprovalDate,
+			ApprovalStatus:     &approvals[i].ApprovalStatus,
+			ApprovalDepartment: &approvals[i].ApprovalDepartment,
+			ApprovalNote:       &approvals[i].ApprovalNote,
+			DocCrID:            &approvals[i].DocCrID,
+			CreatedAt:          approvals[i].CreatedAt,
+			UpdatedAt:          approvals[i].UpdatedAt,
+		})
 	}
 
 	return &domainDocCr.SendApproveResult{Approvals: approveItems}, nil
@@ -946,7 +976,7 @@ func (r *DocumentCrRepositoryDB) SendApproveReject(ctx context.Context, req doma
 		DocStatus: "Waiting Review",
 	}
 
-	if err := r.db.WithContext(ctx).Model(&DocumentCrModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(docUpdate).Error; err != nil {
+	if err := r.db.WithContext(ctx).Model(&DocumentCrModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(&docUpdate).Error; err != nil {
 		return nil, fmt.Errorf("failed to update document status: %w", err)
 	}
 
@@ -1213,7 +1243,7 @@ func (r *DocumentCrRepositoryDB) Upsert(ctx context.Context, req domainDocCr.Cre
 		}
 
 		result = doc
-		return nil 
+		return nil
 	})
 
 	if err != nil {
