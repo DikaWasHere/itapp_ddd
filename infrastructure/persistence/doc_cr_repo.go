@@ -973,7 +973,7 @@ func (r *DocumentCrRepositoryDB) SendApproveReject(ctx context.Context, req doma
 	docUpdate := struct {
 		DocStatus string
 	}{
-		DocStatus: "Waiting Review",
+		DocStatus: "Cancel",
 	}
 
 	if err := r.db.WithContext(ctx).Model(&DocumentCrModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(&docUpdate).Error; err != nil {
