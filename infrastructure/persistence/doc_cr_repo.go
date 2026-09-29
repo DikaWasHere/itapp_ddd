@@ -195,7 +195,7 @@ func (r *DocumentCrRepositoryDB) GetAll(ctx context.Context, req domainDocCr.Get
 			SELECT DISTINCT ON (tdc.doc_cr_id) tdc.*
 			FROM trs.trs_document_cr tdc
 			LEFT JOIN trs.trs_pic tp ON tdc.doc_cr_id = tp.doc_cr_id
-			LEFT JOIN trs.trs_approval ta ON tdc.doc_cr_id = ta.doc_cr_id
+			LEFT JOIN trs.trs_approval ta ON tdc.doc_cr_id = ta.doc_cr_id AND ta.approval_status != 'Cancel'
 			WHERE 1=1
 	`
 	var queryParams []interface{}
@@ -256,7 +256,9 @@ func (r *DocumentCrRepositoryDB) GetAll(ctx context.Context, req domainDocCr.Get
 
 		items = append(items, item)
 	}
-	// go
+			if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed to iterate rows: %w", err)
+	}
 	reviewMap := make(map[uint]*domainDocCr.Review)
 	if len(docIDs) > 0 {
 		var reviewModels []ReviewModel
@@ -973,7 +975,7 @@ func (r *DocumentCrRepositoryDB) SendApproveReject(ctx context.Context, req doma
 	docUpdate := struct {
 		DocStatus string
 	}{
-		DocStatus: "Cancel",
+		DocStatus: "Waiting Review",
 	}
 
 	if err := r.db.WithContext(ctx).Model(&DocumentCrModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(&docUpdate).Error; err != nil {
