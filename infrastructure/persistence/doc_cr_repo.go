@@ -875,6 +875,15 @@ func (r *DocumentCrRepositoryDB) SendApprove(ctx context.Context, req domainDocC
 		Find(&approvals).Error; err != nil {
 		return nil, fmt.Errorf("failed to fetch approvals: %w", err)
 	}
+	if err := r.db.WithContext(ctx).Create(&DocumentCrLogModel{
+    DocCrID:     req.DocCrID,
+    LogActivity: "Approved",
+    NikLog:      req.NikLog,
+    NameLog:     req.NameLog,
+    NoteLog:     req.NoteLog,
+}).Error; err != nil {
+    return nil, fmt.Errorf("failed to create approve log: %w", err)
+}
 
 	hasSameDepartment := false
 	hasITServices := false
@@ -912,17 +921,7 @@ if hasSameDepartment {
 					return nil, fmt.Errorf("failed to update document status: %w", err)
 				}
 
-				newApproval := DocumentCrLogModel{
-					DocCrID:     req.DocCrID,
-					LogActivity: "Approved",
-					NikLog:      req.NikLog,
-					NameLog:     req.NameLog,
-					NoteLog:     req.NoteLog,
-				}
 
-				if err := r.db.WithContext(ctx).Create(&newApproval).Error; err != nil {
-					return nil, fmt.Errorf("failed to create log: %w", err)
-				}
 			}
 		} else {
 			fmt.Println("masuk Urgent || Urgent")
@@ -937,17 +936,7 @@ if hasSameDepartment {
 				return nil, fmt.Errorf("failed to update document status: %w", err)
 			}
 
-			newApproval := DocumentCrLogModel{
-				DocCrID:     req.DocCrID,
-				LogActivity: "Approved",
-				NikLog:      req.NikLog,
-				NameLog:     req.NameLog,
-				NoteLog:     req.NoteLog,
-			}
 
-			if err := r.db.WithContext(ctx).Create(&newApproval).Error; err != nil {
-				return nil, fmt.Errorf("failed to create log: %w", err)
-			}
 		}
 	}
 
