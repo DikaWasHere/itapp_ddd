@@ -454,6 +454,7 @@ type DocumentCrDetailJoinModel struct {
 	ApplicationName     string     `gorm:"column:application_name"`
 	DeployedDate        *time.Time `gorm:"column:deployed_date"`
 	CreatedAt           time.Time  `gorm:"column:created_at"`
+	DeletedAt           gorm.DeletedAt `gorm:"column:deleted_at;index"`
 
 	// Data from trs_approval (nullable because LEFT JOIN)
 	ApprovalID         *uint   `gorm:"column:approval_id"`
@@ -1066,10 +1067,8 @@ func (r *DocumentCrRepositoryDB) Delete(ctx context.Context, req domainDocCr.Del
 		return nil, fmt.Errorf("failed to delete document: %w", err)
 	}
 	return &domainDocCr.DeleteResult{
-		DocCrID:         req.DocCrID,
-		ApplicationName: req.ApplicationName,
-		CreatedAt:       time.Now(),
-		UpdatedAt:       time.Now()}, nil
+		DocCrID: req.DocCrID,
+	}, nil
 }
 
 // GetByID mengambil satu document berdasarkan ID

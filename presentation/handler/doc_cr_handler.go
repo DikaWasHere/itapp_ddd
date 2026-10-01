@@ -1058,15 +1058,14 @@ func (h *DocumentCrHandler) UpdateStatus(c *fiber.Ctx) error {
 }
 
 type docCrDeleteRequest struct {
-	DocCrID         uint   `json:"application_id"`
-	ApplicationName string `json:"application_name"`
+	DocCrID         uint   `json:"doc_cr_id"`
+	NikLog         string `json:"nik_log"`
+	NameLog        string `json:"name_log"`
+	NoteLog        string `json:"note_log"`
 }
 
 type DeleteResponse struct {
-	ApplicationID   uint      `json:"application_id"`
-	ApplicationName string    `json:"application_name"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
+	DocCrID   uint      `json:"doc_cr_id"`
 }
 
 // Show delete DocumentCr
@@ -1092,7 +1091,6 @@ func (h *DocumentCrHandler) Delete(c *fiber.Ctx) error {
 
 	domainReq := domainDocCr.DeleteRequest{
 		DocCrID:         req.DocCrID,
-		ApplicationName: req.ApplicationName,
 	}
 
 	result, err := h.service.Delete(c.Context(), domainReq)
@@ -1101,11 +1099,6 @@ func (h *DocumentCrHandler) Delete(c *fiber.Ctx) error {
 		return pkg.BadRequestResponse(c, "Failed to delete DocumentCr: "+err.Error())
 	}
 
-	h.logger.Info("[%s] %s | Status: 200 | DocumentCr deleted successfully for DocCrID: %d", c.Method(), c.Path(), req.DocCrID)
-	return pkg.SuccessResponse(c, DeleteResponse{
-		ApplicationID:   result.DocCrID,
-		ApplicationName: result.ApplicationName,
-		CreatedAt:       result.CreatedAt,
-		UpdatedAt:       result.UpdatedAt,
-	})
+	h.logger.Info("[%s] %s | Status: 200 | DocumentCr deleted successfully for DocCrID: %d", c.Method(), c.Path(),result.DocCrID)
+	return pkg.SuccessResponse(c, "The data has been deleted")
 }

@@ -251,12 +251,15 @@ type UpdateStatusResult struct {
 
 type DeleteRequest struct {
 	DocCrID         uint
-	ApplicationName string
+	NikLog          string
+	NameLog         string
+	NoteLog         string
 }
 
 type DeleteResult struct {
 	DocCrID         uint
 	ApplicationName string
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
+	// CreatedAt       time.Time
+	// UpdatedAt       time.Time
+	DeletedAt       time.Time
 }
