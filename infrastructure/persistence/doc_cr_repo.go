@@ -630,7 +630,7 @@ func (r *DocumentCrRepositoryDB) CountByYear(ctx context.Context, year string) (
 	}
 	endOfYear := fmt.Sprintf("%d-01-01 00:00:00", yearInt+1)
 
-	err = r.db.WithContext(ctx).
+	err = r.db.WithContext(ctx).Unscoped().
 		Model(&DocumentCrModel{}).
 		Where("created_at >= ? AND created_at < ?", startOfYear, endOfYear).
 		Count(&count).Error

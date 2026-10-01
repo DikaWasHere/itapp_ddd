@@ -54,10 +54,9 @@ func (s *Service) GetDetail(ctx context.Context, req domainDocCr.GetDetailReques
 
 func (s *Service) Create(ctx context.Context, req domainDocCr.CreateDocCrRequest) (*domainDocCr.DocumentCr, error) {
 	formId := req.FormId
-	existing := make([]string, 0) // filename/link lama yang dipertahankan
+	existing := make([]string, 0) 
  
 	if req.DocCrID == 0 {
-		// ===== MODE CREATE (kode existing Anda, tidak berubah) =====
 		nowYear := time.Now().Format("2006")
 		nowYearId := time.Now().Format("06")
  
