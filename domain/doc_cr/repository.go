@@ -258,8 +258,5 @@ type DeleteRequest struct {
 
 type DeleteResult struct {
 	DocCrID         uint
-	ApplicationName string
-	// CreatedAt       time.Time
-	// UpdatedAt       time.Time
 	DeletedAt       time.Time
 }
