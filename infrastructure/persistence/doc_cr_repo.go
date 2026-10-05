@@ -196,7 +196,7 @@ func (r *DocumentCrRepositoryDB) GetAll(ctx context.Context, req domainDocCr.Get
 			FROM trs.trs_document_cr tdc
 			LEFT JOIN trs.trs_pic tp ON tdc.doc_cr_id = tp.doc_cr_id
 			LEFT JOIN trs.trs_approval ta ON tdc.doc_cr_id = ta.doc_cr_id AND ta.approval_status != 'Cancel'
-			WHERE 1=1
+			WHERE tdc.deleted_at IS NULL
 	`
 	var queryParams []interface{}
 
@@ -358,7 +358,7 @@ func (r *DocumentCrRepositoryDB) GetDetail(ctx context.Context, req domainDocCr.
         LEFT JOIN trs.trs_approval ta ON tdc.doc_cr_id = ta.doc_cr_id AND ta.approval_status != 'Cancel'
         LEFT JOIN trs.trs_pic tp ON tdc.doc_cr_id = tp.doc_cr_id
         LEFT JOIN trs.trs_review tr ON tdc.doc_cr_id = tr.doc_cr_id
-        WHERE tdc.doc_cr_id = ?
+        WHERE tdc.doc_cr_id = ? AND tdc.deleted_at IS NULL
         ORDER BY tdc.created_at DESC;
     `
 
@@ -1063,12 +1063,33 @@ func (r *DocumentCrRepositoryDB) UpdateStatus(ctx context.Context, req domainDoc
 }
 
 func (r *DocumentCrRepositoryDB) Delete(ctx context.Context, req domainDocCr.DeleteRequest) (*domainDocCr.DeleteResult, error) {
-	if err := r.db.WithContext(ctx).Delete(&DocumentCrModel{}, "doc_cr_id = ?", req.DocCrID).Error; err != nil {
-		return nil, fmt.Errorf("failed to delete document: %w", err)
+	var result *domainDocCr.DeleteResult
+
+	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		logModel := DocumentCrLogModel{
+			DocCrID:     req.DocCrID,
+			LogActivity: "Deleted",
+			NikLog:      req.NikLog,
+			NameLog:     req.NameLog,
+			NoteLog:     req.NoteLog,
+			DeletedAt:   gorm.DeletedAt{Time: time.Now(), Valid: true},
+		}
+		if err := tx.Create(&logModel).Error; err != nil {
+			return fmt.Errorf("failed to create log: %w", err)
+		}
+
+		if err := tx.Delete(&DocumentCrModel{}, "doc_cr_id = ?", req.DocCrID).Error; err != nil {
+			return fmt.Errorf("failed to delete document: %w", err)
+		}
+
+		result = &domainDocCr.DeleteResult{DocCrID: req.DocCrID}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
 	}
-	return &domainDocCr.DeleteResult{
-		DocCrID: req.DocCrID,
-	}, nil
+	return result, nil
 }
 
 // GetByID mengambil satu document berdasarkan ID

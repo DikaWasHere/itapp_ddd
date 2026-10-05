@@ -259,4 +259,8 @@ type DeleteRequest struct {
 type DeleteResult struct {
 	DocCrID         uint
 	DeletedAt       time.Time
+	NikLog          string
+	NameLog         string
+	NoteLog         string
+	LogActivity      string
 }

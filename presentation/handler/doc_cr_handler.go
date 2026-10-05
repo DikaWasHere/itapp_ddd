@@ -1091,6 +1091,9 @@ func (h *DocumentCrHandler) Delete(c *fiber.Ctx) error {
 
 	domainReq := domainDocCr.DeleteRequest{
 		DocCrID:         req.DocCrID,
+		NikLog:          req.NikLog,
+		NameLog:         req.NameLog,
+		NoteLog:         req.NoteLog,
 	}
 
 	result, err := h.service.Delete(c.Context(), domainReq)
