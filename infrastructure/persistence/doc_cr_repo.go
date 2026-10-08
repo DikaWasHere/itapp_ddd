@@ -40,6 +40,7 @@ type DocumentCrModel struct {
 	GitRepository       string         `gorm:"column:git_repository"`
 	DocNotes            string         `gorm:"column:doc_notes"`
 	DocAttachment       string         `gorm:"column:doc_attachment"`
+	DocAttachmentName   string         `gorm:"column:doc_attachment_name"`
 	DocStatus           string         `gorm:"column:doc_status"`
 	ApplicationName     string         `gorm:"column:application_name"`
 	DeployedDate        *time.Time     `gorm:"column:deployed_date"`
@@ -70,6 +71,7 @@ func (m *DocumentCrModel) toEntity() *domainDocCr.DocumentCr {
 		GitRepository:       m.GitRepository,
 		DocNotes:            m.DocNotes,
 		DocAttachment:       m.DocAttachment,
+		DocAttachmentName:   m.DocAttachmentName,
 		DocStatus:           m.DocStatus,
 		ApplicationName:     m.ApplicationName,
 		DeployedDate:        m.DeployedDate,
@@ -343,7 +345,7 @@ func (r *DocumentCrRepositoryDB) GetDetail(ctx context.Context, req domainDocCr.
             tdc.requester_nik, tdc.requester_name, tdc.requester_department,
             tdc.reason_detail, tdc.problem_detail, tdc.server_type, tdc.cr_type,
             tdc.cr_priority, tdc.git_merge_request, tdc.git_repository,
-            tdc.doc_notes, tdc.doc_attachment, tdc.doc_status, tdc.application_name,
+            tdc.doc_notes, tdc.doc_attachment,tdc.doc_attachment_name, tdc.doc_status, tdc.application_name,
             tdc.deployed_date, tdc.created_at,
             -- Approval fields (nullable)
             ta.approval_id, ta.approval_nik, ta.approval_name,
@@ -450,6 +452,7 @@ type DocumentCrDetailJoinModel struct {
 	GitRepository       string     `gorm:"column:git_repository"`
 	DocNotes            string     `gorm:"column:doc_notes"`
 	DocAttachment       string     `gorm:"column:doc_attachment"`
+	DocAttachmentName   string     `gorm:"column:doc_attachment_name"`
 	DocStatus           string     `gorm:"column:doc_status"`
 	ApplicationName     string     `gorm:"column:application_name"`
 	DeployedDate        *time.Time `gorm:"column:deployed_date"`
@@ -506,6 +509,7 @@ func toDocumentCrDetailItem(rows []DocumentCrDetailJoinModel) (*domainDocCr.Docu
 		GitRepository:       first.GitRepository,
 		DocNotes:            first.DocNotes,
 		DocAttachment:       first.DocAttachment,
+		DocAttachmentName:   first.DocAttachmentName,
 		DocStatus:           first.DocStatus,
 		ApplicationName:     first.ApplicationName,
 		DeployedDate:        first.DeployedDate,
@@ -581,11 +585,6 @@ func toDocumentCrDetailItem(rows []DocumentCrDetailJoinModel) (*domainDocCr.Docu
 
 // Create membuat DocumentCr baru
 func (r *DocumentCrRepositoryDB) Create(ctx context.Context, req domainDocCr.CreateDocCrRequest) (*domainDocCr.DocumentCr, error) {
-	// Konversi DocAttachment ([]string) ke string dengan join "|"
-	var docAttachmentStr string
-	if len(req.DocAttachment) > 0 {
-		docAttachmentStr = strings.Join(req.DocAttachment, "|")
-	}
 
 	docModel := DocumentCrModel{
 		DocCrName:           req.DocCrName,
@@ -602,7 +601,8 @@ func (r *DocumentCrRepositoryDB) Create(ctx context.Context, req domainDocCr.Cre
 		GitMergeRequest:     req.GitMergeRequest,
 		GitRepository:       req.GitRepository,
 		DocNotes:            req.DocNotes,
-		DocAttachment:       docAttachmentStr,
+		DocAttachment:       strings.Join(req.DocAttachment, "|"),
+		DocAttachmentName:   strings.Join(req.DocAttachmentName, "|"),
 		DocStatus:           req.DocStatus,
 		ApplicationName:     req.ApplicationName,
 		DeployedDate:        req.DeployedDate,
@@ -1265,10 +1265,6 @@ func (r *DocumentCrRepositoryDB) Upsert(ctx context.Context, req domainDocCr.Cre
 
 // createInTx versi Create() yang berjalan di dalam transaksi
 func (r *DocumentCrRepositoryDB) createInTx(tx *gorm.DB, req domainDocCr.CreateDocCrRequest) (*domainDocCr.DocumentCr, error) {
-	var docAttachmentStr string
-	if len(req.DocAttachment) > 0 {
-		docAttachmentStr = strings.Join(req.DocAttachment, "|")
-	}
 
 	docModel := DocumentCrModel{
 		DocCrName:           req.DocCrName,
@@ -1285,7 +1281,8 @@ func (r *DocumentCrRepositoryDB) createInTx(tx *gorm.DB, req domainDocCr.CreateD
 		GitMergeRequest:     req.GitMergeRequest,
 		GitRepository:       req.GitRepository,
 		DocNotes:            req.DocNotes,
-		DocAttachment:       docAttachmentStr,
+		DocAttachment:       strings.Join(req.DocAttachment, "|"),
+		DocAttachmentName:   strings.Join(req.DocAttachmentName, "|"),
 		DocStatus:           req.DocStatus,
 		ApplicationName:     req.ApplicationName,
 		DeployedDate:        req.DeployedDate,
@@ -1324,6 +1321,7 @@ func (r *DocumentCrRepositoryDB) updateInTx(tx *gorm.DB, req domainDocCr.CreateD
 		"git_repository":       req.GitRepository,
 		"doc_notes":            req.DocNotes,
 		"doc_attachment":       strings.Join(req.DocAttachment, "|"),
+		"doc_attachment_name":  strings.Join(req.DocAttachmentName, "|"),
 		"application_name":     req.ApplicationName,
 	}
 

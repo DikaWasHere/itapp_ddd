@@ -128,6 +128,7 @@ type docCrDetailResponse struct {
 	GitRepository       string              `json:"git_repository"`
 	DocNotes            string              `json:"doc_notes"`
 	DocAttachment       string              `json:"doc_attachment"`
+	DocAttachmentName   string              `json:"doc_attachment_name"`
 	DocStatus           string              `json:"doc_status"`
 	ApplicationName     string              `json:"application_name"`
 	DeployedDate        *time.Time          `json:"deployed_date"`
@@ -298,6 +299,7 @@ func (h *DocumentCrHandler) GetDetail(c *fiber.Ctx) error {
 		GitRepository:       item.DocCr.GitRepository,
 		DocNotes:            item.DocCr.DocNotes,
 		DocAttachment:       item.DocCr.DocAttachment,
+		DocAttachmentName:   item.DocCr.DocAttachmentName,
 		DocStatus:           item.DocCr.DocStatus,
 		ApplicationName:     item.DocCr.ApplicationName,
 		DeployedDate:        item.DocCr.DeployedDate,
@@ -407,6 +409,7 @@ type docCrCreateRequest struct {
 	DocNotes               string     `json:"doc_notes"`
 	DocAttachment          []string   `json:"doc_attachment"`
 	DocAttachmentExtension []string   `json:"doc_attachment_extension"`
+	DocAttachmentName      []string   `json:"doc_attachment_name"`
 	DocStatus              string     `json:"doc_status"`
 	ApplicationName        string     `json:"application_name"`
 	DeployedDate           *time.Time `json:"deployed_date"`
@@ -513,6 +516,7 @@ func (h *DocumentCrHandler) Create(c *fiber.Ctx) error {
 		DocNotes:               req.DocNotes,
 		DocAttachment:          req.DocAttachment,
 		DocAttachmentExtension: req.DocAttachmentExtension,
+		DocAttachmentName:      req.DocAttachmentName,
 		DocStatus:              req.DocStatus,
 		ApplicationName:        req.ApplicationName,
 		DeployedDate:           req.DeployedDate,
@@ -574,6 +578,7 @@ type docCrSendReviewRequest struct {
 	DocNotes            string               `json:"doc_notes"`
 	DocAttachment       []string             `json:"doc_attachment"`
 	DocAttachmentExtension []string            `json:"doc_attachment_extension"`
+	DocAttachmentName      []string             `json:"doc_attachment_name"`
 	DocStatus           string               `json:"doc_status"`
 	ApplicationName     string               `json:"application_name"`
 	ReviewNote          string               `json:"review_note"`
@@ -667,6 +672,7 @@ func (h *DocumentCrHandler) SendReview(c *fiber.Ctx) error {
 		DocNotes:            req.DocNotes,
 		DocAttachment:       req.DocAttachment,
 		DocAttachmentExtension: req.DocAttachmentExtension,
+		DocAttachmentName:      req.DocAttachmentName,
 		DocStatus:           "Waiting Approve",
 		ApplicationName:     req.ApplicationName,
 		ReviewNote:          req.ReviewNote,

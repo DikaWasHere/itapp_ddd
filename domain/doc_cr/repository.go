@@ -80,6 +80,7 @@ type CreateDocCrRequest struct {
 	DocNotes               string
 	DocAttachment          []string
 	DocAttachmentExtension []string
+	DocAttachmentName      []string
 	DocStatus              string
 	ApplicationName        string
 	DeployedDate           *time.Time
@@ -116,6 +117,7 @@ type SendReviewRequest struct {
 	DocNotes            string
 	DocAttachment       []string
 	DocAttachmentExtension []string
+	DocAttachmentName   []string
 	DocStatus           string
 	ApplicationName     string
 	ReviewNote          string
