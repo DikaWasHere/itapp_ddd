@@ -170,6 +170,7 @@ type SendRevisionRequest struct {
 	GitRepository       string
 	DocNotes            string
 	DocAttachment       string 
+	DocAttachmentName   string
 	DocStatus           string
 	ApplicationName     string
 	ReviewNote          string

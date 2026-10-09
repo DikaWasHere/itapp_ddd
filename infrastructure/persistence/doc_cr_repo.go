@@ -381,37 +381,37 @@ func (r *DocumentCrRepositoryDB) GetDetail(ctx context.Context, req domainDocCr.
 }
 
 // fetchApprovals mengambil data approval untuk DocumentCr tertentu
-func (r *DocumentCrRepositoryDB) fetchApprovals(ctx context.Context, docCrID uint, item *domainDocCr.DocumentCrDetailItem) error {
-	rows, err := r.db.WithContext(ctx).Raw(`
-		SELECT *
-		FROM trs.trs_approval
-		WHERE doc_cr_id = ? AND approval_status != 'Cancel';
-	`, docCrID).Rows()
-	if err != nil {
-		return err
-	}
-	defer rows.Close()
+// func (r *DocumentCrRepositoryDB) fetchApprovals(ctx context.Context, docCrID uint, item *domainDocCr.DocumentCrDetailItem) error {
+// 	rows, err := r.db.WithContext(ctx).Raw(`
+// 		SELECT *
+// 		FROM trs.trs_approval
+// 		WHERE doc_cr_id = ? AND approval_status != 'Cancel';
+// 	`, docCrID).Rows()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer rows.Close()
 
-	for rows.Next() {
-		var approvalModel ApprovalModel
-		r.db.ScanRows(rows, &approvalModel)
-		item.Approvals = append(item.Approvals, approvalModel.toEntity())
-	}
-	return nil
-}
+// 	for rows.Next() {
+// 		var approvalModel ApprovalModel
+// 		r.db.ScanRows(rows, &approvalModel)
+// 		item.Approvals = append(item.Approvals, approvalModel.toEntity())
+// 	}
+// 	return nil
+// }
 
-// fetchReview mengambil data review
-func (r *DocumentCrRepositoryDB) fetchReview(ctx context.Context, docCrID uint, item *domainDocCr.DocumentCrDetailItem) {
-	var reviewModel ReviewModel
-	err := r.db.WithContext(ctx).Raw(`
-		SELECT *
-		FROM trs.trs_review
-		WHERE doc_cr_id = ?;
-	`, docCrID).Scan(&reviewModel).Error
-	if err == nil {
-		item.Review = reviewModel.toEntity()
-	}
-}
+// // fetchReview mengambil data review
+// func (r *DocumentCrRepositoryDB) fetchReview(ctx context.Context, docCrID uint, item *domainDocCr.DocumentCrDetailItem) {
+// 	var reviewModel ReviewModel
+// 	err := r.db.WithContext(ctx).Raw(`
+// 		SELECT *
+// 		FROM trs.trs_review
+// 		WHERE doc_cr_id = ?;
+// 	`, docCrID).Scan(&reviewModel).Error
+// 	if err == nil {
+// 		item.Review = reviewModel.toEntity()
+// 	}
+// }
 
 // fetchMilestones mengambil data milestones
 func (r *DocumentCrRepositoryDB) fetchMilestones(ctx context.Context, docCrID uint, item *domainDocCr.DocumentCrDetailItem) {
@@ -653,6 +653,7 @@ type SendReviewUpdateModel struct {
 	GitRepository   string
 	DocNotes        string
 	DocAttachment   string
+	DocAttachmentName string
 	DocStatus       string
 	ApplicationName string
 }
@@ -673,6 +674,7 @@ func (r *DocumentCrRepositoryDB) SendReview(ctx context.Context, req domainDocCr
 		GitRepository:   req.GitRepository,
 		DocNotes:        req.DocNotes,
 		DocAttachment:   strings.Join(req.DocAttachment, "|"),
+		DocAttachmentName: strings.Join(req.DocAttachmentName, "|"),
 		DocStatus:       req.DocStatus,
 		ApplicationName: req.ApplicationName,
 	}
@@ -806,6 +808,7 @@ type SendRevisionUpdateModel struct {
 	GitRepository   string
 	DocNotes        string
 	DocAttachment   string
+	DocAttachmentName   string
 	DocStatus       string
 	ApplicationName string
 }
