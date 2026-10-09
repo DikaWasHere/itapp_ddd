@@ -141,6 +141,9 @@ type SendReviewRejectRequest struct {
 	NikLog       string
 	NameLog      string
 	NoteLog      string
+	DocAttachment []string
+	DocAttachmentExtension []string
+	DocAttachmentName []string
 }
 
 // SendReviewRejectResult adalah hasil dari operasi reject review
@@ -169,8 +172,9 @@ type SendRevisionRequest struct {
 	GitMergeRequest     string
 	GitRepository       string
 	DocNotes            string
-	DocAttachment       string 
-	DocAttachmentName   string
+	DocAttachment       []string 
+	DocAttachmentExtension []string
+	DocAttachmentName   []string
 	DocStatus           string
 	ApplicationName     string
 	ReviewNote          string

@@ -717,6 +717,9 @@ type docCrSendReviewRejectRequest struct {
 	NikLog       string `json:"nik_log"`
 	NameLog      string `json:"name_log"`
 	NoteLog      string `json:"note_log"`
+	DocAttachment []string `json:"doc_attachment"`
+	DocAttachmentExtension []string `json:"doc_attachment_extension"`
+	DocAttachmentName []string `json:"doc_attachment_name"`
 }
 
 // Show Send Review Reject DocumentCr
@@ -750,6 +753,9 @@ func (h *DocumentCrHandler) SendReviewReject(c *fiber.Ctx) error {
 		NikLog:       req.NikLog,
 		NameLog:      req.NameLog,
 		NoteLog:      req.NoteLog,
+		DocAttachment: req.DocAttachment,
+		DocAttachmentExtension: req.DocAttachmentExtension,
+		DocAttachmentName:      req.DocAttachmentName,
 	}
 
 	// Panggil service
@@ -785,7 +791,9 @@ type docCrSendRevisionRequest struct {
 	GitMergeRequest     string           `json:"git_merge_request"`
 	GitRepository       string           `json:"git_repository"`
 	DocNotes            string           `json:"doc_notes"`
-	DocAttachment       string           `json:"doc_attachment"`
+	DocAttachment       []string           `json:"doc_attachment"`
+	DocAttachmentExtension []string        `json:"doc_attachment_extension"`
+	DocAttachmentName      []string        `json:"doc_attachment_name"`
 	ApplicationName     string           `json:"application_name"`
 	ReviewNote          string           `json:"review_note"`
 	NikLog              string           `json:"nik_log"`
@@ -839,6 +847,8 @@ func (h *DocumentCrHandler) SendRevision(c *fiber.Ctx) error {
 		GitRepository:       req.GitRepository,
 		DocNotes:            req.DocNotes,
 		DocAttachment:       req.DocAttachment,
+		DocAttachmentExtension: req.DocAttachmentExtension,
+		DocAttachmentName:      req.DocAttachmentName,
 		ApplicationName:     req.ApplicationName,
 		ReviewNote:          req.ReviewNote,
 		NikLog:              req.NikLog,

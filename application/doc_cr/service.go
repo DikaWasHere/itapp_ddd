@@ -166,6 +166,29 @@ func (s *Service) SendReviewReject(ctx context.Context, req domainDocCr.SendRevi
 		s.logger.Warn("SendReviewReject failed: DocCrID is required")
 		return nil, fmt.Errorf("DocCrID is required")
 	}
+
+	filenames := make([]string, 0, len(req.DocAttachment))
+newB64 := make([]string, 0)
+newExt := make([]string, 0)
+for i, att := range req.DocAttachment {
+    if isBase64(att) {
+        ext := ""
+        if i < len(req.DocAttachmentExtension) { ext = req.DocAttachmentExtension[i] }
+        newB64 = append(newB64, att)
+        newExt = append(newExt, ext)
+        continue
+    }
+    filenames = append(filenames, att) // file lama (bukan base64) tetap dipertahankan
+}
+if len(newB64) > 0 {
+    joined, err := s.attachment.ProcessAttachments(ctx, req.FormId, newB64, newExt, len(filenames))
+    if err != nil {
+        s.logger.Error("Failed to process attachments", err)
+        return nil, err
+    }
+    filenames = append(filenames, strings.Split(joined, "|")...)
+}
+req.DocAttachment = filenames
  
 	result, err := s.repo.SendReviewReject(ctx, req)
 	if err != nil {
@@ -184,17 +207,28 @@ func (s *Service) SendRevision(ctx context.Context, req domainDocCr.SendRevision
 		return nil, fmt.Errorf("DocCrID is required")
 	}
  
-	// Handle base64 attachment jika ada
-	if req.DocAttachment != "" {
-		imageFileName := fmt.Sprintf("%s.png", req.FormId)
-		imageFilePath := fmt.Sprintf("public/attachment/%s", imageFileName)
- 
-		if err := s.fileStore.Save(req.DocAttachment, imageFilePath); err != nil {
-			s.logger.Error("Failed to save attachment", err)
-			return nil, fmt.Errorf("failed to save attachment: %w", err)
-		}
-		req.DocAttachment = imageFileName
-	}
+filenames := make([]string, 0, len(req.DocAttachment))
+newB64 := make([]string, 0)
+newExt := make([]string, 0)
+for i, att := range req.DocAttachment {
+    if isBase64(att) {
+        ext := ""
+        if i < len(req.DocAttachmentExtension) { ext = req.DocAttachmentExtension[i] }
+        newB64 = append(newB64, att)
+        newExt = append(newExt, ext)
+        continue
+    }
+    filenames = append(filenames, att) // file lama (bukan base64) tetap dipertahankan
+}
+if len(newB64) > 0 {
+    joined, err := s.attachment.ProcessAttachments(ctx, req.FormId, newB64, newExt, len(filenames))
+    if err != nil {
+        s.logger.Error("Failed to process attachments", err)
+        return nil, err
+    }
+    filenames = append(filenames, strings.Split(joined, "|")...)
+}
+req.DocAttachment = filenames
  
 	result, err := s.repo.SendRevision(ctx, req)
 	if err != nil {

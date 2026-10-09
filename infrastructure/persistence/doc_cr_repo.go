@@ -90,6 +90,8 @@ type ReviewModel struct {
 	DocCrID      uint      `gorm:"column:doc_cr_id"`
 	CreatedAt    time.Time `gorm:"column:created_at"`
 	UpdatedAt    time.Time `gorm:"column:updated_at"`
+	DocAttachment string    `gorm:"column:doc_attachment"`
+	DocAttachmentName string `gorm:"column:doc_attachment_name"`
 }
 
 func (ReviewModel) TableName() string {
@@ -787,6 +789,8 @@ func (r *DocumentCrRepositoryDB) SendReviewReject(ctx context.Context, req domai
 		ReviewDate:   func() *time.Time {  return &now }(),
 		ReviewStatus: "Waiting Revision",
 		ReviewNote:   req.ReviewNote,
+		DocAttachment:   strings.Join(req.DocAttachment, "|"),
+		DocAttachmentName: strings.Join(req.DocAttachmentName, "|"),
 	}
 	if err := r.db.WithContext(ctx).Model(&ReviewModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(reviewUpdate).Error; err != nil {
 		return nil, fmt.Errorf("failed to update review: %w", err)
@@ -827,7 +831,8 @@ func (r *DocumentCrRepositoryDB) SendRevision(ctx context.Context, req domainDoc
 		GitMergeRequest: req.GitMergeRequest,
 		GitRepository:   req.GitRepository,
 		DocNotes:        req.DocNotes,
-		DocAttachment:   req.DocAttachment,
+		DocAttachment:   strings.Join(req.DocAttachment, "|"),
+		DocAttachmentName: strings.Join(req.DocAttachmentName, "|"),
 		DocStatus:       "Waiting Review",
 		ApplicationName: req.ApplicationName,
 	}
