@@ -234,6 +234,7 @@ type SendApproveRejectRequest struct {
 	NikLog        string
 	NameLog       string
 	NoteLog       string
+	ReviewNote    string
 }
 
 // SendApproveRejectResult adalah hasil dari operasi approve reject

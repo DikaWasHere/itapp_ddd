@@ -763,8 +763,14 @@ func (r *DocumentCrRepositoryDB) SendReviewReject(ctx context.Context, req domai
 	// 1. Update status dokumen ke "Waiting Revision"
 	newDocStatus := struct {
 		DocStatus string
+		ReviewNote string
+		DocAttachment string
+		DocAttachmentName string
 	}{
 		DocStatus: "Waiting Revision",
+		ReviewNote:   req.ReviewNote,
+		DocAttachment:   strings.Join(req.DocAttachment, "|"),
+		DocAttachmentName: strings.Join(req.DocAttachmentName, "|"),
 	}
 
 	if err := r.db.WithContext(ctx).Model(&DocumentCrModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(newDocStatus).Error; err != nil {
@@ -987,10 +993,10 @@ func (r *DocumentCrRepositoryDB) SendApproveReject(ctx context.Context, req doma
 
 	// 3. Update data review
 	now := time.Now()
-	reviewUpdate := ReviewModel{
-		ReviewDate:   func() *time.Time { return &now }(),
-		ReviewStatus: "Waiting Review",
-		ReviewNote:   "Reject Approve",
+	reviewUpdate := map[string]interface{}{
+		"review_date":   now,
+		"review_status": "Waiting Review",
+		"review_note":   req.ReviewNote,
 	}
 	if err := r.db.WithContext(ctx).Model(&ReviewModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(reviewUpdate).Error; err != nil {
 		return nil, fmt.Errorf("failed to update review: %w", err)
