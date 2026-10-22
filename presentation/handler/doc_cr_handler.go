@@ -975,7 +975,6 @@ type docCrSendApproveRejectRequest struct {
 	NikLog        string `json:"nik_log"`
 	NameLog       string `json:"name_log"`
 	NoteLog       string `json:"note_log"`
-	ReviewNote    string `json:"review_note"`
 }
 
 // Show approve Reject DocumentCr
@@ -1007,7 +1006,6 @@ func (h *DocumentCrHandler) SendApproveReject(c *fiber.Ctx) error {
 		NikLog:        req.NikLog,
 		NameLog:       req.NameLog,
 		NoteLog:       req.NoteLog,
-		ReviewNote:	   req.ReviewNote,
 	}
 
 	// Panggil service

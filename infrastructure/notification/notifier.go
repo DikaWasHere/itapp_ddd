@@ -65,5 +65,9 @@ func (n *HTTPNotifier) Send(username string, title string, message string) error
 	// Tampilkan status dan isi response
 	fmt.Println("Notification response status:", resp.Status)
 	fmt.Println("Response body:", string(body))
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("notification failed: status %d, body: %s", resp.StatusCode, string(body))
+	}
 	return nil
 }

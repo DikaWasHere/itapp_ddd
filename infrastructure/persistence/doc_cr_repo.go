@@ -993,10 +993,9 @@ func (r *DocumentCrRepositoryDB) SendApproveReject(ctx context.Context, req doma
 
 	// 3. Update data review
 	now := time.Now()
-	reviewUpdate := map[string]interface{}{
-		"review_date":   now,
-		"review_status": "Waiting Review",
-		"review_note":   req.ReviewNote,
+	reviewUpdate := ReviewModel{
+		ReviewDate:   &now,
+		ReviewStatus: "Waiting Review",
 	}
 	if err := r.db.WithContext(ctx).Model(&ReviewModel{}).Where("doc_cr_id = ?", req.DocCrID).Updates(reviewUpdate).Error; err != nil {
 		return nil, fmt.Errorf("failed to update review: %w", err)

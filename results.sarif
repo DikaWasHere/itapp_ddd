@@ -1,0 +1,448 @@
+{
+	"runs": [
+		{
+			"results": [
+				{
+					"level": "error",
+					"locations": [
+						{
+							"physicalLocation": {
+								"artifactLocation": {},
+								"region": {
+									"endColumn": 26,
+									"endLine": 53,
+									"snippet": {
+										"text": "resp, err := n.client.Do(req)"
+									},
+									"sourceLanguage": "go",
+									"startColumn": 26,
+									"startLine": 53
+								}
+							}
+						}
+					],
+					"message": {
+						"text": "SSRF via taint analysis"
+					},
+					"ruleId": "G704"
+				},
+				{
+					"level": "error",
+					"locations": [
+						{
+							"physicalLocation": {
+								"artifactLocation": {},
+								"region": {
+									"endColumn": 29,
+									"endLine": 44,
+									"snippet": {
+										"text": "req, err := http.NewRequest(\"POST\", os.Getenv(\"URL_NOTIF\"), bytes.NewBuffer(jsonData))"
+									},
+									"sourceLanguage": "go",
+									"startColumn": 29,
+									"startLine": 44
+								}
+							}
+						}
+					],
+					"message": {
+						"text": "SSRF via taint analysis"
+					},
+					"ruleId": "G704"
+				},
+				{
+					"level": "error",
+					"locations": [
+						{
+							"physicalLocation": {
+								"artifactLocation": {},
+								"region": {
+									"endColumn": 12,
+									"endLine": 24,
+									"snippet": {
+										"text": "if err := os.MkdirAll(dir, 0755); err != nil {"
+									},
+									"sourceLanguage": "go",
+									"startColumn": 12,
+									"startLine": 24
+								}
+							}
+						}
+					],
+					"message": {
+						"text": "Expect directory permissions to be 0750 or less"
+					},
+					"ruleId": "G301"
+				},
+				{
+					"level": "error",
+					"locations": [
+						{
+							"physicalLocation": {
+								"artifactLocation": {},
+								"region": {
+									"endColumn": 2,
+									"endLine": 32,
+									"snippet": {
+										"text": "os.MkdirAll(\"logs\", 0755)"
+									},
+									"sourceLanguage": "go",
+									"startColumn": 2,
+									"startLine": 32
+								}
+							}
+						}
+					],
+					"message": {
+						"text": "Expect directory permissions to be 0750 or less"
+					},
+					"ruleId": "G301"
+				},
+				{
+					"level": "error",
+					"locations": [
+						{
+							"physicalLocation": {
+								"artifactLocation": {},
+								"region": {
+									"endColumn": 12,
+									"endLine": 28,
+									"snippet": {
+										"text": "if err := os.WriteFile(filePath, data, 0644); err != nil {"
+									},
+									"sourceLanguage": "go",
+									"startColumn": 12,
+									"startLine": 28
+								}
+							}
+						}
+					],
+					"message": {
+						"text": "Expect WriteFile permissions to be 0600 or less"
+					},
+					"ruleId": "G306",
+					"ruleIndex": 1
+				},
+				{
+					"level": "warning",
+					"locations": [
+						{
+							"physicalLocation": {
+								"artifactLocation": {},
+								"region": {
+									"endColumn": 3,
+									"endLine": 433,
+									"snippet": {
+										"text": "r.db.ScanRows(rows, \u0026milestoneModel)"
+									},
+									"sourceLanguage": "go",
+									"startColumn": 3,
+									"startLine": 433
+								}
+							}
+						}
+					],
+					"message": {
+						"text": "Errors unhandled"
+					},
+					"ruleId": "G104"
+				},
+				{
+					"level": "warning",
+					"locations": [
+						{
+							"physicalLocation": {
+								"artifactLocation": {},
+								"region": {
+									"endColumn": 2,
+									"endLine": 32,
+									"snippet": {
+										"text": "os.MkdirAll(\"logs\", 0755)"
+									},
+									"sourceLanguage": "go",
+									"startColumn": 2,
+									"startLine": 32
+								}
+							}
+						}
+					],
+					"message": {
+						"text": "Errors unhandled"
+					},
+					"ruleId": "G104"
+				},
+				{
+					"level": "warning",
+					"locations": [
+						{
+							"physicalLocation": {
+								"artifactLocation": {},
+								"region": {
+									"endColumn": 3,
+									"endLine": 26,
+									"snippet": {
+										"text": "syncer.Sync()"
+									},
+									"sourceLanguage": "go",
+									"startColumn": 3,
+									"startLine": 26
+								}
+							}
+						}
+					],
+					"message": {
+						"text": "Errors unhandled"
+					},
+					"ruleId": "G104"
+				},
+				{
+					"level": "warning",
+					"locations": [
+						{
+							"physicalLocation": {
+								"artifactLocation": {},
+								"region": {
+									"endColumn": 2,
+									"endLine": 33,
+									"snippet": {
+										"text": "migration.RunMigration()"
+									},
+									"sourceLanguage": "go",
+									"startColumn": 2,
+									"startLine": 33
+								}
+							}
+						}
+					],
+					"message": {
+						"text": "Errors unhandled"
+					},
+					"ruleId": "G104"
+				}
+			],
+			"taxonomies": [
+				{
+					"downloadUri": "https://cwe.mitre.org/data/xml/cwec_v4.4.xml.zip",
+					"guid": "f2856fc0-85b7-373f-83e7-6f8582243547",
+					"informationUri": "https://cwe.mitre.org/data/published/cwe_v4.4.pdf/",
+					"isComprehensive": true,
+					"language": "en",
+					"minimumRequiredLocalizedDataSemanticVersion": "4.4",
+					"name": "CWE",
+					"organization": "MITRE",
+					"releaseDateUtc": "2021-03-15",
+					"shortDescription": {
+						"text": "The MITRE Common Weakness Enumeration"
+					},
+					"taxa": [
+						{
+							"fullDescription": {
+								"text": "During installation, installed file permissions are set to allow anyone to modify those files."
+							},
+							"guid": "fca8970d-b44c-3162-a385-cc09266d12a4",
+							"helpUri": "https://cwe.mitre.org/data/definitions/276.html",
+							"id": "276",
+							"shortDescription": {
+								"text": "Incorrect Default Permissions"
+							}
+						},
+						{
+							"fullDescription": {
+								"text": "The software does not properly anticipate or handle exceptional conditions that rarely occur during normal operation of the software."
+							},
+							"guid": "7df38d1d-038e-3ced-8601-8d9265b90a25",
+							"helpUri": "https://cwe.mitre.org/data/definitions/703.html",
+							"id": "703",
+							"shortDescription": {
+								"text": "Improper Check or Handling of Exceptional Conditions"
+							}
+						},
+						{
+							"fullDescription": {
+								"text": "The web server receives a URL or similar request from an upstream component and retrieves the contents of this URL, but it does not sufficiently ensure that the request is being sent to the expected destination."
+							},
+							"guid": "27dd8327-2f38-3be3-af3f-cabc06087edb",
+							"helpUri": "https://cwe.mitre.org/data/definitions/918.html",
+							"id": "918",
+							"shortDescription": {
+								"text": "Server-Side Request Forgery (SSRF)"
+							}
+						}
+					],
+					"version": "4.4"
+				}
+			],
+			"tool": {
+				"driver": {
+					"guid": "8b518d5f-906d-39f9-894b-d327b1a421c5",
+					"informationUri": "https://github.com/securego/gosec/",
+					"name": "gosec",
+					"rules": [
+						{
+							"defaultConfiguration": {
+								"level": "warning"
+							},
+							"fullDescription": {
+								"text": "Errors unhandled"
+							},
+							"help": {
+								"text": "Errors unhandled\nSeverity: LOW\nConfidence: HIGH\n"
+							},
+							"id": "G104",
+							"name": "Improper Check or Handling of Exceptional Conditions",
+							"properties": {
+								"precision": "high",
+								"tags": [
+									"security",
+									"LOW"
+								]
+							},
+							"relationships": [
+								{
+									"kinds": [
+										"superset"
+									],
+									"target": {
+										"guid": "7df38d1d-038e-3ced-8601-8d9265b90a25",
+										"id": "703",
+										"toolComponent": {
+											"guid": "f2856fc0-85b7-373f-83e7-6f8582243547",
+											"name": "CWE"
+										}
+									}
+								}
+							],
+							"shortDescription": {
+								"text": "Errors unhandled"
+							}
+						},
+						{
+							"defaultConfiguration": {
+								"level": "error"
+							},
+							"fullDescription": {
+								"text": "Expect directory permissions to be 0750 or less"
+							},
+							"help": {
+								"text": "Expect directory permissions to be 0750 or less\nSeverity: MEDIUM\nConfidence: HIGH\n"
+							},
+							"id": "G301",
+							"name": "Incorrect Default Permissions",
+							"properties": {
+								"precision": "high",
+								"tags": [
+									"security",
+									"MEDIUM"
+								]
+							},
+							"relationships": [
+								{
+									"kinds": [
+										"superset"
+									],
+									"target": {
+										"guid": "fca8970d-b44c-3162-a385-cc09266d12a4",
+										"id": "276",
+										"toolComponent": {
+											"guid": "f2856fc0-85b7-373f-83e7-6f8582243547",
+											"name": "CWE"
+										}
+									}
+								}
+							],
+							"shortDescription": {
+								"text": "Expect directory permissions to be 0750 or less"
+							}
+						},
+						{
+							"defaultConfiguration": {
+								"level": "error"
+							},
+							"fullDescription": {
+								"text": "Expect WriteFile permissions to be 0600 or less"
+							},
+							"help": {
+								"text": "Expect WriteFile permissions to be 0600 or less\nSeverity: MEDIUM\nConfidence: HIGH\n"
+							},
+							"id": "G306",
+							"name": "Incorrect Default Permissions",
+							"properties": {
+								"precision": "high",
+								"tags": [
+									"security",
+									"MEDIUM"
+								]
+							},
+							"relationships": [
+								{
+									"kinds": [
+										"superset"
+									],
+									"target": {
+										"guid": "fca8970d-b44c-3162-a385-cc09266d12a4",
+										"id": "276",
+										"toolComponent": {
+											"guid": "f2856fc0-85b7-373f-83e7-6f8582243547",
+											"name": "CWE"
+										}
+									}
+								}
+							],
+							"shortDescription": {
+								"text": "Expect WriteFile permissions to be 0600 or less"
+							}
+						},
+						{
+							"defaultConfiguration": {
+								"level": "error"
+							},
+							"fullDescription": {
+								"text": "SSRF via taint analysis"
+							},
+							"help": {
+								"text": "SSRF via taint analysis\nSeverity: HIGH\nConfidence: HIGH\n"
+							},
+							"id": "G704",
+							"name": "Server-Side Request Forgery (SSRF)",
+							"properties": {
+								"precision": "high",
+								"tags": [
+									"security",
+									"HIGH"
+								]
+							},
+							"relationships": [
+								{
+									"kinds": [
+										"superset"
+									],
+									"target": {
+										"guid": "27dd8327-2f38-3be3-af3f-cabc06087edb",
+										"id": "918",
+										"toolComponent": {
+											"guid": "f2856fc0-85b7-373f-83e7-6f8582243547",
+											"name": "CWE"
+										}
+									}
+								}
+							],
+							"shortDescription": {
+								"text": "SSRF via taint analysis"
+							}
+						}
+					],
+					"semanticVersion": "dev",
+					"supportedTaxonomies": [
+						{
+							"guid": "f2856fc0-85b7-373f-83e7-6f8582243547",
+							"name": "CWE"
+						}
+					],
+					"version": "dev"
+				}
+			}
+		}
+	],
+	"$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
+	"version": "2.1.0"
+}

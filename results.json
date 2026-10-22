@@ -1,0 +1,156 @@
+{
+	"Golang errors": {},
+	"Issues": [
+		{
+			"severity": "HIGH",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "918",
+				"url": "https://cwe.mitre.org/data/definitions/918.html"
+			},
+			"rule_id": "G704",
+			"details": "SSRF via taint analysis",
+			"file": "D:\\belajar magang\\rombak_itapp\\go_itapp_ddd\\infrastructure\\notification\\notifier.go",
+			"code": "52: \t// Kirim request\n53: \tresp, err := n.client.Do(req)\n54: \tif err != nil {\n",
+			"line": "53",
+			"column": "26",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "918",
+				"url": "https://cwe.mitre.org/data/definitions/918.html"
+			},
+			"rule_id": "G704",
+			"details": "SSRF via taint analysis",
+			"file": "D:\\belajar magang\\rombak_itapp\\go_itapp_ddd\\infrastructure\\notification\\notifier.go",
+			"code": "43: \t// Buat request HTTP\n44: \treq, err := http.NewRequest(\"POST\", os.Getenv(\"URL_NOTIF\"), bytes.NewBuffer(jsonData))\n45: \tif err != nil {\n",
+			"line": "44",
+			"column": "29",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "276",
+				"url": "https://cwe.mitre.org/data/definitions/276.html"
+			},
+			"rule_id": "G301",
+			"details": "Expect directory permissions to be 0750 or less",
+			"file": "D:\\belajar magang\\rombak_itapp\\go_itapp_ddd\\infrastructure\\storage\\file_storage.go",
+			"code": "23: \tdir := filepath.Dir(filePath)\n24: \tif err := os.MkdirAll(dir, 0755); err != nil {\n25: \t\treturn fmt.Errorf(\"failed to create directory: %w\", err)\n",
+			"line": "24",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "276",
+				"url": "https://cwe.mitre.org/data/definitions/276.html"
+			},
+			"rule_id": "G301",
+			"details": "Expect directory permissions to be 0750 or less",
+			"file": "D:\\belajar magang\\rombak_itapp\\go_itapp_ddd\\infrastructure\\logger\\logger.go",
+			"code": "31: func SetupLogger() {\n32: \tos.MkdirAll(\"logs\", 0755)\n33: \n",
+			"line": "32",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "276",
+				"url": "https://cwe.mitre.org/data/definitions/276.html"
+			},
+			"rule_id": "G306",
+			"details": "Expect WriteFile permissions to be 0600 or less",
+			"file": "D:\\belajar magang\\rombak_itapp\\go_itapp_ddd\\infrastructure\\storage\\file_storage.go",
+			"code": "27: \n28: \tif err := os.WriteFile(filePath, data, 0644); err != nil {\n29: \t\treturn fmt.Errorf(\"failed to write file: %w\", err)\n",
+			"line": "28",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "D:\\belajar magang\\rombak_itapp\\go_itapp_ddd\\infrastructure\\persistence\\doc_cr_repo.go",
+			"code": "432: \t\tvar milestoneModel DocumentCrLogModel\n433: \t\tr.db.ScanRows(rows, \u0026milestoneModel)\n434: \t\titem.Milestones = append(item.Milestones, milestoneModel.toEntity())\n",
+			"line": "433",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "D:\\belajar magang\\rombak_itapp\\go_itapp_ddd\\infrastructure\\logger\\logger.go",
+			"code": "31: func SetupLogger() {\n32: \tos.MkdirAll(\"logs\", 0755)\n33: \n",
+			"line": "32",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "D:\\belajar magang\\rombak_itapp\\go_itapp_ddd\\infrastructure\\logger\\logger.go",
+			"code": "25: \tif syncer, ok := sw.w.(interface{ Sync() error }); ok {\n26: \t\tsyncer.Sync()\n27: \t}\n",
+			"line": "26",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "D:\\belajar magang\\rombak_itapp\\go_itapp_ddd\\container\\container.go",
+			"code": "32: \tpersistence.DatabaseInit()\n33: \tmigration.RunMigration()\n34: \n",
+			"line": "33",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		}
+	],
+	"Stats": {
+		"files": 29,
+		"lines": 5637,
+		"nosec": 0,
+		"found": 9
+	},
+	"GosecVersion": "dev"
+}
