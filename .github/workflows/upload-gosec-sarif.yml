@@ -1,0 +1,35 @@
+name: Upload gosec SARIF
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  upload-sarif:
+    name: Upload gosec results
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify SARIF file exists
+        shell: bash
+        run: |
+          test -f go_itapp_ddd/results.sarif
+          echo "SARIF file ditemukan:"
+          ls -lh go_itapp_ddd/results.sarif
+
+      - name: Upload SARIF to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: go_itapp_ddd/results.sarif
+          category: gosec
