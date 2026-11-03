@@ -3,8 +3,7 @@ name: Upload gosec SARIF
 on:
   push:
     branches:
-      - main
-      - master
+      - workflow
   pull_request:
   workflow_dispatch:
 
