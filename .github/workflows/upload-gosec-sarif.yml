@@ -35,7 +35,7 @@ jobs:
       - name: Run gosec with AI recommendations
         env:
           GOSEC_AI_API_KEY: ${{ secrets.GOSEC_AI_API_KEY }}
-          GOSEC_AI_PROVIDER: gemini-2.5-flash
+          GOSEC_AI_PROVIDER: gemini-3.8-flash
         run: |
           if [ -z "$GOSEC_AI_API_KEY" ]; then
             echo "GOSEC_AI_API_KEY is not configured"
