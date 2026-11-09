@@ -38,13 +38,18 @@ jobs:
           GOSEC_AI_API_KEY: ${{ secrets.GOSEC_AI_API_KEY }}
           GOSEC_AI_PROVIDER: gemini-3.1-pro-preview
         run: |
-          if [ -z "$GOSEC_AI_API_KEY" ]; then
-            echo "GOSEC_AI_API_KEY is not configured"
-            exit 1
+          # Opsi A: temuan TIDAK menggagalkan job (-no-fail).
+          # Yang memblokir merge adalah ruleset "Require code scanning results".
+          AI_ARGS=()
+          if [ -n "$GOSEC_AI_API_KEY" ]; then
+            AI_ARGS=(-ai-api-provider "$GOSEC_AI_PROVIDER")
+          else
+            echo "::warning::GOSEC_AI_API_KEY belum diisi, gosec jalan tanpa rekomendasi AI"
           fi
+
           set +e
           gosec \
-            -ai-api-provider "$GOSEC_AI_PROVIDER" \
+            "${AI_ARGS[@]}" \
             -fmt=sarif \
             -out=results.sarif \
             -verbose=json \
@@ -52,8 +57,20 @@ jobs:
             -log=gosec.log \
             -severity=low \
             -confidence=medium \
+            -no-fail \
             ./... > gosec-recommendations.json
-          echo "gosec_exit=$?" >> "$GITHUB_OUTPUT"
+          code=$?
+          set -e
+          echo "gosec_exit=$code" >> "$GITHUB_OUTPUT"
+
+          if [ -f results.sarif ]; then
+            count=$(grep -o '"ruleId"' results.sarif | wc -l | tr -d ' ' || true)
+            echo "::notice::gosec selesai: $count temuan dilaporkan ke Code Scanning"
+          fi
+
+          # -no-fail bikin gosec exit 0 walau ada temuan.
+          # Exit != 0 di sini hanya terjadi kalau gosec sendiri gagal jalan.
+          exit "$code"
 
       - name: Upload SARIF to GitHub Code Scanning
         if: always() && hashFiles('results.sarif') != ''
@@ -62,8 +79,12 @@ jobs:
           sarif_file: results.sarif
           category: gosec
 
-      - name: Gagal jika ada temuan
-        if: steps.gosec.outputs.gosec_exit != '0'
-        run: |
-          echo "gosec menemukan masalah — perbaiki dulu sebelum merge."
-          exit 1
+      - name: Upload gosec recommendations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gosec-recommendations
+          path: |
+            gosec-recommendations.json
+            gosec.log
+          if-no-files-found: ignore
