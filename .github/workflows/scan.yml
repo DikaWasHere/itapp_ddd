@@ -1,0 +1,90 @@
+name: Upload gosec SARIF
+
+on:
+  push:
+    branches:
+      - workflow2
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  upload-sarif:
+    name: Upload gosec results
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Download Go modules
+        run: go mod download
+
+      - name: Install gosec
+        run: go install github.com/securego/gosec/v2/cmd/gosec@latest
+
+      - name: Run gosec with AI recommendations
+        id: gosec
+        env:
+          GOSEC_AI_API_KEY: ${{ secrets.GOSEC_AI_API_KEY }}
+          GOSEC_AI_PROVIDER: gemini-3.1-pro-preview
+        run: |
+          # Opsi B: temuan gosec menggagalkan job, lalu merge diblokir
+          # lewat ruleset "Require status checks to pass" (Upload gosec results).
+          # SARIF tetap di-upload dulu (step berikutnya pakai if: always()).
+          AI_ARGS=()
+          if [ -n "$GOSEC_AI_API_KEY" ]; then
+            AI_ARGS=(-ai-api-provider "$GOSEC_AI_PROVIDER")
+          else
+            echo "::warning::GOSEC_AI_API_KEY belum diisi, gosec jalan tanpa rekomendasi AI"
+          fi
+
+          set +e
+          gosec \
+            "${AI_ARGS[@]}" \
+            -fmt=sarif \
+            -out=results.sarif \
+            -verbose=json \
+            -stdout \
+            -log=gosec.log \
+            -severity=low \
+            -confidence=medium \
+            ./... > gosec-recommendations.json
+          code=$?
+          set -e
+          echo "gosec_exit=$code" >> "$GITHUB_OUTPUT"
+
+          if [ -f results.sarif ]; then
+            count=$(grep -o '"ruleId"' results.sarif | wc -l | tr -d ' ' || true)
+            echo "::notice::gosec selesai: $count temuan dilaporkan ke Code Scanning"
+          fi
+
+          # Tanpa -no-fail: gosec exit 1 kalau ada temuan -> job merah
+          # -> check "Upload gosec results" gagal -> merge terkunci.
+          exit "$code"
+
+      - name: Upload SARIF to GitHub Code Scanning
+        if: always() && hashFiles('results.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+          category: gosec
+
+      - name: Upload gosec recommendations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gosec-recommendations
+          path: |
+            gosec-recommendations.json
+            gosec.log
+          if-no-files-found: ignore
