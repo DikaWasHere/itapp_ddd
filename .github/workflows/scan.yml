@@ -1,0 +1,66 @@
+name: Upload gosec SARIF
+
+on:
+  push:
+    branches:
+      - workflow
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  upload-sarif:
+    name: Upload gosec results
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Download Go modules
+        run: go mod download
+
+      - name: Install gosec
+        run: go install github.com/securego/gosec/v2/cmd/gosec@latest
+
+      - name: Run gosec with AI recommendations
+        env:
+          GOSEC_AI_API_KEY: ${{ secrets.GOSEC_AI_API_KEY }}
+          GOSEC_AI_PROVIDER: gemini-3.1-pro-preview
+        run: |
+          if [ -z "$GOSEC_AI_API_KEY" ]; then
+            echo "GOSEC_AI_API_KEY is not configured"
+            exit 1
+          fi
+          gosec \
+            -ai-api-provider "$GOSEC_AI_PROVIDER" \
+            -fmt=sarif \
+            -out=results.sarif \
+            -verbose=json \
+            -stdout \
+            -log=gosec.log \
+            -no-fail \
+            ./... > gosec-recommendations.json
+
+      - name: Upload SARIF to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+          category: gosec
+
+      - name: Upload gosec recommendations
+        uses: actions/upload-artifact@v4
+        with:
+          name: gosec-recommendations
+          path: |
+            gosec-recommendations.json
+            gosec.log
