@@ -32,29 +32,38 @@ jobs:
       - name: Install gosec
         run: go install github.com/securego/gosec/v2/cmd/gosec@latest
 
-      - name: Run gosec
+      - name: Run gosec with AI recommendations
         id: gosec
-        continue-on-error: true
+        env:
+          GOSEC_AI_API_KEY: ${{ secrets.GOSEC_AI_API_KEY }}
+          GOSEC_AI_PROVIDER: gemini-3.1-pro-preview
         run: |
+          if [ -z "$GOSEC_AI_API_KEY" ]; then
+            echo "GOSEC_AI_API_KEY is not configured"
+            exit 1
+          fi
+          set +e
           gosec \
+            -ai-api-provider "$GOSEC_AI_PROVIDER" \
             -fmt=sarif \
             -out=results.sarif \
+            -verbose=json \
+            -stdout \
             -log=gosec.log \
-            ./...
-
-      - name: Check SARIF file
-        if: always()
-        run: |
-          ls -lh results.sarif
-          head -n 20 results.sarif
+            -severity=low \
+            -confidence=medium \
+            ./... > gosec-recommendations.json
+          echo "gosec_exit=$?" >> "$GITHUB_OUTPUT"
 
       - name: Upload SARIF to GitHub Code Scanning
-        if: always()
+        if: always() && hashFiles('results.sarif') != ''
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif
           category: gosec
 
-      - name: Fail workflow when gosec finds issues
-        if: steps.gosec.outcome == 'failure'
-        run: exit 1
+      - name: Gagal jika ada temuan
+        if: steps.gosec.outputs.gosec_exit != '0'
+        run: |
+          echo "gosec menemukan masalah — perbaiki dulu sebelum merge."
+          exit 1
