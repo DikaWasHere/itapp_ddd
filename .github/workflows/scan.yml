@@ -32,7 +32,9 @@ jobs:
       - name: Install gosec
         run: go install github.com/securego/gosec/v2/cmd/gosec@latest
 
-      - name: Run gosec with AI recommendations
+      - name: Run gosec
+        id: gosec
+        continue-on-error: true
         env:
           GOSEC_AI_API_KEY: ${{ secrets.GOSEC_AI_API_KEY }}
           GOSEC_AI_PROVIDER: gemini-3.1-pro-preview
@@ -41,6 +43,7 @@ jobs:
             echo "GOSEC_AI_API_KEY is not configured"
             exit 1
           fi
+
           gosec \
             -ai-api-provider "$GOSEC_AI_PROVIDER" \
             -fmt=sarif \
@@ -48,19 +51,25 @@ jobs:
             -verbose=json \
             -stdout \
             -log=gosec.log \
-            -no-fail \
             ./... > gosec-recommendations.json
 
       - name: Upload SARIF to GitHub Code Scanning
+        if: always() && hashFiles('results.sarif') != ''
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif
           category: gosec
 
       - name: Upload gosec recommendations
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: gosec-recommendations
           path: |
             gosec-recommendations.json
             gosec.log
+          if-no-files-found: ignore
+
+      - name: Fail workflow when gosec finds issues
+        if: steps.gosec.outcome == 'failure'
+        run: exit 1
