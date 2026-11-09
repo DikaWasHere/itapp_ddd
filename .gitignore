@@ -1,1 +1,10 @@
 .env
+logs/
+*.log
+bin/
+build/
+dist/
+*.exe
+docs/
+*.docs
+public/attachment/
