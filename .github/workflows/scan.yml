@@ -38,8 +38,9 @@ jobs:
           GOSEC_AI_API_KEY: ${{ secrets.GOSEC_AI_API_KEY }}
           GOSEC_AI_PROVIDER: gemini-3.1-pro-preview
         run: |
-          # Opsi A: temuan TIDAK menggagalkan job (-no-fail).
-          # Yang memblokir merge adalah ruleset "Require code scanning results".
+          # Opsi B: temuan gosec menggagalkan job, lalu merge diblokir
+          # lewat ruleset "Require status checks to pass" (Upload gosec results).
+          # SARIF tetap di-upload dulu (step berikutnya pakai if: always()).
           AI_ARGS=()
           if [ -n "$GOSEC_AI_API_KEY" ]; then
             AI_ARGS=(-ai-api-provider "$GOSEC_AI_PROVIDER")
@@ -57,7 +58,6 @@ jobs:
             -log=gosec.log \
             -severity=low \
             -confidence=medium \
-            -no-fail \
             ./... > gosec-recommendations.json
           code=$?
           set -e
@@ -68,8 +68,8 @@ jobs:
             echo "::notice::gosec selesai: $count temuan dilaporkan ke Code Scanning"
           fi
 
-          # -no-fail bikin gosec exit 0 walau ada temuan.
-          # Exit != 0 di sini hanya terjadi kalau gosec sendiri gagal jalan.
+          # Tanpa -no-fail: gosec exit 1 kalau ada temuan -> job merah
+          # -> check "Upload gosec results" gagal -> merge terkunci.
           exit "$code"
 
       - name: Upload SARIF to GitHub Code Scanning
