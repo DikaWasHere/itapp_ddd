@@ -10,7 +10,6 @@ import (
 )
 
 var DB *gorm.DB
-
 func DatabaseInit() {
 	_ = godotenv.Load() 
 
